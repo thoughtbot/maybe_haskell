@@ -4,21 +4,52 @@ When we declare a function in Haskell, we first write a type signature:
 five :: Int
 ```
 
-Then a definition:
+We can read this as `five` *of type* `Int`.
+
+Next, we write a definition:
 
 ```haskell
 five = 5
 ```
 
-The type signature is optional, as Haskell can almost always tell the type of an
-expression by inspecting the types of its constituent parts. That said, good
-Haskellers will include a type signature on all top-level definitions as it
-provides executable documentation and may, in some cases, prevent errors which
-occur when the compiler assigns a more generic type than you might otherwise
-want. For example, if we omitted the type signature in the above, the compiler
-would assign the type `five :: Num a => a` which means that the type of `five`
-is `a`ny type that's `Num`eric in nature -- i.e. it can be added, negated and so
-forth.
+We can read this as `five` *is* `5`.
+
+In Haskell, `=` is not variable assignment, it's defining equivalence. We're
+saying here that the word `five` *is equivalent to* the literal `5`. Anywhere
+you see one, you can replace it with the other and the program will always give
+the same answer. This property is called *referential transparency* and it holds
+true for any Haskell definition, no matter how complicated.
+
+It's also possible to specify the types with an *annotation* rather than a
+signature. We can annotate any expression with `:: <type>` to explicitly tell
+the compiler the type we want (or expect) that expression to have.
+
+```haskell
+six = (5 :: Int) + 1
+```
+
+Type annotations and signatures are mostly optional, as Haskell can almost
+always tell the type of an expression by inspecting the types of its constituent
+parts. For example, Haskell knows that `six` is an `Int` because it saw that `5`
+is an `Int` and since you can only use `(+)` with arguments of the same type, it
+*enforced* that `1` is also an `Int` and the final result of the addition is
+itself an `Int`.
+
+Good Haskellers will include a type signature on all top-level definitions
+anyway. It provides executable documentation and may, in some cases, prevent
+errors which occur when the compiler assigns a more generic type than you might
+otherwise want. For example, if we omitted the type signatures in our first
+example, the compiler would assign the type `five :: Num a => a` which means
+that the type of `five` is `a`ny type that's `Num`eric in nature -- i.e. it can
+be added, negated and so forth.
+
+*Inferred types*, as these are called, are usually fine but can open you up to
+unclear error messages. If you were to use this value in two places and treat it
+as an `Int` in one and a `Float` in another, the error message may not
+immediately identify the problem depending on which expression the compiler sees
+first. On the other hand, if you explicitly state the type as whichever one you
+want it to be, then using it incorrectly will produce an error message leading
+you directly to the line and character of your error.
 
 ## Defining Our Own Types
 
@@ -71,9 +102,9 @@ getAge (Person _ age) = age
 
 In the above definitions, each function is looking for the `Person` constructor.
 If it gets an argument that matches (which in this case is guaranteed), Haskell
-will bind each part of the constructed value to the variables given then execute
-body of the function. The `_` pattern (called a wildcard) is used for any parts
-we don't care about.
+will bind each part of the constructed value to the variables given, then
+execute the body of the function. The `_` pattern (called a *wildcard*) is used
+for any parts we don't care about.
 
 There are [other][records] [ways][lenses] to do this sort of thing, but we won't
 get into that here.
@@ -85,7 +116,7 @@ get into that here.
 ## Sum Types
 
 As alluded to earlier, types can have more than one constructor, each separated
-by a `|` symbol. This is called a *Sum type*:
+by a `|` symbol. This is called a *sum type*:
 
 ```haskell
 data Person = PersonWithAge String Int | PersonWithoutAge String
@@ -119,10 +150,7 @@ getAge (PersonWithoutAge _) = -- uh-oh
 If we decide to be lazy and not define that second function body, Haskell will
 compile, but warn us about the *non-exhaustive pattern*. If such a program ever
 attempts to match `getAge` with a `Person` that has no age, we'll see one of the
-few runtime errors possible in Haskell -- that's why you always fix all
-compilation warnings, kids.
-
-![one armed man](http://images.thoughtbot.com/maybe/one-armed-man.jpg)
+few runtime errors possible in Haskell.
 
 A person's name is always there, but their age may or may not be. Defining two
 constructors makes both cases explicit and forces anyone attempting to access a
@@ -131,10 +159,10 @@ person's age to deal with its potential non-presence.
 ## Kinds and Parameters
 
 Imagine we wanted to generalize this `Person` type. What if people were able to
-hold arbitrary things? What that thing is (its type) doesn't really matter, the
-only meaningful thing we can say about it is if it's there or not. What we had
-before was a *person with an age* or a *person without an age*, what we want
-here is a *person with a thing* or a *person without a thing*.
+hold arbitrary things? What if what that thing is (its type) doesn't really
+matter, the only meaningful thing we can say about it is if it's there or not.
+What we had before was a *person with an age* or a *person without an age*, what
+we want here is a *person with a thing* or a *person without a thing*.
 
 One way to do this is to *parameterize* the type:
 
@@ -191,7 +219,7 @@ Congrats. You now completely understand parameterized types.
 Haskell's `Maybe` type should make all kinds of sense now:
 
 ```haskell
-data Maybe a = Just a | Nothing
+data Maybe a = Nothing | Just a
 ```
 
 It's a bit like `PersonWith | PersonWithout`, except we're not dragging along a
@@ -211,6 +239,13 @@ find predicate (first:rest) =
         then Just first
         else find predicate rest
 ```
+
+This function has two definitions matching two different patterns: if given the
+empty list, we immediately return `Nothing`. Otherwise, the (non-empty) list is
+de-constructed into its `first` element and the `rest` of the list by matching
+on the `(:)` (pronounced *cons*) constructor. Then we test if applying the
+`predicate` function to `first` returns `True`. If it does, we return `Just` it.
+Otherwise, we recurse and try to find the element in the `rest` of the list.
 
 This forces all callers of `find` to deal with the potential `Nothing` case.
 
@@ -238,4 +273,34 @@ findUser uid =
 Depending on your domain and the likelihood of Maybe values, you might find this
 sort of "stair-casing" propagating throughout your system. This can lead to the
 thought that `Maybe` isn't really all that valuable over some *null* value built
-into the language. I assure you that's not the case.
+into the language. If you have to have this sort of matching expression peppered
+throughout the code base, how is that better than the analogous "`nil` checks"?
+
+## Don't Give Up
+
+The above might leave you feeling underwhelmed. That code doesn't look all that
+better than the equivalent Ruby:
+
+```ruby
+def find_user(uid)
+  if user = all_users.detect? { |u| u.matches_id?(uid) }
+    user
+  else
+    # what to do? error?
+  end
+end
+```
+
+First of all, the Haskell version is type safe. I'd put money on most Ruby
+developers returning `nil` from the `else` branch. The Haskell type system won't
+allow that and that's a good thing. I understand that without spending time
+programming in Haskell it's hard to see the benefits of ruthless type safety
+employed at every turn. I assure you it's a coding experience like no other, but
+I'm not here to convince you of that -- at least not directly.
+
+The bottom line is that an experienced Haskeller would not write this code this
+way. `case` is a code smell when it comes to `Maybe`. Almost all code using
+`Maybe` can be improved from a tedious `case` evaluation using one of the three
+abstractions I'll be exploring in this book.
+
+Let's get started.
