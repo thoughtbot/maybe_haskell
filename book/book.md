@@ -20,3 +20,19 @@
 <<[haskell-basics/maybe.md]
 
 <<[haskell-basics/get-started.md]
+
+# Functor
+
+<<[functor/choices.md]
+
+<<[functor/type-classes.md]
+
+<<[functor/functor.md]
+
+<<[functor/laws.md]
+
+<<[functor/why.md]
+
+<<[functor/curried-form.md]
+
+<<[functor/generic-map.md]
