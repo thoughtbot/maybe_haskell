@@ -36,3 +36,13 @@
 <<[functor/curried-form.md]
 
 <<[functor/generic-map.md]
+
+# Applicative
+
+<<[applicative/follow-the-types.md]
+
+<<[applicative/apply.md]
+
+<<[applicative/operator.md]
+
+<<[applicative/in-the-wild.md]
