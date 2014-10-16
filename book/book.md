@@ -8,8 +8,15 @@
 <<[introduction.md]
 
 \mainmatter
-\part{Haskell Basics}
 
 # Haskell Basics
 
-<<[haskell-basics.md]
+<<[haskell-basics/functions.md]
+
+<<[haskell-basics/data-types.md]
+
+<<[haskell-basics/kinds-and-parameters.md]
+
+<<[haskell-basics/maybe.md]
+
+<<[haskell-basics/get-started.md]
