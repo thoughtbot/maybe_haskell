@@ -21,9 +21,9 @@ might as well use it in both contexts.
 ```haskell
 data Person = Person String Int
 --   |        |
---   |        ` Type constructor
+--   |        ` A constructors
 --   |
---   ` Type name
+--   ` The type's name
 ```
 
 With this data type declared, we can now use it to write functions that
