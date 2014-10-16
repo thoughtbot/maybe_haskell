@@ -15,8 +15,8 @@ If you try to find a `User`, and you get back a value, and you try to treat it
 like a `User` when it's actually `nil`, you get a `NoMethodError`. What's worse,
 that error may not happen anywhere near the source of the problem. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
-result is various "`nil` checks" peppered throughout the code. Is this the best we
-can do?
+result is various "`nil` checks" peppered throughout the code. Is this the best
+we can do?
 
 The problem of partial functions is not going away. User input may be invalid,
 files may not exist, networks may fail. We will always need a way to deal with
