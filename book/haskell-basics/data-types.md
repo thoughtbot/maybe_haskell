@@ -47,11 +47,14 @@ getAge :: Person -> Int
 getAge (Person _ age) = age
 ```
 
-In the above definitions, each function is looking for the `Person` constructor.
-If it gets an argument that matches (which in this case is guaranteed), Haskell
-will bind each part of the constructed value to the variables given, then
-execute the body of the function. The `_` pattern (called a *wildcard*) is used
-for any parts we don't care about.
+In the above definitions, each function is looking for values constructed with
+`Person`. If it gets an argument that matches (which in this case is guaranteed
+since that's the only way to get a `Person` in our system so far), Haskell will
+use that function body with each part of the constructed value bound to the
+variables given. The `_` pattern (called a *wildcard*) is used for any parts we
+don't care about. Again, this is using `=` for equivalence (as always). We're
+saying that `getName`, when given `(Person name _)`, *is equivalent to* `name`.
+Similarly for `getAge`.
 
 There are [other][records] [ways][lenses] to do this sort of thing, but we won't
 get into that here.
