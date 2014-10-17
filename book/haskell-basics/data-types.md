@@ -66,7 +66,9 @@ get into that here.
 ## Sum Types
 
 As alluded to earlier, types can have more than one constructor, each separated
-by a `|` symbol. This is called a *sum type*:
+by a `|` symbol. This is called a *sum type* because the total number of values
+you can build of this type is the sum of the number of values you can build with
+each constructor.
 
 ```haskell
 data Person = PersonWithAge String Int | PersonWithoutAge String
