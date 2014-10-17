@@ -21,7 +21,7 @@ might as well use it in both contexts.
 ```haskell
 data Person = Person String Int
 --   |        |
---   |        ` A constructors
+--   |        ` A constructor
 --   |
 --   ` The type's name
 ```
