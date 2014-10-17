@@ -5,7 +5,7 @@ now that we have two points of reference (`Maybe` and `[]`) for this idea of
 *mapping*, we can talk about some of the more interesting aspects of what it
 really means.
 
-At some point, you may have wondered why Haskell type signatures don't separate
+For example, you may have wondered why Haskell type signatures don't separate
 arguments from return values. The answer to that question should help clarify
 why the abstract function `fmap`, which works with far more than only lists, is
 aptly named.
