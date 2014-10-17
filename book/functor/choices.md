@@ -40,7 +40,7 @@ you have three choices:
 
 The first option is a non-starter. As you saw, it is possible to throw runtime
 exceptions in Haskell via the `error` function, but you should avoid this at all
-costs. We're trying to avoid runtime exceptions, not add them.
+costs. We're trying to remove runtime exceptions, not add them.
 
 The second option is only possible in certain scenarios. You need to have some
 way to handle an incoming `Nothing`. That may mean skipping certain aspects of
