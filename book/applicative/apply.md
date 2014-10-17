@@ -21,10 +21,12 @@ userFromParams params = apply
     (getParam "email" params)
 ```
 
-We can make this read a bit better by taking advantage of a special syntax that
-Haskell allows: if you surround a function with backticks, you can place it
-*between* it's arguments rather than in front of them. This is known as *infix*
-(vs *prefix* or *postfix*) notation:
+This type checks and indeed works as expected.
+
+We can make this expression read a bit better by taking advantage of a special
+syntax that Haskell allows: if you surround a function with backticks, you can
+place it *between* it's arguments rather than in front of them. This is known as
+*infix* notation:
 
 ```haskell
 userFromParams :: Params -> Maybe User
