@@ -36,8 +36,8 @@ pat = Person "Pat" 29
 
 ## Pattern Matching
 
-To get these values back out again, we would use something called [pattern
-matching][pattern-matching].
+To get the individual parts back out again, we would use something called
+[pattern matching][pattern-matching].
 
 ```haskell
 getName :: Person -> String
