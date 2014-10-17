@@ -28,6 +28,7 @@ data User = User String String
 ```
 
 How do we build a `User` from query params representing their name and email?
+
 The simplest way is the following:
 
 ```haskell
