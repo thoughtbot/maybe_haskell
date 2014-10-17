@@ -2,12 +2,12 @@
 
 This pattern is used in a number of places in the Haskell ecosystem.
 
-The [aeson][] package defines a number of functions for parsing things out of
-JSON values, these functions return their results wrapped in a `Parser` type
-which is very much like `Maybe` except that it holds a bit more information
-about *why* the computation failed, not only *that* the computation failed. The
-`Applicative` instance for this type can be used to combine these sub-parsers
-into something domain-specific.
+As one example, the [aeson][] package defines a number of functions for parsing
+things out of JSON values, these functions return their results wrapped in a
+`Parser` type which is very much like `Maybe` except that it holds a bit more
+information about *why* the computation failed, not only *that* the computation
+failed. The `Applicative` instance for this type can be used to combine these
+sub-parsers into something domain-specific.
 
 [aeson]: http://hackage.haskell.org/package/aeson
 
