@@ -14,16 +14,12 @@ aptly named.
 
 In the implementation of purely functional programming languages, there is value
 in all functions taking exactly one argument and returning exactly one result.
-Therefore, the authors of Haskell had two choices for implementing
-"multi-argument" functions.
+Therefore, users of Haskell have two choices for defining "multi-argument"
+functions.
 
-They could do nothing, and make us rely of tuples as the only means of defining
-and using functions of more than one argument:
+We could rely solely on tuples:
 
 ```haskell
--- 
--- Note: This is valid, but un-idiomatic Haskell
--- 
 add :: (Int, Int) -> Int
 add (x, y) = x + y
 ```
@@ -41,7 +37,7 @@ f = map add5 [1,2,3]
     add5 x = add (x, 5)
 ```
 
-Instead, all functions in Haskell are in what's known as "curried" form:
+Alternatively, we could write all functions in "curried" form:
 
 ```haskell
 -- 
@@ -58,9 +54,22 @@ add x = \y -> x + y
 -- 
 ```
 
-Haskell syntax then allows one to name arguments in whatever way they like; we
-don't have to always assign a single lambda expression for the function body. In
-fact, these are all equivalent:
+This makes partial application simpler. Since `add 5` is a valid expression and
+is of the correct type to pass to `map`, we can use it directly:
+
+```haskell
+f :: [Int]
+f = map (add 5) [1,2,3]
+```
+
+While both forms are valid Haskell without any additional changes to the
+language (in fact, the `curry` and `uncurry` functions in the Prelude will
+convert functions between the two forms), the latter form is preferred and some
+decisions were made regarding Haskell's syntax to better support it.
+
+For example, we can name function arguments in whatever way we like; we don't
+have to always assign a single lambda expression as the function body. In fact,
+these are all equivalent:
 
 ```haskell
 add = \x -> \y -> x + y
@@ -68,21 +77,29 @@ add x = \y -> x + y
 add x y = x + y
 ```
 
-This makes partial application simpler. Since `add 5` is a valid expression
-which returns another function, we can use it directly in our map:
+Haskell also defines `->` to be right-associative and function application to be
+left associative. That means we don't need to add any parenthesis unless we want
+to explicitly group in some other way. This means rather than writing:
 
 ```haskell
-f :: [Int]
-f = map (add 5) [1,2,3]
+addThree :: Int -> (Int -> (Int -> Int))
+addThree x y z = x + y + z
+
+six :: Int
+six = ((addThree 1) 2) 3
 ```
 
-Haskell also defines `->` to be right-associative. That means we don't need to
-add the parenthesis either, resulting in a typical function definition:
+We can write:
 
 ```haskell
-add :: Int -> Int -> Int
-add x y = x + y
+addThree :: Int -> Int -> Int -> Int
+addThree x y z = x + y + z
+
+six :: Int
+six = addThree 1 2 3
 ```
+
+And that's why Haskell type signatures have the form they do.
 
 ## Partial Application
 
