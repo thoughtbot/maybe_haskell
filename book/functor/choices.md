@@ -69,11 +69,12 @@ fromMaybe 10 notReallyFive
 Option 3 is actually a variation on option 2. By making your own result a
 `Maybe` you always have the ability to return `Nothing` yourself if the value's
 not present. If the value *is* present, you can perform whatever computation you
-need to and wrap what would be your normal result in `Just`. The main downside
-is that now your callers also have to consider how to deal with the `Maybe`.
-Given the same situation, they should again make the same choice (option 3), but
-that only pushes the problem up to their callers -- any `Maybe` values tend to
-go *viral*.
+need to and wrap what would be your normal result in `Just`.
+
+The main downside is that now your callers also have to consider how to deal
+with the `Maybe`. Given the same situation, they should again make the same
+choice (option 3), but that only pushes the problem up to their callers -- any
+`Maybe` values tend to go *viral*.
 
 Eventually, probably at some UI boundary, someone will need to "deal with" the
 `Maybe`, be that providing a substitute or skipping some action that might
