@@ -38,7 +38,7 @@ Each individual `v .: "..."` call is a function that attempts to pull the value
 for the given key out of the JSON object. Potential failure (missing key,
 invalid type, etc) is captured by returning a value wrapped in the `Parser`
 type. We can combine the individual `Parser` values together into one `Parser
-User` using `(<$>)` and `(<$>)`.
+User` using `(<$>)` and `(<*>)`.
 
 If any key is missing, the whole thing fails. If they're all there, we get the
 `User` we wanted. This concern is completely isolated within the implementation
