@@ -49,10 +49,10 @@ given a completely abstract `Maybe a`, it's not possible to determine a
 substitute because you can't produce a value of type `a` out of nowhere.
 
 Even if you did know the type (say you were given a `Maybe Int`) it would be
-unfair to your callers to take on the responsibility of selecting a safe
-substitute. In one case `0` might be best because we're going to add something,
-but in another `1` would be better because we plan to multiply. It's best to let
-them handle it themselves using a utility function like `fromMaybe`:
+unfair to your callers if you defined the safe substitute yourself. In one case
+`0` might be best because we're going to add something, but in another `1` would
+be better because we plan to multiply. It's best to let them handle it
+themselves using a utility function like `fromMaybe`:
 
 ```haskell
 fromMaybe :: a -> Maybe a -> a
