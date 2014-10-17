@@ -62,10 +62,10 @@ f :: [Int]
 f = map (add 5) [1,2,3]
 ```
 
-While both forms are valid Haskell without any additional changes to the
-language (in fact, the `curry` and `uncurry` functions in the Prelude will
-convert functions between the two forms), the latter form is preferred and some
-decisions were made regarding Haskell's syntax to better support it.
+While both forms are valid Haskell (in fact, the `curry` and `uncurry` functions
+in the Prelude will convert functions between the two forms), the latter was
+chosen as the default and so Haskell's syntax allows some things that make it
+more convenient.
 
 For example, we can name function arguments in whatever way we like; we don't
 have to always assign a single lambda expression as the function body. In fact,
