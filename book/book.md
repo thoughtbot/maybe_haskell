@@ -46,3 +46,13 @@
 <<[applicative/operator.md]
 
 <<[applicative/in-the-wild.md]
+
+# Monad
+
+<<[monad/intro.md]
+
+<<[monad/power.md]
+
+<<[monad/bind.md]
+
+<<[monad/do.md]

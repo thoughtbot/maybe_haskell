@@ -31,7 +31,7 @@ place it *between* it's arguments rather than in front of them. This is known as
 ```haskell
 userFromParams :: Params -> Maybe User
 userFromParams params =
-    fmap User (getParams "name" params) `apply` getParam "email" params
+    fmap User (getParam "name" params) `apply` getParam "email" params
 ```
 
 With a bit more effort, we could apply the same trick to `fmap` and end up with
@@ -40,7 +40,7 @@ the following chaining:
 ```haskell
 userFromParams :: Params -> Maybe User
 userFromParams params =
-    User `fmap` getParams "name" params `apply` getParam "email" params
+    User `fmap` getParam "name" params `apply` getParam "email" params
 ```
 
 Making this form compile requires assigning a certain *fixity* to `fmap` and
