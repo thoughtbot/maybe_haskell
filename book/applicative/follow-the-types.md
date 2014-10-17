@@ -111,5 +111,6 @@ userFromParams :: Params -> Maybe User
 userFromParams params = x ?+? y
 ```
 
-Seems that if we had some way to apply a `Maybe` function to a `Maybe` value to
-get a `Maybe` result, we'd be in business.
+We only have to figure out what that `?+?` should be. What it looks like we need
+is some way to apply a `Maybe` function to a `Maybe` value to get a `Maybe`
+result.
