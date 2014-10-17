@@ -10,20 +10,23 @@ findUser = undefined
 ```
 
 Now imagine we have a view somewhere that is displaying the user's name in all
-capitals. The logic of getting from a `User` to that capitalized `String` is not
-terribly complex, but it could be -- imagine something like getting from a
-`User` to their yearly spending on products valued over $1,000. In our case the
-transformation is only one function, but realistically it could be a whole suite
-of functions wired together. Ideally, none of these functions should have to
-think about potential non-presence or contain any "nil-checks"; they should all
-be written to work on values that are fully present.
+capitals:
 
 ```haskell
 userUpperName :: User -> String
 userUpperName u = map toUpper (userName u)
 ```
 
-Given this function, which works only on present values, we can use `fmap` to
+The logic of getting from a `User` to that capitalized `String` is not terribly
+complex, but it could be -- imagine something like getting from a `User` to
+their yearly spending on products valued over $1,000. In our case the
+transformation is only one function, but realistically it could be a whole suite
+of functions wired together. Ideally, none of these functions should have to
+think about potential non-presence or contain any "nil-checks" as that's not
+their purpose; they should all be written to work on values that are fully
+present.
+
+Given `userUpperName`, which works only on present values, we can use `fmap` to
 apply it to a value which may not be present to get back the result we expect
 with the same level of *present-ness*:
 
