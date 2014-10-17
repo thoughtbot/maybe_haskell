@@ -1,6 +1,6 @@
 ## Apply
 
-We can define such a function in terms of `Maybe` directly:
+We can define exactly such a function in terms of `Maybe` directly:
 
 ```haskell
 apply :: Maybe (a -> b) -> Maybe a -> Maybe b
@@ -12,7 +12,7 @@ If both the function and the value are present, pull them out, apply the
 function, and wrap the result in `Just`. If either are missing, return `Nothing`
 directly.
 
-Here's how we can use it:
+Here's how things look when we plug it in:
 
 ```haskell
 userFromParams :: Params -> Maybe User
