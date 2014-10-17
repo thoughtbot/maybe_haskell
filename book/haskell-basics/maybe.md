@@ -35,9 +35,9 @@ Returning a `Maybe` value forces all callers of `find` to deal with the
 potential `Nothing` case:
 
 ```haskell
---
+-- 
 -- Warning: this is a type error, not working code!
---
+-- 
 findUser :: UserId -> User
 findUser uid = find (matchesId uid) allUsers
 ```
