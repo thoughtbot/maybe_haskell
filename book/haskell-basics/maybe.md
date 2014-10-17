@@ -31,7 +31,8 @@ on the `(:)` (pronounced *cons*) constructor. Then we test if applying the
 `predicate` function to `first` returns `True`. If it does, we return `Just` it.
 Otherwise, we recurse and try to find the element in the `rest` of the list.
 
-This forces all callers of `find` to deal with the potential `Nothing` case.
+Returning a `Maybe` value forces all callers of `find` to deal with the
+potential `Nothing` case:
 
 ```haskell
 --
