@@ -4,12 +4,12 @@ to safely manipulate values which may in fact not be present. This immediately
 makes many uses of `Maybe` more convenient, while still being explicit and safe
 in the face of failure and partial functions.
 
-There's another notable case where `Maybe` can cause inconvenience. Imagine
-we're writing some code using a web framework. It provides a function `getParam`
-which takes the name of a query parameter (passed as part of the URL in a GET
-HTTP request), and returns the value for that parameter as parsed out of the
-current URL. Since the parameter you name could be missing or invalid, this
-function returns `Maybe`:
+There's another notable case where `Maybe` can cause inconvenience, one that
+can't be solved by `fmap` alone. Imagine we're writing some code using a web
+framework. It provides a function `getParam` which takes the name of a query
+parameter (passed as part of the URL in a GET HTTP request), and returns the
+value for that parameter as parsed out of the current URL. Since the parameter
+you name could be missing or invalid, this function returns `Maybe`:
 
 ```haskell
 -- Don't worry about how these are represented
