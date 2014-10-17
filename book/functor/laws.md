@@ -135,10 +135,12 @@ fh notReallyFive
 
 You should convince yourself that `fh` and `fmap h` behave in exactly the same
 way. The second functor law states that this must be the case if your type is a
-valid `Functor`. Because Haskell is referentially transparent, we can replace
-functions with their implementations freely -- it may require some explicit
-parenthesis here and there, but the code will always give the same answer. Doing
-so brings us back directly to the statement of the second law:
+valid `Functor`.
+
+Because Haskell is referentially transparent, we can replace functions with
+their implementations freely -- it may require some explicit parenthesis here
+and there, but the code will always give the same answer. Doing so brings us
+back directly to the statement of the second law:
 
 ```haskell
 (fmap f . fmap g) actuallyFive
