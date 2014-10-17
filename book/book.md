@@ -1,4 +1,4 @@
-% Sampling Haskell
+% Maybe Haskell
 % Pat Brisbin
 
 \clearpage
