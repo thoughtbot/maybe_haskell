@@ -21,9 +21,9 @@ They could do nothing, and make us rely of tuples as the only means of defining
 and using functions of more than one argument:
 
 ```haskell
---
+-- 
 -- Note: This is valid, but un-idiomatic Haskell
---
+-- 
 add :: (Int, Int) -> Int
 add (x, y) = x + y
 ```
@@ -44,7 +44,7 @@ f = map add5 [1,2,3]
 Instead, all functions in Haskell are in what's known as "curried" form:
 
 ```haskell
---
+-- 
 --     / One argument type, an Int
 --     |
 --     |       / One return type, a function from Int to Int
@@ -55,7 +55,7 @@ add x = \y -> x + y
 --  |   ` One body expression, a lambda from Int to Int
 --  |
 --  ` One argument variable, an Int
---
+-- 
 ```
 
 Haskell syntax then allows one to name arguments in whatever way they like; we

@@ -21,9 +21,9 @@ syntactic sugar and write the type for *a list of `a`s* as `List a` rather than
 `[a]`, you can confirm it too has the correct type:
 
 ```haskell
---
+-- 
 -- List a === [a]
---
+-- 
 --     (a -> b) -> f    a -> f    b
 map :: (a -> b) -> List a -> List b
 ```

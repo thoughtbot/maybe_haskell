@@ -9,9 +9,9 @@ For example, let's look at the first Functor law:
 
 ```haskell
 fmap id x == id x
---
+-- 
 -- for any value x, of type Maybe a
---
+-- 
 ```
 
 Where `id` is the *identity* function, one which returns whatever you give it:
