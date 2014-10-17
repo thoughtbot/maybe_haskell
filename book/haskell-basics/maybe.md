@@ -10,8 +10,8 @@ It's a bit like `PersonWith | PersonWithout`, except we're not dragging along a
 name this time. This type is only concerned with representing a value (of any
 type) which is either *present* or *not*.
 
-We can use this in functions which would otherwise be *partial*, meaning they
-can't produce a value for all possible inputs:
+We can use this to take functions which would otherwise be *partial* and make
+them *total*:
 
 ```haskell
 -- | Find the first element from the list for which the predicate function
