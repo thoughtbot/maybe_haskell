@@ -77,7 +77,7 @@ choice (option 3), but that only pushes the problem up to their callers -- any
 `Maybe` values tend to go *viral*.
 
 Eventually, probably at some UI boundary, someone will need to "deal with" the
-`Maybe`, be that providing a substitute or skipping some action that might
+`Maybe`, either by providing a substitute or skipping some action that might
 otherwise take place. This should happen only once, at that boundary. Every
 function between the source and final use should pass along this context
 unchanged.
