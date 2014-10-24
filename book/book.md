@@ -56,3 +56,5 @@
 <<[monad/bind.md]
 
 <<[monad/do.md]
+
+<<[monad/wrapping-up.md]
