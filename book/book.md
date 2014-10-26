@@ -58,3 +58,7 @@
 <<[monad/do.md]
 
 <<[monad/wrapping-up.md]
+
+# Other Types
+
+<< [other-types/either.md]
