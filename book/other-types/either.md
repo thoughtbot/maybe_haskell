@@ -66,7 +66,7 @@ When we get to `fmap` (and others), things are clearer:
 fmap :: (a -> b) -> Either e a -> Either e b
 ```
 
-## ParserError
+### ParserError
 
 As an example, consider some kind of parser. If the parser fails, it would be
 nice to include the line and character that triggered the failure. To accomplish
@@ -218,7 +218,7 @@ Given that the choice is arbitrary, I present the actual definition from
 Left e <*> _ = Left e
 ```
 
-## Monad
+### Monad
 
 When thinking through the `Monad` instance for our `Parsed` type, we don't have
 the same issue of deciding which error to propagate. Remember that the extra
