@@ -28,12 +28,13 @@ the compiler the type we want (or expect) that expression to have.
 six = (5 :: Int) + 1
 ```
 
-Type annotations and signatures are mostly optional, as Haskell can almost
+Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
-parts. For example, Haskell knows that `six` is an `Int` because it saw that `5`
-is an `Int` and since you can only use `(+)` with arguments of the same type, it
-*enforced* that `1` is also an `Int` and the final result of the addition is
-itself an `Int`.
+parts or seeing how it is eventually used. For example, Haskell knows that `six`
+is an `Int` because it saw that `5` is an `Int`. Since you can only use `(+)`
+with arguments of the same type, it *enforced* that `1` is also an `Int`.
+Knowing that `(+)` returns the same type as its arguments, the final result of
+the addition must itself be an `Int`.
 
 Good Haskellers will include a type signature on all top-level definitions
 anyway. It provides executable documentation and may, in some cases, prevent
