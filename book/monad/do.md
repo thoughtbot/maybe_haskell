@@ -38,9 +38,9 @@ First, to make things clearer, let's add some arbitrary line breaks:
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
-  findUser uid >>=
-  userAddress >>=
-  shippingCost
+    findUser uid >>=
+    userAddress >>=
+    shippingCost
 ```
 
 Next, let's name the arguments to each expression via anonymous functions,
@@ -50,10 +50,10 @@ add another arbitrary line break to highlight the final expression in the chain.
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
-  findUser uid >>= \u ->
-  userAddress u >>= \a ->
+    findUser uid >>= \u ->
+    userAddress u >>= \a ->
 
-  shippingCost a
+    shippingCost a
 ```
 
 Next, we'll take each lambda and translate it into a funny-looking assignment
@@ -62,10 +62,10 @@ using `(<-)`:
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
-  u <- findUser uid
-  a <- userAddress u
+    u <- findUser uid
+    a <- userAddress u
 
-  shippingCost a
+    shippingCost a
 ```
 
 Finally, we prefix the series of "statements" with `do`:
@@ -73,10 +73,10 @@ Finally, we prefix the series of "statements" with `do`:
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid = do
-  u <- findUser uid
-  a <- userAddress u
+    u <- findUser uid
+    a <- userAddress u
 
-  shippingCost a
+    shippingCost a
 ```
 
 Et Viola, you have the equivalent *do-notation* version of our function. When
@@ -88,10 +88,10 @@ Remove the `do` keyword:
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
-  u <- findUser uid
-  a <- userAddress u
+    u <- findUser uid
+    a <- userAddress u
 
-  shippingCost a
+    shippingCost a
 ```
 
 Translate each *binding* (the `(<-)` expressions) into a version using `(>>=)`
@@ -100,10 +100,10 @@ and lambdas:
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
-  findUser uid >>= \u ->
-  userAddress u >>= \a ->
+    findUser uid >>= \u ->
+    userAddress u >>= \a ->
 
-  shippingCost a
+    shippingCost a
 ```
 
 The compiler can stop here as all remaining steps are stylistic changes only

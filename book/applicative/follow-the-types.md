@@ -34,11 +34,11 @@ The simplest way is the following:
 ```haskell
 userFromParams :: Params -> Maybe User
 userFromParams params =
-  case getParam "name" params of
-      Just name -> case getParam "email" params of
-          Just email -> Just (User name email)
-          Nothing -> Nothing
-      Nothing -> Nothing
+    case getParam "name" params of
+        Just name -> case getParam "email" params of
+            Just email -> Just (User name email)
+            Nothing -> Nothing
+        Nothing -> Nothing
 ```
 
 `Maybe` is not making our lives easier here. Yes, type safety is a huge implicit
