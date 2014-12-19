@@ -45,9 +45,10 @@ that the type of `five` is `a`ny type that's `Num`eric in nature -- i.e. it can
 be added, negated and so forth.
 
 *Inferred types*, as these are called, are usually fine but can open you up to
-unclear error messages. If you were to use this value in two places and treat it
-as an `Int` in one and a `Float` in another, the error message may not
-immediately identify the problem depending on which expression the compiler sees
-first. On the other hand, if you explicitly state the type as whichever one you
-want it to be, then using it incorrectly will produce an error message leading
-you directly to the line and character of your error.
+unclear error messages. If you were to take the result of our generalized `five`
+and use it in two places, treating it as an `Int` in one and a `Float` in
+another, the error message may not immediately identify the problem depending on
+which expression the compiler sees first. On the other hand, if you explicitly
+state the type as whichever one you want it to be, then using it incorrectly
+will produce an error message leading you directly to the line and character of
+your error.
