@@ -10,7 +10,7 @@ For example, let's look at the first Functor law:
 ```haskell
 fmap id x == id x
 -- 
--- for any value x, of type Maybe a
+-- for any value x, of type f a (e.g. Maybe a)
 -- 
 ```
 
