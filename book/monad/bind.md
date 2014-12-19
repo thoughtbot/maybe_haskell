@@ -83,9 +83,9 @@ findUserShippingCost uid =
         Nothing -> Nothing
 ```
 
-This code is almost offensively ugly, but it's the sort of code I write every
-day in Ruby. We might hide it behind three-line methods each holding one level
-of conditional, but it's there.
+This code is offensively ugly, but it's the sort of code I write every day in
+Ruby. We might hide it behind three-line methods each holding one level of
+conditional, but it's there.
 
 How does this code look with `(>>=)`?
 
