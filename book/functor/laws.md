@@ -31,7 +31,7 @@ fmap id == id
 ```
 
 This law says that if we call `fmap id`, the function we get back should be
-equivalent to `id` itself. This is what "well behaved" means in this context. If
+equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
 element in the list (as `fmap id` does) gives you back the same exact list, and
 that is exactly what you expect to get if you apply `id` directly to the list
