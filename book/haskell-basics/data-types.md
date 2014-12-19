@@ -8,22 +8,25 @@ data Person = MakePerson String Int
 ```
 
 Here we've stated that the people in our system have a name (a `String`) and an
-age (an `Int`). To the left of the `=` is the name of the type and to the right
-can be one or more *constructors*. In almost all cases, you can treat a
-constructor like any other function; for example, `MakePerson` is a function
-that takes a `String` and an `Int`, and returns a `Person`.
+age (an `Int`). To the left of the `=` is the *type* constructor and to the
+right can be one or more *data* constructors. The type constructor is the name
+of the type and is used in type signatures. The data constructors are functions
+which produce values of the given type. For example, `MakePerson` is a function
+that takes a `String` and an `Int`, and returns a `Person`. Note that I will
+often use the general term "constructor" to refer to a *data* constructor if the
+meaning is clear from context.
 
-It's quite common to give the same name to the type and its constructor. This is
-because it's syntactically impossible to use one in place of the other, so the
-compiler makes no restriction. Naming is hard, so if you have a good one, you
-might as well use it in both contexts.
+When there is only one data constructor, it's quite common to give it the same
+name as the type constructor. This is because it's syntactically impossible to
+use one in place of the other, so the compiler makes no restriction. Naming is
+hard, so if you have a good one, you might as well use it in both contexts.
 
 ```haskell
 data Person = Person String Int
 --   |        |
---   |        ` A constructor
+--   |        ` Data constructor
 --   |
---   ` The type's name
+--   ` Type constructor
 ```
 
 With this data type declared, we can now use it to write functions that
@@ -65,10 +68,10 @@ get into that here.
 
 ## Sum Types
 
-As alluded to earlier, types can have more than one constructor, each separated
-by a `|` symbol. This is called a *sum type* because the total number of values
-you can build of this type is the sum of the number of values you can build with
-each constructor.
+As alluded to earlier, types can have more than one data constructor, each
+separated by a `|` symbol. This is called a *sum type* because the total number
+of values you can build of this type is the sum of the number of values you can
+build with each constructor.
 
 ```haskell
 data Person = PersonWithAge String Int | PersonWithoutAge String
