@@ -14,7 +14,7 @@ two types in that type class, the first is:
 pure :: a -> f a
 ```
 
-This is relatively simple and represents taking some value and placing in a the
+This is relatively simple and represents taking some value and placing in the
 *minimal* or *default* context of `f`, whatever that means for the particular
 type. For `Maybe`, it is implemented as wrapping the value in `Just`. We won't
 be discussing this function any further since the most common way it is used can
