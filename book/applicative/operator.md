@@ -1,6 +1,6 @@
 ## Operators Are Not Syntax
 
-If a function name is only symbols. You can always write it infix, no backticks
+If a function name is only symbols, you can always write it infix, no backticks
 required. This is how an expression like `1 + 1` does what you would expect and
 doesn't need to be written as `(+) 1 1` even though `(+)` is a function like any
 other. We call functions like this *operators*.
