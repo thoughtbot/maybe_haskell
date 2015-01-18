@@ -52,7 +52,7 @@ andThen (Just x) f = f x
 andThen _ _ = Nothing
 ```
 
-We'll use the function infix via backticks for readability:
+Again, we'll use the function infix via backticks for readability:
 
 ```haskell
 loginUser :: Params -> Maybe User
