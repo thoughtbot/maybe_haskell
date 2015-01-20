@@ -34,8 +34,8 @@ even has a default definition of `pure`.
 ## Chaining
 
 `(>>=)` is defined as an operator because it's meant to be used infix. It's also
-given an appropriate *fixity* so that it can be chained together intuitively.
-The word `andThen` comes to mind again as having multiple dependent computations
+given an appropriate fixity so that it can be chained together intuitively. The
+word `andThen` comes to mind again as having multiple dependent computations
 lends itself to an `x andThen y andThen z` nature. To see this in action, let's
 walk through another example.
 

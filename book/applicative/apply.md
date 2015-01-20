@@ -34,7 +34,7 @@ userFromParams params =
     fmap User (getParam "name" params) `apply` getParam "email" params
 ```
 
-With a bit more effort, we could apply the same trick to `fmap` and end up with
+With a bit more effort, we could use the same trick with `fmap` and end up with
 the following chaining:
 
 ```haskell

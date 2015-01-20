@@ -56,8 +56,9 @@ findUserShippingCost uid =
     shippingCost a
 ```
 
-Next, we'll take each lambda and translate it into a funny-looking assignment
-using `(<-)`:
+Next, we'll take each lambda and translate it into a *binding*, which looks a
+bit like variable assignment and uses `(<-)`. You can read `x <- y` as "x from
+y":
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
@@ -94,8 +95,7 @@ findUserShippingCost uid =
     shippingCost a
 ```
 
-Translate each *binding* (the `(<-)` expressions) into a version using `(>>=)`
-and lambdas:
+Translate each binding into a version using `(>>=)` and lambdas:
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
@@ -107,17 +107,19 @@ findUserShippingCost uid =
 ```
 
 The compiler can stop here as all remaining steps are stylistic changes only
-(removing whitespace and *eta-reducing* the lambdas).
+(removing whitespace and *eta-reducing*[^eta-reduce] the lambdas).
+
+[eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
 
 ## Will it Pipe?
 
 Both notations have their place and which to use is often up to the individual
 developer, but I do have a personal guideline I can offer.
 
-As mentioned, *do-notation* is typically useful in the `IO` `Monad` where the
-computation is probably representing a series of dependent steps anyway. If your
-process is a straight pipe-line, chaining expressions together with `(>>=)` will
-usually read better:
+As mentioned, *do-notation* is typically useful in the `IO` monad where the
+computation is probably representing a series of dependent actions to take place
+in the real world. If your process is a straight pipe-line, chaining expressions
+together with `(>>=)` will usually read better:
 
 ```haskell
 -- Read stdin, pass it to the given function, and print the result on stdout

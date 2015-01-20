@@ -12,8 +12,7 @@ User <$> getParam "name" params <*> getParam "email" params
 Here, the two results from `getParam "name"` and `getParam "email"` (either of
 which could be present or not) are passed together to `User`. If they're both
 present we get a `Just User`, otherwise `Nothing`. Within the `getParam "email"`
-expression, you can't make reference to the (potential) result of `getParam
-"name"`.
+expression, you can't reference the (potential) result of `getParam "name"`.
 
 We need that ability to solve our current conundrum because we need to check the
 value of the "type" param to know what to do next. We need... *monads*.
