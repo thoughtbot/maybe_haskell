@@ -66,3 +66,15 @@
 <<[other-types/intro.md]
 
 <<[other-types/either.md]
+
+
+
+<<[other-types/io/intro.md]
+
+<<[other-types/io/statements.md]
+
+<<[other-types/io/main.md]
+
+<<[other-types/io/other-instances.md]
+
+<<[other-types/io/more.md]
