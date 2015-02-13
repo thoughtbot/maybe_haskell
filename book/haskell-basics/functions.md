@@ -20,7 +20,7 @@ you see one, you can replace it with the other and the program will always give
 the same answer. This property is called *referential transparency* and it holds
 true for any Haskell definition, no matter how complicated.
 
-It's also possible to specify the types with an *annotation* rather than a
+It's also possible to specify types with an *annotation* rather than a
 signature. We can annotate any expression with `:: <type>` to explicitly tell
 the compiler the type we want (or expect) that expression to have.
 

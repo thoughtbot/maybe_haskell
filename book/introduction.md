@@ -33,7 +33,7 @@ to handle that case, but it also means that if a value is *not* of this special
 "nullable" type, you can feel safe in your assumption that the value's really
 there -- No `nil` checks required.
 
-The focus of this book will be Haskell's implementation of this idea via its
+The focus of this book will be Haskell's implementation of this idea via the
 `Maybe` data type. This type and all of the functions that deal with it are not
 built-in, language-level constructs. All of it is implemented as libraries,
 written in a very straightforward way. In fact, we'll write most of that code
@@ -69,7 +69,7 @@ That makes this expression a function which must take a list and return the
 number of even elements it has. We then assign this function the name
 `countEvens`.
 
-This is a relatively contrived example, but its indicative of the sort of thing
+This is a relatively contrived example, but it's indicative of the sort of thing
 that can happen at any level: if your first reaction is "So much syntax! What is
 this crazy dot thing!?", you're going to have a bad time. Instead, try to
 internalize the parts that make sense while getting comfortable with *not*
@@ -112,7 +112,7 @@ expressive, and powerful. My hope is to show that Haskell and its "academic"
 ideas are not limited to PhD thesis papers. These ideas result directly in
 cleaner, more maintainable code that solves practical problems.
 
-I won't be going into how to setup a Haskell programming environment, showing
+I won't be going into how to set up a Haskell programming environment, showing
 you how to write and run complete Haskell programs, or diving deeply into every
 language construct we'll see. If you are interested in going further and
 actually learning Haskell (and I hope you are!), then I recommend following

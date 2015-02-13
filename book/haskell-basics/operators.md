@@ -110,7 +110,7 @@ normally-named Haskell function by surrounding it in backticks:
 elem needle haystack
 
 -- Reads a little better infix
-needle `elem` hastack
+needle `elem` haystack
 
 -- Or as a section, leaving out the needle
 intersects xs ys = any (`elem` xs) ys
@@ -359,7 +359,7 @@ trim = f . f
 
 I would read this as "trim is f after f where f is reverse after drop-spaces".
 Even though it's "full of punctuation" and uses terse variable names, I think
-this Haskell code comes extremely close to expressing my intent
+this Haskell code comes extremely close to expressing my intent.
 
 Functions like `trim` and `f` are known as *point-free*. That can be a source of
 confusion because there's visually more "points". The reason is that the `(.)`s
