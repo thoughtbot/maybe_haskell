@@ -21,91 +21,91 @@ behaviors:
 
 [report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
 
-1. Operators are placed between their arguments
+### Operators are placed between their arguments
 
-  This is called *infix notation*. It's very intuitive and looks like this:
+This is called *infix notation*. It's very intuitive and looks like this:
 
-  ```hs
-  2 + 2
-  -- => 4
-  ```
+```haskell
+2 + 2
+-- => 4
+```
 
-  Functions are usually called using *prefix notation*. It's not common, but if
-  you do want to call an operator using prefix notation, you have to surround it
-  in parenthesis:
+Functions are usually called using *prefix notation*. It's not common, but if
+you do want to call an operator using prefix notation, you have to surround it
+in parenthesis:
 
-  ```hs
-  (+) 2 2
-  -- => 4
-  ```
+```haskell
+(+) 2 2
+-- => 4
+```
 
-  You also have to surround operators with parenthesis if passing them as an
-  argument to another function, as in this `sum` example:
+You also have to surround operators with parenthesis if passing them as an
+argument to another function, as in this `sum` example:
 
-  ```hs
-  sum = foldl (+) 0
-  ```
+```haskell
+sum = foldl (+) 0
+```
 
-  Without the parenthesis, Haskell would think you were trying to add `foldl`
-  and `0` which is most certainly a type error.
+Without the parenthesis, Haskell would think you were trying to add `foldl`
+and `0` which is most certainly a type error.
 
-2. Operators can be assigned a *fixity*
+### Operators can be assigned a *fixity*
 
-  An operator's *fixity* is its [associativity][] and [precedence][] relative to
-  other operators. By default, function application binds most tightly and
-  associates to the left. This means the following expression:
+An operator's *fixity* is its [associativity][] and [precedence][] relative to
+other operators. By default, function application binds most tightly and
+associates to the left. This means the following expression:
 
-  [associativity]: http://en.wikipedia.org/wiki/Associative_property
-  [precedence]: http://en.wikipedia.org/wiki/Order_of_operations
+[associativity]: http://en.wikipedia.org/wiki/Associative_property
+[precedence]: http://en.wikipedia.org/wiki/Order_of_operations
 
-  ```hs
-  2 + 2 * 6
-  ```
+```haskell
+2 + 2 * 6
+```
 
-  would normally be parsed as
+would normally be parsed as
 
-  ```hs
-  (((2 +) 2) * 6)
-  -- => 24
-  ```
+```haskell
+(((2 +) 2) * 6)
+-- => 24
+```
 
-  and that would not give the correct result by the normal rules of mathematics
-  which state that multiplication should occur before addition. We could
-  disambiguate this with explicit parenthesis:
+and that would not give the correct result by the normal rules of mathematics
+which state that multiplication should occur before addition. We could
+disambiguate this with explicit parenthesis:
 
-  ```hs
-  2 + (2 * 6)
-  -- => 14
-  ```
+```haskell
+2 + (2 * 6)
+-- => 14
+```
 
-  This is tedious, noisy, and it's better to say once that `(*)` binds more
-  tightly than `(+)`. We'll see examples of declaring exactly that a little
-  later on.
+This is tedious, noisy, and it's better to say once that `(*)` binds more
+tightly than `(+)`. We'll see examples of declaring exactly that a little
+later on.
 
-3. Operators can be used in a *section*
+### Operators can be used in a *section*
 
-  If we surround an operator and one of its arguments in parenthesis, we get a
-  function that will accept the missing argument. We can also choose freely
-  which argument to leave out. This can be seen in the following two
-  expressions:
+If we surround an operator and one of its arguments in parenthesis, we get a
+function that will accept the missing argument. We can also choose freely
+which argument to leave out. This can be seen in the following two
+expressions:
 
-  ```hs
-  map (/ 10) [100, 200, 300]
-  -- => [10, 20, 30]
+```haskell
+map (/ 10) [100, 200, 300]
+-- => [10, 20, 30]
 
-  map (10 /) [10, 5, 1]
-  -- => [1, 2, 10]
-  ```
+map (10 /) [10, 5, 1]
+-- => [1, 2, 10]
+```
 
-  There is one gotcha to be aware of: the `(-)` operator. This operator can't do
-  a right section since Haskell syntax interprets `(-2)` as the number *negative
-  two*. The function `subtract` is available to work around this limitation. If
-  you ever need to use `(- n)`, you can use `(subtract n)` instead.
+There is one gotcha to be aware of: the `(-)` operator. This operator can't do
+a right section since Haskell syntax interprets `(-2)` as the number *negative
+two*. The function `subtract` is available to work around this limitation. If
+you ever need to use `(- n)`, you can use `(subtract n)` instead.
 
 As a final note, all of the things I've described here can also be used for any
 normally-named Haskell function by surrounding it in backticks:
 
-```hs
+```haskell
 -- Normal usage of an elem function
 elem needle haystack
 
@@ -124,7 +124,7 @@ whose importance in writing Haskell can't be overstated: `($)` and `(.)`.
 `($)` is an operator which represents applying a function to an argument. Its
 complete and deceptively simple definition is the following:
 
-```hs
+```haskell
 infixr 0 $
 
 ($) :: (a -> b) -> a -> b
@@ -157,7 +157,7 @@ try exploring the following Haskell code:
 
 [identity]: http://en.wikipedia.org/wiki/Identity_function
 
-```hs
+```haskell
 id :: a -> a
 id x = x
 
@@ -174,77 +174,77 @@ At first, it can be hard to see why such a circular definition has any use at
 all. Having this function available comes with (at least) two very real
 benefits:
 
-1. We can speak precisely about function application itself
+#### We can speak precisely about function application itself
 
-  Function application is one of the most important things you can do in
-  Haskell. For this reason, the authors of the language ensured the doing so was
-  free of any unnecessary syntax: no parenthesis, no commas, put the function
-  name next to its argument, `f x`, that's it. This is great, but sometimes it's
-  useful to name this phenomenon.
+Function application is one of the most important things you can do in
+Haskell. For this reason, the authors of the language ensured the doing so was
+free of any unnecessary syntax: no parenthesis, no commas, put the function
+name next to its argument, `f x`, that's it. This is great, but sometimes it's
+useful to name this phenomenon.
 
-  Take the following Haskell code:
+Take the following Haskell code:
 
-  ```hs
-  -- A list of functions (using sections)
-  fs = [(+1), (+2), (+3)]
+```haskell
+-- A list of functions (using sections)
+fs = [(+1), (+2), (+3)]
 
-  -- A list of values
-  xs = [1, 2, 3]
+-- A list of values
+xs = [1, 2, 3]
 
-  -- Zip the lists together by calling ($) with an element of each list as we go
-  zipWith ($) fs xs
-  -- => [2, 4, 6]
-  ```
+-- Zip the lists together by calling ($) with an element of each list as we go
+zipWith ($) fs xs
+-- => [2, 4, 6]
+```
 
-  Pretty neat right? Here's another example using `($)` in a section:
+Pretty neat right? Here's another example using `($)` in a section:
 
-  ```hs
-  -- A list of predicate functions (also using sections)
-  ps = [even, (< 10), (> 0)]
+```haskell
+-- A list of predicate functions (also using sections)
+ps = [even, (< 10), (> 0)]
 
-  -- Check if a number matches all of those conditions
-  check x = all ($ x) ps
+-- Check if a number matches all of those conditions
+check x = all ($ x) ps
 
-  check 2  -- => True
-  check 5  -- => False
-  check 12 -- => False
-  ```
+check 2  -- => True
+check 5  -- => False
+check 12 -- => False
+```
 
-2. We can get rid of parenthesis
+#### We can get rid of parenthesis
 
-  Take the following expression:
+Take the following expression:
 
-  ```hs
-  take 2 drop 5 filter even [1..]
-  ```
+```haskell
+take 2 drop 5 filter even [1..]
+```
 
-  This expression is a type error, because Haskell's default precedence
-  misaligns with our intention:
+This expression is a type error, because Haskell's default precedence
+misaligns with our intention:
 
-  ```hs
-  (((take 2) drop 5) filter even) [1..]
-  ```
+```haskell
+(((take 2) drop 5) filter even) [1..]
+```
 
-  Our intention was for the applications to "go the other way". We can state
-  that explicitly through parenthesis and get this to compile:
+Our intention was for the applications to "go the other way". We can state
+that explicitly through parenthesis and get this to compile:
 
-  ```hs
-  take 2 (drop 5 (filter even [1..]))
-  -- => [12, 14]
-  ```
+```haskell
+take 2 (drop 5 (filter even [1..]))
+-- => [12, 14]
+```
 
-  That looks awfully Lispy. Remember the fixity declaration given to `($)`? It
-  associates to the right, and has the lowest possible precedence. That's
-  exactly what we need in this case (and in fact many cases):
+That looks awfully Lispy. Remember the fixity declaration given to `($)`? It
+associates to the right, and has the lowest possible precedence. That's
+exactly what we need in this case (and in fact many cases):
 
-  ```hs
-  take 2 $ drop 5 $ filter even [1..]
-  -- => [12, 14]
-  ```
+```haskell
+take 2 $ drop 5 $ filter even [1..]
+-- => [12, 14]
+```
 
-  *take 2 of drop 5 of filter even 1..*
+*take 2 of drop 5 of filter even 1..*
 
-  Much better.
+Much better.
 
 ### Function Composition
 
@@ -257,7 +257,7 @@ appends "XY" on the end.
 
 Its complete, and again deceptively simple, definition is as follows:
 
-```hs
+```haskell
 infixr 9 .
 
 (.) :: (b -> c) -> (a -> b) -> a -> c
@@ -274,7 +274,7 @@ these reasons, I'd like to use an alternate but equivalent definition:
 [prelude]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.
 [lambda]: https://wiki.haskell.org/Anonymous_function
 
-```hs
+```haskell
 (f . g) x = f (g x)
 ```
 
@@ -285,7 +285,7 @@ should make sense once we see how it works.
 `(.)`'s type reads best if we imagine it taking two arguments and returning a
 function:
 
-```hs
+```haskell
 (.) :: (b -> c) -> (a -> b) -> (a -> c)
 ```
 
@@ -322,7 +322,7 @@ then reversing it back. We immediately see that the form `reverse $ dropWhile
 isSpace x` is repeated twice. We can reduce this repetition with a local
 definition:
 
-```hs
+```haskell
 trim s = f $ f s
 
   where
@@ -341,7 +341,7 @@ Haskellers may get confused about which of `($)` or `(.)` we should use in this
 case. Because we would read the function as reverse-after-drop and not
 reverse-of-drop, we know that `(.)` is what we want:
 
-```hs
+```haskell
 trim s = f $ f s
 
   where
@@ -350,7 +350,7 @@ trim s = f $ f s
 
 Better, but still noisy. We can pull the same trick with `trim` itself:
 
-```hs
+```haskell
 trim = f . f
 
   where
