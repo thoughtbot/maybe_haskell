@@ -62,7 +62,7 @@ associates to the left. This means the following expression:
 2 + 2 * 6
 ```
 
-would normally be parsed as
+would normally be treated as
 
 ```haskell
 (((2 +) 2) * 6)
