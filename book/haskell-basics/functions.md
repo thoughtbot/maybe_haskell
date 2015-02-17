@@ -41,7 +41,7 @@ anyway. It provides executable documentation and may, in some cases, prevent
 errors which occur when the compiler assigns a more generic type than you might
 otherwise want. For example, if we omitted the type signatures in our first
 example, the compiler would assign the type `five :: Num a => a` which means
-that the type of `five` is `a`ny type that's `Num`eric in nature -- i.e. it can
+that the type of `five` is any type that's `Num`eric in nature -- i.e. it can
 be added, negated and so forth.
 
 *Inferred types*, as these are called, are usually fine but can open you up to
