@@ -87,7 +87,7 @@ Even though it's good design for every function in our system to pass along a
 and return `Maybe` values. Each function separately checking if they should go
 ahead and perform their computations will become repetitive and tedious.
 Instead, we can completely abstract this "pass along the `Maybe`" concern using
-using [higher-order][] functions and something called *functors*.
+[higher-order][] functions and something called *functors*.
 
 [higher-order]: http://learnyouahaskell.com/higher-order-functions
 

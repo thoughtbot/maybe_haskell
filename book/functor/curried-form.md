@@ -63,9 +63,9 @@ f = map (add 5) [1,2,3]
 ```
 
 While both forms are valid Haskell (in fact, the `curry` and `uncurry` functions
-in the Prelude will convert functions between the two forms), the latter was
-chosen as the default and so Haskell's syntax allows some things that make it
-more convenient.
+in the Prelude convert functions between the two forms), the latter was chosen
+as the default and so Haskell's syntax allows some things that make it more
+convenient.
 
 For example, we can name function arguments in whatever way we like; we don't
 have to always assign a single lambda expression as the function body. In fact,
@@ -79,7 +79,7 @@ add x y = x + y
 
 Haskell also defines `->` to be right-associative and function application to be
 left associative. That means we don't need to add any parenthesis unless we want
-to explicitly group in some other way. This means rather than writing:
+to explicitly group in some other way. Rather than writing:
 
 ```haskell
 addThree :: Int -> (Int -> (Int -> Int))

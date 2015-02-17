@@ -42,4 +42,4 @@ User` using `(<$>)` and `(<*>)`.
 
 If any key is missing, the whole thing fails. If they're all there, we get the
 `User` we wanted. This concern is completely isolated within the implementation
-of `(<$>)` and `(<*>)`.
+of `(<$>)` and `(<*>)` for `Parser`.

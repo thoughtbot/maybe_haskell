@@ -137,12 +137,12 @@ accounted for under an operation like `fmap`?
 ```haskell
 --      (a -> b) -> f        a -> f        b
 --      (a -> b) -> Either e a -> Either e b
-fmap :: (a -> b) -> Parsed a   -> Parsed   b
+fmap :: (a -> b) -> Parsed   a -> Parsed   b
 fmap f (Right v) = Right (f v)
 fmap _ (Left e)  = Left e
 ```
 
-If the value is there, we apply the given function to it. If its not, we pass
+If the value is there, we apply the given function to it. If it's not, we pass
 along the error. Now we can do something like this:
 
 ```haskell
@@ -173,7 +173,7 @@ only difference is we're doing it for a different kind of context.
 ```haskell
 -- Given two json objects, merge them. Duplicate keys result in those in the
 -- second object being kept.
-merge :: JSON -> JSON
+merge :: JSON -> JSON -> JSON
 merge = undefined
 
 jsonString1 = "..."
@@ -191,6 +191,7 @@ value's not there, that error is preserved as a new `Left` value:
 --       f        (a -> b) -> f        a -> f        b
 --       Either e (a -> b) -> Either e a -> Either e b
 (<*>) :: Parsed   (a -> b) -> Parsed   a -> Parsed   b
+Right f <*> Right x = Right (f x)
 Right _ <*> Left e = Left e
 ```
 
@@ -258,7 +259,7 @@ function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
 that that's the `Parsed HTML` we're after.
 
 If both parses succeed, we get a `Right`-constructed value containing the `HTML`
-we want. If either parse, fails we get a `Left`-constructed value containing the
+we want. If either parse fails, we get a `Left`-constructed value containing the
 `ParserError` from whichever failed.
 
 Allowing such a readable expression (*parse JSON and then parse HTML at body*),
