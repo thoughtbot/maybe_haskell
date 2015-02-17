@@ -109,7 +109,7 @@ findUserShippingCost uid =
 The compiler can stop here as all remaining steps are stylistic changes only
 (removing whitespace and *eta-reducing*[^eta-reduce] the lambdas).
 
-[eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
+[^eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
 
 ## Will it Pipe?
 
