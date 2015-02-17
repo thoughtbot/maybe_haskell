@@ -14,7 +14,7 @@ sub-parsers into something domain-specific.
 Again, imagine we had a rich `User` data type:
 
 ```haskell
-data User
+data User = User
     String        -- Name
     String        -- Email
     Int           -- Age
@@ -27,15 +27,19 @@ type) and returns a `Parser User`:
 
 ```haskell
 parseJSON :: Value -> Parser User
-parseJSON v = User
-    <$> v .: "name"
-    <*> v .: "email"
-    <*> v .: "age"
-    <*> v .: "birth_date"
+parseJSON (Object o) = User
+    <$> o .: "name"
+    <*> o .: "email"
+    <*> o .: "age"
+    <*> o .: "birth_date"
+
+-- If we're given some JSON value besides an object (an array, a string, etc) we
+-- can signal failure by returning the special value mzero
+parseJSON _ = mzero
 ```
 
-Each individual `v .: "..."` call is a function that attempts to pull the value
-for the given key out of the JSON object. Potential failure (missing key,
+Each individual `o .: "..."` expression is a function that attempts to pull the
+value for the given key out of a JSON `Object`. Potential failure (missing key,
 invalid type, etc) is captured by returning a value wrapped in the `Parser`
 type. We can combine the individual `Parser` values together into one `Parser
 User` using `(<$>)` and `(<*>)`.
