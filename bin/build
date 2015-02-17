@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Build all versions into ./build using paperback.
+#
+# Requires access to https://github.com/thoughtbot/paperback. See its README for
+# installation instructions.
+#
+###
+docker run -v $PWD:/source thoughtbot/paperback build
