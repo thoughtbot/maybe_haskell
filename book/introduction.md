@@ -39,11 +39,11 @@ built-in, language-level constructs. All of it is implemented as libraries,
 written in a very straightforward way. In fact, we'll write most of that code
 ourselves over the course of this short e-book.
 
-Haskell is not the only language to have such a construct. Scala has a similar
-`Option` type and Swift has `Optional` with various built-in syntax elements to
-make its usage more convenient. Many of the ideas implemented in these languages
-were lifted directly from Haskell. If you happen to use one of them, it can be
-good to learn where the ideas originated.
+Haskell is not the only language to have such a construct. For example, Scala
+has a similar `Option` type and Swift has `Optional` with various built-in
+syntax elements to make its usage more convenient. Many of the ideas implemented
+in these languages were lifted directly from Haskell. If you happen to use one
+of them, it can be good to learn where the ideas originated.
 
 ## Required Experience
 
