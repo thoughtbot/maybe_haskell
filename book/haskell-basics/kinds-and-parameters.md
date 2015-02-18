@@ -17,7 +17,7 @@ data Person a = PersonWith String a | PersonWithout String
 ```
 
 Any lowercase value will do, but it's common to use `a` because it's short, and
-a value of type `a` can be thought of as a value of `a`ny type. Rather than
+a value of type `a` can be thought of as a value of any type. Rather than
 hard-coding that a person has an age (or not), we can say a person is holding
 some thing of type `a` (or not).
 
@@ -37,7 +37,7 @@ that thing which I do not have.
 Functions that operate on people can choose if they care about what the person's
 holding or not. For example, getting someone's name shouldn't be affected by
 them holding something or not, so we can leave it unspecified, again using `a`
-to mean `a`ny type:
+to mean any type:
 
 ```haskell
 getName :: Person a -> String
