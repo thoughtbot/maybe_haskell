@@ -255,42 +255,23 @@ a quick example, if `appendX` takes a string and appends an "X" on the end, and
 *append y after append x* and represents a function that takes a string and
 appends "XY" on the end.
 
-Its complete, and again deceptively simple, definition is as follows:
+Its complete, and again deceptively simple, definition is as follows (this is not
+the exact definition as stated in the [Haskell Prelude][prelude], but equivalent
+to it):
+
+[prelude]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.
 
 ```haskell
 infixr 9 .
 
-(.) :: (b -> c) -> (a -> b) -> a -> c
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
 
-(.) f g = \x -> f (g x)
-```
-
-This is the definition you'll find if you look it up in the [Haskell
-Prelude][prelude]. It can be a little hard to parse if you're not used to
-[anonymous functions][lambda] and it doesn't take advantage of the fact that
-operators can be placed between their arguments when being defined too. For
-these reasons, I'd like to use an alternate but equivalent definition:
-
-[prelude]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.
-[lambda]: https://wiki.haskell.org/Anonymous_function
-
-```haskell
 (f . g) x = f (g x)
 ```
 
-Going back to the fixity declaration, we can see that `(.)` also associates to
-the right, but that it's given the highest precedence possible. The reason
-should make sense once we see how it works.
-
-`(.)`'s type reads best if we imagine it taking two arguments and returning a
-function:
-
-```haskell
-(.) :: (b -> c) -> (a -> b) -> (a -> c)
-```
-
-Because of how `(->)` itself associates, the two signatures are equivalent. This
-is related to an idea called *currying* which I'll talk more about later.
+In the fixity declaration, we can see that `(.)` also associates to the right,
+but that it's given the highest precedence possible. The reason should make
+sense once we see how it works.
 
 We can read this type as follows: given two functions, one from `b` to `c` and
 the other from `a` to `b`, we get back a new function this time from `a` to `c`.
