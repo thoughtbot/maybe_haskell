@@ -342,12 +342,6 @@ I would read this as "trim is f after f where f is reverse after drop-spaces".
 Even though it's "full of punctuation" and uses terse variable names, I think
 this Haskell code comes extremely close to expressing my intent.
 
-Functions like `trim` and `f` are known as *point-free*. That can be a source of
-confusion because there's visually more "points". The reason is that the `(.)`s
-are not the points we're talking about. `s` and `x` were "fixed points" of the
-functions `trim` and `f` respectively (in a mathematical sense), so removing
-them makes the functions point-free.
-
 I go through all of this for two reasons:
 
 1. Operators can be a huge source of confusion and fear in new Haskell
