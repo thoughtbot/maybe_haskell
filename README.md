@@ -9,6 +9,10 @@ Please provide feedback via [GitHub][], or [email][].
 [github]: https://github.com/thoughtbot/maybe_haskell/issues
 [email]: mailto:pat+maybe-haskell@thoughtbot.com
 
+Thank you to all who've [contributed][contributors] so far!
+
+[contributors]: https://github.com/thoughtbot/maybe_haskell/graphs/contributors
+
 ## Roadmap
 
 - [x] Introduction
