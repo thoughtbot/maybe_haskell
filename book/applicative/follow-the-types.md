@@ -108,9 +108,13 @@ And we want this:
 
 ```haskell
 userFromParams :: Params -> Maybe User
-userFromParams params = x ?+? y
+userFromParams params = x ??? y
 ```
 
-We only have to figure out what that `?+?` should be. What it looks like we need
-is some way to apply a `Maybe` function to a `Maybe` value to get a `Maybe`
-result.
+We only have to figure out what that `???` should be. What it looks like we
+need[^typed-holes] is some way to apply a `Maybe` function to a `Maybe` value to
+get a `Maybe` result.
+
+[^typed-holes]: We could actually use a new feature in GHC called [typed holes][] to find out exactly what type of function we need and use that to guide us in writing it.
+
+[typed holes]: https://downloads.haskell.org/~ghc/7.8.1/docs/html/users_guide/typed-holes.html
