@@ -1,0 +1,4 @@
+#!/bin/sh
+find build \
+  -mindepth 2 -maxdepth 2 \! -name '*-sample*' \
+  -exec cp -rv {} release/ \;
