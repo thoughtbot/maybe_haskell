@@ -3,7 +3,7 @@
 Since the `apply` we made up reads best when written infix, it was defined as an
 operator named `(<*>)` in the `Applicative` type class. Like `fmap` it is a type
 class function, meaning it can be implemented by many types. There are actually
-two types in that type class, the first is:
+two member functions in that type class, the first is:
 
 ```haskell
 pure :: a -> f a

@@ -44,8 +44,7 @@ findUser uid = find (matchesId uid) allUsers
 
 This is a type error since the expression actually returns a `Maybe User`.
 Instead, we have to take that `Maybe User` and inspect it to see if something's
-there or not. We can do this via `case` which supports pattern matching not
-unlike you've seen before:
+there or not. We can do this via `case` which also supports pattern matching:
 
 ```haskell
 findUser :: UserId -> User
