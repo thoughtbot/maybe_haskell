@@ -1,14 +1,14 @@
 ## Maybe
 
-Haskell's `Maybe` type should make all kinds of sense now:
+Haskell's `Maybe` type is very similar to our `Person` example:
 
 ```haskell
 data Maybe a = Nothing | Just a
 ```
 
-It's a bit like `PersonWith | PersonWithout`, except we're not dragging along a
-name this time. This type is only concerned with representing a value (of any
-type) which is either *present* or *not*.
+The difference is we're not dragging along a name this time. This type is only
+concerned with representing a value (of any type) which is either *present* or
+*not*.
 
 We can use this to take functions which would otherwise be *partial* and make
 them *total*:

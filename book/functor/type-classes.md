@@ -1,30 +1,52 @@
 ## About Type Classes
 
-Haskell uses type classes for functions which may be implemented in different
-ways for different data types. For example, we can add or negate various kinds
-of numbers: integers, floating points, rational numbers, etc. To accommodate
-this, Haskell has a [`Num`][] type class with functions like `(+)` and `negate`
-as part of it. Each concrete type (`Int`, `Float`, etc) then defines its own
-version of the required functions.
+Haskell has a concept called *type classes*. They're not at all related to the
+classes used in Object-oriented programming. Instead, Haskell uses type classes
+for functions which may be implemented in different ways for different data
+types. These are more like the *interfaces* and *protocols* you may find in
+other languages. For example, we can add or negate various kinds of numbers:
+integers, floating points, rational numbers, etc. To accommodate this, Haskell
+has a [`Num`][] type class with functions like `(+)` and `negate` as part of it.
+Each concrete type (`Int`, `Float`, etc) then defines its own version of the
+required functions.
 
 [`Num`]: http://hackage.haskell.org/package/base-4.7.0.1/docs/Prelude.html#t:Num
 
-Being a member of a type class requires you implement any *member functions*
-with the correct type signatures. For example, to make `Int` a `Num` someone
-defined a `negate` function with the type `Int -> Int`.
+Type classes are defined with the `class` keyword and a `where` clause listing
+the types of any *member functions*:
 
-Usually, but not always, there are *laws* associated with these that your
-implementations must satisfy. For example, if you negate a number twice, you
-should get back to the same number. This can be stated formally as:
+```haskell
+class Num a where
+    (+) :: a -> a -> a
+
+    negate :: a -> a
+```
+
+Being an *instance* of a type class requires you implement any member functions
+with the correct type signatures. To make `Int` an instance of `Num`, someone
+defined the `(+)` and `negate` functions for it. This is done with the
+`instance` keyword and a `where` clause that implements the functions from the
+class declaration:
+
+```haskell
+instance Num Int where
+    x + y = addInt x y
+
+    negate x = negateInt x
+```
+
+Usually, but not always, there are *laws* associated with these functions that
+your implementations must satisfy. Type class laws are important for the utility
+of type classes. They allow us as developers to reason about what will happen
+when we use type class functions without having to understand all of the
+concrete types for which they are defined. For example, if you negate a number
+twice, you should get back to the same number. This can be stated formally as:
 
 ```haskell
 negate (negate x) == x -- for any x
 ```
 
-The first requirement is enforced by the type system. If your code compiles, you
-got this part right. Unfortunately, the second requirement cannot be enforced by
-the compiler. You'll need to verify that you got this right using tests. Most
-laws can be stated as *properties* and thoroughly tested with a tool like
-[QuickCheck][].
-
-[quickcheck]: http://www.haskell.org/haskellwiki/Introduction_to_QuickCheck1
+Knowing that this law holds gives us a precise understanding of what will happen
+when we use `negate`. Because of the laws, we get this understanding without
+knowing the how `negate` is implemented for various types. This is a simple
+example, but we'll see a more interesting one with the `Functor` type class.

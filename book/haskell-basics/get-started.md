@@ -13,12 +13,15 @@ def find_user(uid)
 end
 ```
 
-First of all, the Haskell version is type safe. I'd put money on most Ruby
+First of all, the Haskell version is type safe: `findUser` must always return a
+`User` since that's the type we've specified. I'd put money on most Ruby
 developers returning `nil` from the `else` branch. The Haskell type system won't
-allow that and that's a good thing. I understand that without spending time
-programming in Haskell it's hard to see the benefits of ruthless type safety
-employed at every turn. I assure you it's a coding experience like no other, but
-I'm not here to convince you of that -- at least not directly.
+allow that and that's a good thing. Otherwise, we have these values floating
+throughout our system that we assume are there and in fact are not. I understand
+that without spending time programming in Haskell, it's hard to see the benefits
+of ruthless type safety employed at every turn. I assure you it's a coding
+experience like no other, but I'm not here to convince you of that -- at least
+not directly.
 
 The bottom line is that an experienced Haskeller would not write this code this
 way. `case` is a code smell when it comes to `Maybe`. Almost all code using

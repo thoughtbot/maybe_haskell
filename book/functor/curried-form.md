@@ -1,7 +1,6 @@
 ## What's in a Map
 
-The definition of `fmap` for `Maybe` is simple and its usage is intuitive, but
-now that we have two points of reference (`Maybe` and `[]`) for this idea of
+Now that we have two points of reference (`Maybe` and `[]`) for this idea of
 *mapping*, we can talk about some of the more interesting aspects of what it
 really means.
 
@@ -77,37 +76,51 @@ add x = \y -> x + y
 add x y = x + y
 ```
 
-Haskell also defines `->` to be right-associative and function application to be
-left associative. That means we don't need to add any parenthesis unless we want
-to explicitly group in some other way. Rather than writing:
+In type signatures, `(->)` is right-associative. This means that instead of
+writing:
 
 ```haskell
 addThree :: Int -> (Int -> (Int -> Int))
 addThree x y z = x + y + z
-
-six :: Int
-six = ((addThree 1) 2) 3
 ```
 
-We can write:
+We can write the less-noisy:
 
 ```haskell
 addThree :: Int -> Int -> Int -> Int
 addThree x y z = x + y + z
+```
 
+And it has the same meaning. This is why Haskell type signatures don't appear to
+separate argument types from return types. Technically, the first type is the
+only argument, everything else is a functional return type.
+
+Similarly, function application is left-associative. This means that instead of
+writing:
+
+```haskell
+six :: Int
+six = ((addThree 1) 2) 3
+```
+
+We can write the less-noisy:
+
+```haskell
 six :: Int
 six = addThree 1 2 3
 ```
 
-And that's why Haskell type signatures have the form they do.
+And it has the same meaning as well.
 
 ## Partial Application
 
-As in the `map` example above, we can partially apply functions by supplying
-only some of their arguments and getting back another function which accepts any
-arguments we left out. Technically, this is not "partial" at all, since all
-functions really only take a single argument. In fact, this mechanism happens
-even in the cases you wouldn't conceptually refer to as "partial application":
+I mentioned partial application in an early chapter, but it's worth discussing
+again in the context of the `map` example above. We can partially apply
+functions by supplying only some of their arguments and getting back another
+function which accepts any arguments we left out. Technically, this is not
+"partial" at all, since all functions really only take a single argument. In
+fact, this mechanism happens even in the cases you wouldn't conceptually refer
+to as "partial application":
 
 When we wrote the following expression:
 

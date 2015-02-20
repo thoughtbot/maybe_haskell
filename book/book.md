@@ -13,8 +13,6 @@
 
 <<[haskell-basics/functions.md]
 
-<<[haskell-basics/operators.md]
-
 <<[haskell-basics/data-types.md]
 
 <<[haskell-basics/kinds-and-parameters.md]

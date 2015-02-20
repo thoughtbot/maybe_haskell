@@ -67,7 +67,7 @@ f :: Int -> Int
 f = (+2)
 
 g :: Int -> Int
-g = (+3)
+g = (*3)
 ```
 
 We can *compose* these two functions to get a new function, and call that `h`:
@@ -84,28 +84,27 @@ h :: Int -> Int
 h x = f (g x)
 ```
 
-This new function takes a number and gives it to `(+3)`, then it takes the
-result and gives it to `(+2)`. The result is a function that will add 5 to its
-argument.
+This new function takes a number and gives it to `(*3)`, then it takes the
+result and gives it to `(+2)`:
 
 ```haskell
 h 5
--- => 10
+-- => 17
 ```
 
 We can give this function to `fmap` to get one that works with `Maybe` values:
 
 ```haskell
 fmap h actuallyFive
--- => Just 10
+-- => Just 17
 
 fmap h notReallyFive
 -- => Nothing
 ```
 
 Similarly, we can give `f` and `g` to `fmap` to produce functions which can add
-2 or 3 to a `Maybe Int` to produce another `Maybe Int`. The resulting functions
-can also be composed with `(.)` to produce a new function, `fh`:
+2 or multiply 3 to a `Maybe Int` and produce another `Maybe Int`. The resulting
+functions can also be composed with `(.)` to produce a new function, `fh`:
 
 ```haskell
 fh :: Maybe Int -> Maybe Int
@@ -119,35 +118,33 @@ fh :: Maybe Int -> Maybe Int
 fh x = fmap f (fmap g x)
 ```
 
-This function will call `fmap g` on its argument which will add 3 if the
+This function will call `fmap g` on its argument which will multiply by 3 if the
 number's there or return `Nothing` if it's not, then give that result to `fmap
-f` which will add 2 if the number's there, or return `Nothing` if it's not. This
-results in a function which will add 5 to a number if it's there, or return
-`Nothing` if it's not:
+f` which will add 2 if the number's there, or return `Nothing` if it's not:
 
 ```haskell
 fh actuallyFive
--- => Just 10
+-- => Just 17
 
 fh notReallyFive
 -- => Nothing
 ```
 
 You should convince yourself that `fh` and `fmap h` behave in exactly the same
-way. The second functor law states that this must be the case if your type is a
-valid `Functor`.
+way. The second functor law states that this must be the case if your type is to
+be a valid `Functor`.
 
 Because Haskell is referentially transparent, we can replace functions with
-their implementations freely -- it may require some explicit parenthesis here
+their implementations freely -- it may require some explicit parentheses here
 and there, but the code will always give the same answer. Doing so brings us
 back directly to the statement of the second law:
 
 ```haskell
 (fmap f . fmap g) actuallyFive
--- => Just 10
+-- => Just 17
 
 fmap (f . g) actuallyFive
--- => Just 10
+-- => Just 17
 
 (fmap f . fmap g) notReallyFive
 -- => Nothing
@@ -160,8 +157,8 @@ fmap (f . g) == fmap f . fmap g
 ```
 
 Not only can we take normal functions (those which operate on fully present
-values) and give them to `fmap` to get ones that can operate on `Maybe`, but
-this law states we can do so in any order. We can compose our system of
+values) and give them to `fmap` to get ones that can operate on `Maybe` values,
+but this law states we can do so in any order. We can compose our system of
 functions together *then* give that to `fmap` or we can `fmap` individual
 functions and compose *those* together -- either way, we're guaranteed the same
 result. We can rely on this fact whenever we use `fmap` for any type that's in

@@ -9,7 +9,14 @@ findUser :: UserId -> Maybe User
 findUser = undefined
 ```
 
-Now imagine we have a view somewhere that is displaying the user's name in all
+I've left the implementation of `findUser` as `undefined` because it doesn't
+matter for our example. I'll do this frequently throughout the book. `undefined`
+is a function with type `a`. That allows it to stand in for any expression. If
+your program ever tries to evaluate it, it will raise an exception. Still, it
+can be extremely useful while developing because we can confirm that written our
+types correctly without having to think about implementations yet.
+
+Next, imagine we have a view somewhere that is displaying the user's name in all
 capitals:
 
 ```haskell
@@ -42,10 +49,15 @@ functor law, we know that if we compose all of these functions together then
 results, we'll always get the same answer. We're free to architect our system as
 we see fit, but still pass along the `Maybe`s everywhere we need to.
 
-The view template, being the only place that has to "deal with" the Maybe value,
-can do so in a number of ways. Here, I'm using the `fromMaybe` function to
-specify a default value of the empty string:
+If we were doing this in the context of a web application, this maybe-name might
+end up being interpolated into some HTML. It's at this boundary that we'll have
+to "deal with" the `Maybe` value. One option is to use the `fromMaybe` function
+to specify a default value of the empty string:
 
 ```haskell
-widget = "<span class=\"username\">" ++ fromMaybe "" maybeName ++ "</span>"
+widget :: Maybe String -> String
+widget mname = "<span class=\"username\">" ++ name ++ "</span>"
+
+  where
+    name = fromMaybe "" mname
 ```

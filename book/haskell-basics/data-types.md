@@ -5,16 +5,19 @@ Haskell allows you to define custom data types:
 
 ```haskell
 data Person = MakePerson String Int
+--                       |      |
+--                       |      ` The persons's age
+--                       |
+--                       ` The person's name
 ```
 
-Here we've stated that the people in our system have a name (a `String`) and an
-age (an `Int`). To the left of the `=` is the *type* constructor and to the
-right can be one or more *data* constructors. The type constructor is the name
-of the type and is used in type signatures. The data constructors are functions
-which produce values of the given type. For example, `MakePerson` is a function
-that takes a `String` and an `Int`, and returns a `Person`. Note that I will
-often use the general term "constructor" to refer to a *data* constructor if the
-meaning is clear from context.
+To the left of the `=` is the *type* constructor and to the right can be one or
+more *data* constructors. The type constructor is the name of the type and is
+used in type signatures. The data constructors are functions which produce
+values of the given type. For example, `MakePerson` is a function that takes a
+`String` and an `Int`, and returns a `Person`. Note that I will often use the
+general term "constructor" to refer to a *data* constructor if the meaning is
+clear from context.
 
 When there is only one data constructor, it's quite common to give it the same
 name as the type constructor. This is because it's syntactically impossible to

@@ -54,4 +54,7 @@ doubleAge (PersonWith _ age) = 2 * age
 doubleAge (PersonWithout _) = 1 -- perhaps provide a sane default?
 ```
 
-Congrats. You now completely understand parameterized types.
+This has been a very brief introduction to higher-kinded types and specifically
+*type variables* (the `a` in `Person a`). If it doesn't make complete sense now,
+that's OK. Using these things in practice is the best way to gain a more
+complete understanding.

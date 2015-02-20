@@ -42,7 +42,7 @@ userFromParams params = User
 ```
 
 Since the functions are operators, we don't need any backticks. Since they also
-have the correct fixity, parenthesis are not required. The result is an elegant
+have the correct fixity, parentheses are not required. The result is an elegant
 expression with minimal noise. Compare *that* to the stair-`case` we started
 with!
 
