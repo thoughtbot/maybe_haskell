@@ -95,6 +95,14 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#applicative-1">Applicative</a></li>
 <li><a href="#monad-1">Monad</a></li>
 </ul></li>
+<li><a href="#list">List</a></li>
+<li><a href="#io">IO</a><ul>
+<li><a href="#effects-in-a-pure-world">Effects in a pure world</a></li>
+<li><a href="#statements-and-the-curse-of-do-notation">Statements and the curse of do-notation</a></li>
+<li><a href="#typed-puzzles">Typed Puzzles</a></li>
+<li><a href="#other-instances">Other instances</a></li>
+<li><a href="#learning-more">Learning more</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -109,7 +117,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2>An Alternate Solution</h2>
 <p>In languages with sufficiently expressive type systems, we have another option: we can encode in a value's type the fact that it may not be present. Any partial function can be made total by always returning a valid value, but returning one that also indicates if it is actually present or not. Not only does it make it explicit and &quot;type checked&quot; that when a value may not be present you have code to handle that case, but it also means that if a value is <em>not</em> of this special &quot;nullable&quot; type, you can feel safe in your assumption that the value's really there -- No <code>nil</code> checks required.</p>
 <p>The focus of this book will be Haskell's implementation of this idea via the <code>Maybe</code> data type. This type and all of the functions that deal with it are not built-in, language-level constructs. All of it is implemented as libraries, written in a very straightforward way. In fact, we'll write most of that code ourselves over the course of this short e-book.</p>
-<p>Haskell is not the only language to have such a construct. Scala has a similar <code>Option</code> type and Swift has <code>Optional</code> with various built-in syntax elements to make its usage more convenient. Many of the ideas implemented in these languages were lifted directly from Haskell. If you happen to use one of them, it can be good to learn where the ideas originated.</p>
+<p>Haskell is not the only language to have such a construct. For example, Scala has a similar <code>Option</code> type and Swift has <code>Optional</code> with various built-in syntax elements to make its usage more convenient. Many of the ideas implemented in these languages were lifted directly from Haskell. If you happen to use one of them, it can be good to learn where the ideas originated.</p>
 </section>
 <section id="required-experience" class="level2">
 <h2>Required Experience</h2>
@@ -146,8 +154,8 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>In Haskell, <code>=</code> is not variable assignment, it's defining equivalence. We're saying here that the word <code>five</code> <em>is equivalent to</em> the literal <code>5</code>. Anywhere you see one, you can replace it with the other and the program will always give the same answer. This property is called <em>referential transparency</em> and it holds true for any Haskell definition, no matter how complicated.</p>
 <p>It's also possible to specify types with an <em>annotation</em> rather than a signature. We can annotate any expression with <code>:: &lt;type&gt;</code> to explicitly tell the compiler the type we want (or expect) that expression to have.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">six <span class="fu">=</span> (<span class="dv">5</span><span class="ot"> ::</span> <span class="dt">Int</span>) <span class="fu">+</span> <span class="dv">1</span></code></pre>
-<p>Type annotations and signatures are usually optional, as Haskell can almost always tell the type of an expression by inspecting the types of its constituent parts or seeing how it is eventually used. For example, Haskell knows that <code>six</code> is an <code>Int</code> because it saw that <code>5</code> is an <code>Int</code>. Since you can only use <code>(+)</code> with arguments of the same type, it <em>enforced</em> that <code>1</code> is also an <code>Int</code>. Knowing that <code>(+)</code> returns the same type as its arguments, the final result of the addition must itself be an <code>Int</code>.</p>
-<p>Good Haskellers will include a type signature on all top-level definitions anyway. It provides executable documentation and may, in some cases, prevent errors which occur when the compiler assigns a more generic type than you might otherwise want. For example, if we omitted the type signatures in our first example, the compiler would assign the type <code>five :: Num a =&gt; a</code> which means that the type of <code>five</code> is <code>a</code>ny type that's <code>Num</code>eric in nature -- i.e. it can be added, negated and so forth.</p>
+<p>Type annotations and signatures are usually optional, as Haskell can almost always tell the type of an expression by inspecting the types of its constituent parts or seeing how it is eventually used. This process is called <em>type inferrence</em>. For example, Haskell knows that <code>six</code> is an <code>Int</code> because it saw that <code>5</code> is an <code>Int</code>. Since you can only use <code>(+)</code> with arguments of the same type, it <em>enforced</em> that <code>1</code> is also an <code>Int</code>. Knowing that <code>(+)</code> returns the same type as its arguments, the final result of the addition must itself be an <code>Int</code>.</p>
+<p>Good Haskellers will include a type signature on all top-level definitions anyway. It provides executable documentation and may, in some cases, prevent errors which occur when the compiler assigns a more generic type than you might otherwise want. For example, if we omitted the type signatures in our first example, the compiler would assign the type <code>five :: Num a =&gt; a</code> which means that the type of <code>five</code> is any type that's <code>Num</code>eric in nature -- i.e. it can be added, negated and so forth.</p>
 <p><em>Inferred types</em>, as these are called, are usually fine but can open you up to unclear error messages. If you were to take the result of our generalized <code>five</code> and use it in two places, treating it as an <code>Int</code> in one and a <code>Float</code> in another, the error message may not immediately identify the problem depending on which expression the compiler sees first. On the other hand, if you explicitly state the type as whichever one you want it to be, then using it incorrectly will produce an error message leading you directly to the line and character of your error.</p>
 <section id="operators" class="level2">
 <h2>Operators</h2>
@@ -170,7 +178,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h3>Operators can be assigned a <em>fixity</em></h3>
 <p>An operator's <em>fixity</em> is its <a href="http://en.wikipedia.org/wiki/Associative_property">associativity</a> and <a href="http://en.wikipedia.org/wiki/Order_of_operations">precedence</a> relative to other operators. By default, function application binds most tightly and associates to the left. This means the following expression:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">2</span> <span class="fu">+</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">6</span></code></pre>
-<p>would normally be parsed as</p>
+<p>would normally be treated as</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">(((<span class="dv">2</span> <span class="fu">+</span>) <span class="dv">2</span>) <span class="fu">*</span> <span class="dv">6</span>)
 <span class="co">-- =&gt; 24</span></code></pre>
 <p>and that would not give the correct result by the normal rules of mathematics which state that multiplication should occur before addition. We could disambiguate this with explicit parenthesis:</p>
@@ -264,18 +272,13 @@ check <span class="dv">12</span> <span class="co">-- =&gt; False</span></code></
 <section id="function-composition" class="level3">
 <h3>Function Composition</h3>
 <p><code>(.)</code> is a function which denotes <em>composing</em> two functions together. This means to create a new function representing applying one function <em>after</em> another. As a quick example, if <code>appendX</code> takes a string and appends an &quot;X&quot; on the end, and <code>appendY</code> does the same, but with a &quot;Y&quot;, then <code>appendY . appendX</code> can be read as <em>append y after append x</em> and represents a function that takes a string and appends &quot;XY&quot; on the end.</p>
-<p>Its complete, and again deceptively simple, definition is as follows:</p>
+<p>Its complete, and again deceptively simple, definition is as follows (this is not the exact definition as stated in the <a href="http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.">Haskell Prelude</a>, but equivalent to it):</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">9</span> <span class="fu">.</span>
 
-<span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c
+<span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> c)
 
-(<span class="fu">.</span>) f g <span class="fu">=</span> \x <span class="ot">-&gt;</span> f (g x)</code></pre>
-<p>This is the definition you'll find if you look it up in the <a href="http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.">Haskell Prelude</a>. It can be a little hard to parse if you're not used to <a href="https://wiki.haskell.org/Anonymous_function">anonymous functions</a> and it doesn't take advantage of the fact that operators can be placed between their arguments when being defined too. For these reasons, I'd like to use an alternate but equivalent definition:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(f <span class="fu">.</span> g) x <span class="fu">=</span> f (g x)</code></pre>
-<p>Going back to the fixity declaration, we can see that <code>(.)</code> also associates to the right, but that it's given the highest precedence possible. The reason should make sense once we see how it works.</p>
-<p><code>(.)</code>'s type reads best if we imagine it taking two arguments and returning a function:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> c)</code></pre>
-<p>Because of how <code>(-&gt;)</code> itself associates, the two signatures are equivalent. This is related to an idea called <em>currying</em> which I'll talk more about later.</p>
+(f <span class="fu">.</span> g) x <span class="fu">=</span> f (g x)</code></pre>
+<p>In the fixity declaration, we can see that <code>(.)</code> also associates to the right, but that it's given the highest precedence possible. The reason should make sense once we see how it works.</p>
 <p>We can read this type as follows: given two functions, one from <code>b</code> to <code>c</code> and the other from <code>a</code> to <code>b</code>, we get back a new function this time from <code>a</code> to <code>c</code>. This is why such a high precedence is desirable. When you glue two functions together with <code>(.)</code>, the result should be treated (syntactically speaking) as a single function would.</p>
 <p>Looking at the definition, we can see how we get from <code>a</code> to <code>c</code>: <code>(f . g)</code>, when given an <code>x</code>, means to call <code>g</code> on <code>x</code>, then call <code>f</code> on the result of that. If <code>g</code> is <code>(a -&gt; b)</code> and we give its result to <code>f</code>, which is <code>(b -&gt; c)</code>, ultimately we have a function going all the way from <code>a</code> to <code>c</code>.</p>
 <p>Using functions to build other functions is another frequent and important thing to do in Haskell, so it should also be devoid of unnecessary syntax. Take the following function for trimming whitespace from a string:</p>
@@ -302,7 +305,6 @@ trim &quot;  foo bar &quot;
   <span class="kw">where</span>
     f <span class="fu">=</span> reverse <span class="fu">.</span> dropWhile isSpace</code></pre>
 <p>I would read this as &quot;trim is f after f where f is reverse after drop-spaces&quot;. Even though it's &quot;full of punctuation&quot; and uses terse variable names, I think this Haskell code comes extremely close to expressing my intent.</p>
-<p>Functions like <code>trim</code> and <code>f</code> are known as <em>point-free</em>. That can be a source of confusion because there's visually more &quot;points&quot;. The reason is that the <code>(.)</code>s are not the points we're talking about. <code>s</code> and <code>x</code> were &quot;fixed points&quot; of the functions <code>trim</code> and <code>f</code> respectively (in a mathematical sense), so removing them makes the functions point-free.</p>
 <p>I go through all of this for two reasons:</p>
 <ol type="1">
 <li>Operators can be a huge source of confusion and fear in new Haskell developers. Hopefully this section has pre-emptively reduced that a bit.</li>
@@ -367,7 +369,7 @@ getAge (<span class="dt">PersonWithoutAge</span> _) <span class="fu">=</span> <s
 <span class="co">--          |                     ` we can use it as an argument here</span>
 <span class="co">--          |</span>
 <span class="co">--          ` By adding a &quot;type variable&quot; here</span></code></pre>
-<p>Any lowercase value will do, but it's common to use <code>a</code> because it's short, and a value of type <code>a</code> can be thought of as a value of <code>a</code>ny type. Rather than hard-coding that a person has an age (or not), we can say a person is holding some thing of type <code>a</code> (or not).</p>
+<p>Any lowercase value will do, but it's common to use <code>a</code> because it's short, and a value of type <code>a</code> can be thought of as a value of any type. Rather than hard-coding that a person has an age (or not), we can say a person is holding some thing of type <code>a</code> (or not).</p>
 <p>Now we can construct people with or without something:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">patWithAge ::</span> <span class="dt">Person</span> <span class="dt">Int</span>
 patWithAge <span class="fu">=</span> <span class="dt">PersonWith</span> <span class="st">&quot;pat&quot;</span> <span class="dv">29</span>
@@ -375,7 +377,7 @@ patWithAge <span class="fu">=</span> <span class="dt">PersonWith</span> <span cl
 <span class="ot">patWithoutAge ::</span> <span class="dt">Person</span> <span class="dt">Int</span>
 patWithoutAge <span class="fu">=</span> <span class="dt">PersonWithout</span> <span class="st">&quot;pat&quot;</span></code></pre>
 <p>Notice how even in the case where I have no age, I can still specify the type of that thing which I do not have.</p>
-<p>Functions that operate on people can choose if they care about what the person's holding or not. For example, getting someone's name shouldn't be affected by them holding something or not, so we can leave it unspecified, again using <code>a</code> to mean <code>a</code>ny type:</p>
+<p>Functions that operate on people can choose if they care about what the person's holding or not. For example, getting someone's name shouldn't be affected by them holding something or not, so we can leave it unspecified, again using <code>a</code> to mean any type:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getName ::</span> <span class="dt">Person</span> a <span class="ot">-&gt;</span> <span class="dt">String</span>
 getName (<span class="dt">PersonWith</span> name _) <span class="fu">=</span> name
 getName (<span class="dt">PersonWithout</span> name) <span class="fu">=</span> name</code></pre>
@@ -406,7 +408,7 @@ find predicate (first<span class="fu">:</span>rest) <span class="fu">=</span>
 <span class="co">-- </span>
 <span class="ot">findUser ::</span> <span class="dt">UserId</span> <span class="ot">-&gt;</span> <span class="dt">User</span>
 findUser uid <span class="fu">=</span> find (matchesId uid) allUsers</code></pre>
-<p>This is a type error since the expression actually returns a <code>Maybe User</code>. Instead, we have to take that <code>Maybe User</code> and inspect it to see if something's there or not. We can do this via <code>case</code> which supports pattern matching not unlike you've seen before:</p>
+<p>This is a type error since the expression actually returns a <code>Maybe User</code>. Instead, we have to take that <code>Maybe User</code> and inspect it to see if something's there or not. We can do this via <code>case</code> which also supports pattern matching:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">findUser ::</span> <span class="dt">UserId</span> <span class="ot">-&gt;</span> <span class="dt">User</span>
 findUser uid <span class="fu">=</span>
     <span class="kw">case</span> find (matchesId uid) allUsers <span class="kw">of</span>
@@ -473,7 +475,7 @@ fromMaybe <span class="dv">10</span> notReallyFive
 <p>Option 3 is actually a variation on option 2. By making your own result a <code>Maybe</code> you always have the ability to return <code>Nothing</code> yourself if the value's not present. If the value <em>is</em> present, you can perform whatever computation you need to and wrap what would be your normal result in <code>Just</code>.</p>
 <p>The main downside is that now your callers also have to consider how to deal with the <code>Maybe</code>. Given the same situation, they should again make the same choice (option 3), but that only pushes the problem up to their callers -- any <code>Maybe</code> values tend to go <em>viral</em>.</p>
 <p>Eventually, probably at some UI boundary, someone will need to &quot;deal with&quot; the <code>Maybe</code>, either by providing a substitute or skipping some action that might otherwise take place. This should happen only once, at that boundary. Every function between the source and final use should pass along this context unchanged.</p>
-<p>Even though it's good design for every function in our system to pass along a <code>Maybe</code> value, it would be extremely annoying to force them all to actually take and return <code>Maybe</code> values. Each function separately checking if they should go ahead and perform their computations will become repetitive and tedious. Instead, we can completely abstract this &quot;pass along the <code>Maybe</code>&quot; concern using using <a href="http://learnyouahaskell.com/higher-order-functions">higher-order</a> functions and something called <em>functors</em>.</p>
+<p>Even though it's good design for every function in our system to pass along a <code>Maybe</code> value, it would be extremely annoying to force them all to actually take and return <code>Maybe</code> values. Each function separately checking if they should go ahead and perform their computations will become repetitive and tedious. Instead, we can completely abstract this &quot;pass along the <code>Maybe</code>&quot; concern using <a href="http://learnyouahaskell.com/higher-order-functions">higher-order</a> functions and something called <em>functors</em>.</p>
 </section>
 <section id="discovering-a-functor" class="level2">
 <h2>Discovering a Functor</h2>
@@ -634,12 +636,12 @@ add x <span class="fu">=</span> \y <span class="ot">-&gt;</span> x <span class="
 <p>This makes partial application simpler. Since <code>add 5</code> is a valid expression and is of the correct type to pass to <code>map</code>, we can use it directly:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> [<span class="dt">Int</span>]
 f <span class="fu">=</span> map (add <span class="dv">5</span>) [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]</code></pre>
-<p>While both forms are valid Haskell (in fact, the <code>curry</code> and <code>uncurry</code> functions in the Prelude will convert functions between the two forms), the latter was chosen as the default and so Haskell's syntax allows some things that make it more convenient.</p>
+<p>While both forms are valid Haskell (in fact, the <code>curry</code> and <code>uncurry</code> functions in the Prelude convert functions between the two forms), the latter was chosen as the default and so Haskell's syntax allows some things that make it more convenient.</p>
 <p>For example, we can name function arguments in whatever way we like; we don't have to always assign a single lambda expression as the function body. In fact, these are all equivalent:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">add <span class="fu">=</span> \x <span class="ot">-&gt;</span> \y <span class="ot">-&gt;</span> x <span class="fu">+</span> y
 add x <span class="fu">=</span> \y <span class="ot">-&gt;</span> x <span class="fu">+</span> y
 add x y <span class="fu">=</span> x <span class="fu">+</span> y</code></pre>
-<p>Haskell also defines <code>-&gt;</code> to be right-associative and function application to be left associative. That means we don't need to add any parenthesis unless we want to explicitly group in some other way. This means rather than writing:</p>
+<p>Haskell also defines <code>-&gt;</code> to be right-associative and function application to be left associative. That means we don't need to add any parenthesis unless we want to explicitly group in some other way. Rather than writing:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">addThree ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>))
 addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z
 
@@ -742,8 +744,8 @@ x <span class="fu">=</span> fmap <span class="dt">User</span> (getParam <span cl
 y <span class="fu">=</span> getParam <span class="st">&quot;email&quot;</span> params</code></pre>
 <p>And we want this:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userFromParams ::</span> <span class="dt">Params</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">User</span>
-userFromParams params <span class="fu">=</span> x <span class="fu">?+?</span> y</code></pre>
-<p>We only have to figure out what that <code>?+?</code> should be. What it looks like we need is some way to apply a <code>Maybe</code> function to a <code>Maybe</code> value to get a <code>Maybe</code> result.</p>
+userFromParams params <span class="fu">=</span> x <span class="fu">???</span> y</code></pre>
+<p>We only have to figure out what that <code>???</code> should be. What it looks like we need<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> is some way to apply a <code>Maybe</code> function to a <code>Maybe</code> value to get a <code>Maybe</code> result.</p>
 </section>
 <section id="apply" class="level2">
 <h2>Apply</h2>
@@ -770,7 +772,7 @@ userFromParams params <span class="fu">=</span>
 </section>
 <section id="applicative-operators" class="level2">
 <h2>Applicative Operators</h2>
-<p>Since the <code>apply</code> we made up reads best when written infix, it was defined as an operator named <code>(&lt;*&gt;)</code> in the <code>Applicative</code> type class. Like <code>fmap</code> it is a type class function, meaning it can be implemented by many types. There are actually two types in that type class, the first is:</p>
+<p>Since the <code>apply</code> we made up reads best when written infix, it was defined as an operator named <code>(&lt;*&gt;)</code> in the <code>Applicative</code> type class. Like <code>fmap</code> it is a type class function, meaning it can be implemented by many types. There are actually two member functions in that type class, the first is:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">pure ::</span> a <span class="ot">-&gt;</span> f a</code></pre>
 <p>This is relatively simple and represents taking some value and placing in the <em>minimal</em> or <em>default</em> context of <code>f</code>, whatever that means for the particular type. For <code>Maybe</code>, it is implemented as wrapping the value in <code>Just</code>. We won't be discussing this function any further since the most common way it is used can be accomplished with <code>fmap</code>, something you already know.</p>
 <p>The second function is our friend, <code>apply</code>:</p>
@@ -798,20 +800,24 @@ userFromMaybeValues <span class="fu">=</span> <span class="dt">User</span> <span
 <p>This pattern is used in a number of places in the Haskell ecosystem.</p>
 <p>As one example, the <a href="http://hackage.haskell.org/package/aeson">aeson</a> package defines a number of functions for parsing things out of JSON values, these functions return their results wrapped in a <code>Parser</code> type which is very much like <code>Maybe</code> except that it holds a bit more information about <em>why</em> the computation failed, not only <em>that</em> the computation failed. The <code>Applicative</code> instance for this type can be used to combine these sub-parsers into something domain-specific.</p>
 <p>Again, imagine we had a rich <code>User</code> data type:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User</span>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">User</span> <span class="fu">=</span> <span class="dt">User</span>
     <span class="dt">String</span>        <span class="co">-- Name</span>
     <span class="dt">String</span>        <span class="co">-- Email</span>
     <span class="dt">Int</span>           <span class="co">-- Age</span>
     <span class="dt">UTCTime</span>       <span class="co">-- Date of birth</span></code></pre>
 <p>We can tell aeson how to create one of these values from JSON, by implementing the <code>parseJSON</code> function which takes a JSON object (represented by the <code>Value</code> type) and returns a <code>Parser User</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">parseJSON ::</span> <span class="dt">Value</span> <span class="ot">-&gt;</span> <span class="dt">Parser</span> <span class="dt">User</span>
-parseJSON v <span class="fu">=</span> <span class="dt">User</span>
-    <span class="fu">&lt;$&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;name&quot;</span>
-    <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;email&quot;</span>
-    <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;age&quot;</span>
-    <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;birth_date&quot;</span></code></pre>
-<p>Each individual <code>v .: &quot;...&quot;</code> call is a function that attempts to pull the value for the given key out of the JSON object. Potential failure (missing key, invalid type, etc) is captured by returning a value wrapped in the <code>Parser</code> type. We can combine the individual <code>Parser</code> values together into one <code>Parser User</code> using <code>(&lt;$&gt;)</code> and <code>(&lt;*&gt;)</code>.</p>
-<p>If any key is missing, the whole thing fails. If they're all there, we get the <code>User</code> we wanted. This concern is completely isolated within the implementation of <code>(&lt;$&gt;)</code> and <code>(&lt;*&gt;)</code>.</p>
+parseJSON (<span class="dt">Object</span> o) <span class="fu">=</span> <span class="dt">User</span>
+    <span class="fu">&lt;$&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;name&quot;</span>
+    <span class="fu">&lt;*&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;email&quot;</span>
+    <span class="fu">&lt;*&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;age&quot;</span>
+    <span class="fu">&lt;*&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;birth_date&quot;</span>
+
+<span class="co">-- If we're given some JSON value besides an object (an array, a string, etc) we</span>
+<span class="co">-- can signal failure by returning the special value mzero</span>
+parseJSON _ <span class="fu">=</span> mzero</code></pre>
+<p>Each individual <code>o .: &quot;...&quot;</code> expression is a function that attempts to pull the value for the given key out of a JSON <code>Object</code>. Potential failure (missing key, invalid type, etc) is captured by returning a value wrapped in the <code>Parser</code> type. We can combine the individual <code>Parser</code> values together into one <code>Parser User</code> using <code>(&lt;$&gt;)</code> and <code>(&lt;*&gt;)</code>.</p>
+<p>If any key is missing, the whole thing fails. If they're all there, we get the <code>User</code> we wanted. This concern is completely isolated within the implementation of <code>(&lt;$&gt;)</code> and <code>(&lt;*&gt;)</code> for <code>Parser</code>.</p>
 </section>
 </section>
 <section id="monad" class="level1">
@@ -972,7 +978,7 @@ findUserShippingCost uid <span class="fu">=</span> <span class="kw">do</span>
     a <span class="ot">&lt;-</span> userAddress u
 
     shippingCost a</code></pre>
-<p>Et Viola, you have the equivalent <em>do-notation</em> version of our function. When the compiler sees code written like this, it follows (mostly) the same process we did, but in reverse:</p>
+<p>Et Violà, you have the equivalent <em>do-notation</em> version of our function. When the compiler sees code written like this, it follows (mostly) the same process we did, but in reverse:</p>
 <p>Remove the <code>do</code> keyword:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">findUserShippingCost ::</span> <span class="dt">UserId</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Cost</span>
 findUserShippingCost uid <span class="fu">=</span>
@@ -987,7 +993,7 @@ findUserShippingCost uid <span class="fu">=</span>
     userAddress u <span class="fu">&gt;&gt;=</span> \a <span class="ot">-&gt;</span>
 
     shippingCost a</code></pre>
-<p>The compiler can stop here as all remaining steps are stylistic changes only (removing whitespace and <em>eta-reducing</em>[^eta-reduce] the lambdas).</p>
+<p>The compiler can stop here as all remaining steps are stylistic changes only (removing whitespace and <em>eta-reducing</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> the lambdas).</p>
 </section>
 <section id="will-it-pipe" class="level2">
 <h2>Will it Pipe?</h2>
@@ -1073,10 +1079,10 @@ replace <span class="st">&quot;admin&quot;</span> <span class="dt">False</span> 
 <p><code>Parsed a</code> is a value in some context, like <code>Maybe a</code>. This time, rather than only present-or-non-present, the context is richer. It represents present-or-non-present-with-error. Can you think of how this context should be accounted for under an operation like <code>fmap</code>?</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--      (a -&gt; b) -&gt; f        a -&gt; f        b</span>
 <span class="co">--      (a -&gt; b) -&gt; Either e a -&gt; Either e b</span>
-fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Parsed</span> a   <span class="ot">-&gt;</span> <span class="dt">Parsed</span>   b
+fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Parsed</span>   a <span class="ot">-&gt;</span> <span class="dt">Parsed</span>   b
 fmap f (<span class="dt">Right</span> v) <span class="fu">=</span> <span class="dt">Right</span> (f v)
 fmap _ (<span class="dt">Left</span> e)  <span class="fu">=</span> <span class="dt">Left</span> e</code></pre>
-<p>If the value is there, we apply the given function to it. If its not, we pass along the error. Now we can do something like this:</p>
+<p>If the value is there, we apply the given function to it. If it's not, we pass along the error. Now we can do something like this:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (replace <span class="st">&quot;admin&quot;</span> <span class="dt">False</span>) (parseJSON jsonString)</code></pre>
 <p>If the incoming string is valid, we get a successful <code>Parsed JSON</code> result with the <code>&quot;admin&quot;</code> key replaced by <code>False</code>. Otherwise, we get an unsuccessful <code>Parsed JSON</code> result with the original error message still available.</p>
 <p>Knowing that <code>Control.Applicative</code> provides <code>(&lt;$&gt;)</code> is an infix synonym for <code>fmap</code>, we could also use that to make this read a bit better:</p>
@@ -1088,7 +1094,7 @@ fmap _ (<span class="dt">Left</span> e)  <span class="fu">=</span> <span class="
 <p>It would also be nice if we could take two potentially failed results and pass them as arguments to some function that takes normal values. If any result fails, the overall result is also a failure. If all are successful, we get a successful overall result. This sounds a lot like what we did with <code>Maybe</code>, the only difference is we're doing it for a different kind of context.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Given two json objects, merge them. Duplicate keys result in those in the</span>
 <span class="co">-- second object being kept.</span>
-<span class="ot">merge ::</span> <span class="dt">JSON</span> <span class="ot">-&gt;</span> <span class="dt">JSON</span>
+<span class="ot">merge ::</span> <span class="dt">JSON</span> <span class="ot">-&gt;</span> <span class="dt">JSON</span> <span class="ot">-&gt;</span> <span class="dt">JSON</span>
 merge <span class="fu">=</span> undefined
 
 jsonString1 <span class="fu">=</span> <span class="st">&quot;...&quot;</span>
@@ -1100,6 +1106,7 @@ merge <span class="fu">&lt;$&gt;</span> parseJSON jsonString1 <span class="fu">&
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--       f        (a -&gt; b) -&gt; f        a -&gt; f        b</span>
 <span class="co">--       Either e (a -&gt; b) -&gt; Either e a -&gt; Either e b</span>
 <span class="ot">(&lt;*&gt;) ::</span> <span class="dt">Parsed</span>   (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Parsed</span>   a <span class="ot">-&gt;</span> <span class="dt">Parsed</span>   b
+<span class="dt">Right</span> f <span class="fu">&lt;*&gt;</span> <span class="dt">Right</span> x <span class="fu">=</span> <span class="dt">Right</span> (f x)
 <span class="dt">Right</span> _ <span class="fu">&lt;*&gt;</span> <span class="dt">Left</span> e <span class="fu">=</span> <span class="dt">Left</span> e</code></pre>
 <p>Astute readers may notice that we could reduce this to one pattern by using <code>fmap</code> -- this is left as an exercise.</p>
 <p>What about the case where the first argument is <code>Left</code>? At first this seems trivial: there's no use inspecting the second value, we know something has already failed so let's pass that along, right? Well, what if the second value was also an error? Which error should we keep? Either way we discard one of them, and any potential loss of information should be met with pause.</p>
@@ -1121,7 +1128,7 @@ at <span class="fu">=</span> undefined
 <span class="ot">parseBody ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Parsed</span> <span class="dt">HTML</span>
 parseBody jsonString <span class="fu">=</span> parseJSON jsonString <span class="fu">&gt;&gt;=</span> parseHTML <span class="fu">.</span> at <span class="st">&quot;body&quot;</span></code></pre>
 <p>First, <code>parseJSON jsonString</code> gives us a <code>Parsed JSON</code>. This is the <code>m a</code> in <code>(&gt;&gt;=)</code>'s type signature. Then we use <code>(.)</code> to compose a function for getting the value at the <code>&quot;body&quot;</code> key and passing it to <code>parseHTML</code>. The type of this function is <code>(JSON -&gt; Parsed HTML)</code> which aligns with the <code>(a -&gt; m b)</code> of <code>(&gt;&gt;=)</code>'s second argument. Knowing that <code>(&gt;&gt;=)</code> will return <code>m b</code>, we can see that that's the <code>Parsed HTML</code> we're after.</p>
-<p>If both parses succeed, we get a <code>Right</code>-constructed value containing the <code>HTML</code> we want. If either parse, fails we get a <code>Left</code>-constructed value containing the <code>ParserError</code> from whichever failed.</p>
+<p>If both parses succeed, we get a <code>Right</code>-constructed value containing the <code>HTML</code> we want. If either parse fails, we get a <code>Left</code>-constructed value containing the <code>ParserError</code> from whichever failed.</p>
 <p>Allowing such a readable expression (<em>parse JSON and then parse HTML at body</em>), requires the following straight-forward implementation for <code>(&gt;&gt;=)</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--       m        a -&gt; (a -&gt; m        b) -&gt; m        b</span>
 <span class="co">--       Either e a -&gt; (a -&gt; Either e b) -&gt; Either e b</span>
@@ -1132,6 +1139,151 @@ parseBody jsonString <span class="fu">=</span> parseJSON jsonString <span class=
 <p>This is a great way to reduce a project's maintenance burden: if you start with functions returning <code>Maybe</code> values but use generalized functions for (e.g.) any <code>Monad m</code>, you can later upgrade to a fully fledged <code>Error</code> type based on <code>Either</code> without having to change most of the code base.</p>
 </section>
 </section>
+<section id="list" class="level2">
+<h2>List</h2>
+<p><em>TODO</em></p>
+</section>
+<section id="io" class="level2">
+<h2>IO</h2>
+<p>So far, we've seen three types: <code>Maybe a</code>, <code>Either e a</code>, and <code>[a]</code> (which can be thought of as <code>List a</code>). These types all represent a value with some other bit of information: a <em>context</em>. If <code>a</code> is the <code>User</code> you're trying to find, the <code>Maybe</code> says if she was actually found. If the <code>a</code> is the <code>JSON</code> you're attempting to parse, the <code>Either e</code> holds information about the error when the parse fails. If <code>a</code> is a number, then <code>[]</code> tells you it is actually many numbers at once, and how many.</p>
+<p>For all these types, we've seen the behaviors that allow us to add them to the <code>Functor</code>, <code>Applicative</code>, and <code>Monad</code> type classes. These behaviors obey certain laws which allow us to reason about what will happen when we use functions like <code>fmap</code> or <code>(&gt;&gt;=)</code>. In addition to this, we can also reach in and manually resolve the context. We can define a <code>fromMaybe</code> function to reduce a <code>Maybe a</code> to an <code>a</code> by providing a default value for the <code>Nothing</code> case. We can do a similar thing for <code>Either e a</code> with the <code>either</code> function. Given a <code>[a]</code> we can resolve it to an <code>a</code> by selecting one at a given index (taking care to handle the empty list).</p>
+<p>The <code>IO</code> type, so important to Haskell, is exactly like the three types you've seen so far in that it represents a value in some context. With a value of type <code>IO a</code>, the <code>a</code> is the thing you want and the <code>IO</code> means some input or output will be performed in the real word as part of producing that <code>a</code>. The difference is that the only way we can combine <code>IO</code> values is through their <code>Functor</code>, <code>Applicative</code>, and <code>Monad</code> interfaces. In fact, it's really only through its <code>Monad</code> interface since the <code>Applicative</code> and <code>Functor</code> instances are defined in terms of it. We can't ourselves resolve an <code>IO a</code> to an <code>a</code>. This has many ramifications in how programs must be constructed.</p>
+<section id="effects-in-a-pure-world" class="level3">
+<h3>Effects in a pure world</h3>
+<p>One question I get asked a lot is, &quot;how is it that Haskell, a <em>pure</em> functional programming language, can actually do anything? How does it create or read files? How does it print to the terminal? How does it serve web requests?&quot;</p>
+<p>The short answer is, it doesn't. To show this, let's start with the following Ruby program:</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">def</span> main
+  print <span class="st">&quot;give me a word: &quot;</span>
+
+  x = gets
+
+  puts x
+<span class="kw">end</span></code></pre>
+<p>When you run this program with the Ruby interpreter, does anything happen? It depends on your definition of <em>happen</em>. Certainly, no I/O will happen, but that's not <em>nothing</em>. Objects will be instantiated, and a method has been defined. By defining this method, you've constructed a blue-print for some actions to be performed, but then neglected to perform them.</p>
+<p>Ruby expects (and allows) you to invoke effecting methods like <code>main</code> whenever and wherever you want. If you want the above program to do something, you need to call <code>main</code> at the bottom. This is a blessing and a curse. While the flexibility is appreciated, it's a constant source of bugs and makes methods and objects impossible to reason about without looking at their implementations. A method may look &quot;pure&quot;, but internally it might access a database, pull from an external source of randomness, or fire nuclear missiles. Haskell doesn't work like that.</p>
+<p>Here's a translation of the Ruby program into Haskell:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> <span class="kw">do</span>
+  putStr <span class="st">&quot;give me a word: &quot;</span>
+
+  x <span class="ot">&lt;-</span> getLine
+
+  putStrLn x</code></pre>
+<p>Much like the Ruby example, this code doesn't <em>do</em> anything. It defines a function <code>main</code> that states what should happen when it's executed. It does not execute anything itself. Unlike Ruby, Haskell does not expect or allow you to call <code>main</code> yourself. The Haskell runtime will handle that and perform whatever I/O is required for you. This is how I/O happens in a pure language: you define the blue-print, a <em>pure</em> value that says <em>how</em> to perform any I/O, then you give that to a separate runtime, which is in charge of actually performing it.</p>
+</section>
+<section id="statements-and-the-curse-of-do-notation" class="level3">
+<h3>Statements and the curse of do-notation</h3>
+<p>The above Haskell function used <em>do-notation</em>. I did this to highlight that the reason do-notation exists is for Haskell code to look like that equivalent, imperative Ruby on which it was based. This fact has the unfortunate consequence of tricking new Haskell programmers into thinking that <code>putStr</code> (for example) is an imperative statement that actually puts the string to the screen when evaluated.</p>
+<p>In the Ruby code, each statement is implicitly combined with the next as the interpreter sees them. There is some initial global state, statements modify that global state, and the interpreter handles ensuring that subsequent statements see an updated global state from all those that came before. If Ruby used a semi-colon instead of whitespace to delimit statements, we could almost think of <code>(;)</code> as an operator for combining statements and keeping track of the global state between them.</p>
+<p>In Haskell, there are no statements, only expressions. Every expression has a type and compound expressions must be combined in a type-safe way. In the case of <code>IO</code> expressions, they are combined with <code>(&gt;&gt;=)</code>. The semantic result is very similar to Ruby's statements. It's because of this that you may hear <code>(&gt;&gt;=)</code> referred to as a <em>programmable semicolon</em>. In truth, it's so much more than that. It's a first-class function that can be passed around, built on top of, and overloaded from type to type.</p>
+<p>To see how this works, let's build an equivalent definition for <code>main</code>, only this time no do-notation, only <code>(&gt;&gt;=)</code>.</p>
+</section>
+<section id="typed-puzzles" class="level3">
+<h3>Typed Puzzles</h3>
+<p>Starting with the type of <code>main</code>, we immediately see something worth explaining:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">main ::</span> <span class="dt">IO</span> ()</code></pre>
+<p>The type of <code>main</code> is pronounced <em>IO void</em>. <code>()</code> itself is a type defined with a single constructor, it can also be thought of as an empty tuple:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> () <span class="fu">=</span> ()</code></pre>
+<p>It's used to stand in when a computation affects the <em>context</em>, but produces no useful <em>result</em>. It's not specific to <code>IO</code> (or monads for that matter). For example, if you were chaining a series of <code>Maybe</code> values together using <code>(&gt;&gt;=)</code> and under some condition you wanted to manually trigger an overall <code>Nothing</code> result, you could insert a <code>Nothing</code> of type <code>Maybe ()</code> into the expression.</p>
+<p>This is exactly how the <a href="http://hackage.haskell.org/package/base-4.7.0.2/docs/Control-Monad.html#v:guard">guard</a> function works. When specialized to <code>Maybe</code>, its definition is:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">guard ::</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> ()
+guard <span class="dt">True</span> <span class="fu">=</span> <span class="dt">Just</span> ()
+guard <span class="dt">False</span> <span class="fu">=</span> <span class="dt">Nothing</span></code></pre>
+<p>It is used like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">findAdmin ::</span> <span class="dt">UserId</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">User</span>
+findAdmin uid <span class="fu">=</span> <span class="kw">do</span>
+    user <span class="ot">&lt;-</span> findUser uid
+
+    guard (isAdmin user)
+
+    return user</code></pre>
+<p>Next, let's look at the individual pieces we'll be combining into <code>main</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">putStr<span class="ot"> ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+
+putStrLn<span class="ot"> ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</code></pre>
+<p><code>putStr</code> also doesn't have any useful result so it uses <code>()</code>. It takes the given <code>String</code> and returns an action that <em>represents</em> printing that string, without a trailing newline, to the terminal. <code>putStrLn</code> is exactly the same, but includes a trailing newline.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">getLine<span class="ot"> ::</span> <span class="dt">IO</span> <span class="dt">String</span></code></pre>
+<p><code>getLine</code> doesn't take any arguments and has type <code>IO String</code> which means an action that represents reading a line of input from the terminal. It requires <code>IO</code> and presents the read line as its result.</p>
+<p>Next, let's review the type of <code>(&gt;&gt;=)</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&gt;&gt;=) ::</span> m a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> m b) <span class="ot">-&gt;</span> m b</code></pre>
+<p>In our case, <code>m</code> will always be <code>IO</code>, but <code>a</code> and <code>b</code> will be different each time we use <code>(&gt;&gt;=)</code>. The first combination we need is <code>putStr</code> and <code>getLine</code>. <code>putStr &quot;...&quot;</code> fits as <code>m a</code>, because its type is <code>IO ()</code>, but <code>getLine</code> does not have the type <code>() -&gt; IO b</code> which is required for things to line up. Remember from the previous chapter that there's another operator built on top of <code>(&gt;&gt;=)</code> designed to fix this problem:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&gt;&gt;) ::</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m b
+ma <span class="fu">&gt;&gt;</span> mb <span class="fu">=</span> ma <span class="fu">&gt;&gt;=</span> \_ <span class="ot">-&gt;</span> mb</code></pre>
+<p>It turns its second argument into the right type for <code>(&gt;&gt;=)</code> by wrapping it in a lambda that accepts and ignores the <code>a</code> returned by the first action. With this, we can write our first combination:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">main <span class="fu">=</span> putStr <span class="st">&quot;...&quot;</span> <span class="fu">&gt;&gt;</span> getLine</code></pre>
+<p>What is the type of this expression? If <code>(&gt;&gt;)</code> is <code>m a -&gt; m b -&gt; m b</code> and we've got <code>m a</code> as <code>IO ()</code> and <code>m b</code> as <code>IO String</code>, this combined expression must be <code>IO String</code>. It represents an action that, <em>when executed</em>, would print the given string to the terminal, then read in a line.</p>
+<p>Our next requirement is to put this action together with <code>putStrLn</code>. Our current expression has type <code>IO String</code> and <code>putStrLn</code> has type <code>String -&gt; IO ()</code>. This lines up perfectly with <code>(&gt;&gt;=)</code> by taking <code>m</code> as <code>IO</code>, <code>a</code> as <code>String</code>, and <code>b</code> as <code>()</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">main <span class="fu">=</span> putStr <span class="st">&quot;...&quot;</span> <span class="fu">&gt;&gt;</span> getLine <span class="fu">&gt;&gt;=</span> putStrLn</code></pre>
+<p>This code is equivalent to the do-notation version I showed before. If you're not sure, try to manually convert between the two forms. The steps required were shown in the do-notation sub-section of the Monad chapter.</p>
+<p>Hopefully, this exercise has you convinced you that while I/O in Haskell may appear confusing at first, things are quite a bit simpler:</p>
+<ul>
+<li>Any function with an <code>IO</code> type <em>represents</em> an action to be performed</li>
+<li>Actions are not executed, only combined into larger actions using <code>(&gt;&gt;=)</code></li>
+<li>The only way to get the runtime to execute an action is to assign it the special name <code>main</code></li>
+</ul>
+<p>From these rules and the general requirement of type-safety, it emerges that any value of type <code>IO a</code> can only be called directly or indirectly from <code>main</code>.</p>
+</section>
+<section id="other-instances" class="level3">
+<h3>Other instances</h3>
+<p>Unlike previous chapters, here I jumped right into <code>Monad</code>. This was because there's a natural flow from imperative code to monadic programming with do-notation, to the underlying expressions combined with <code>(&gt;&gt;=)</code>. As I mentioned, this is the only way to combine <code>IO</code> values. While <code>IO</code> does have instances for <code>Functor</code> and <code>Applicative</code>, the functions in these classes (<code>fmap</code>, <code>pure</code>, and <code>(&lt;*&gt;)</code>) are defined in terms of <code>return</code> and <code>(&gt;&gt;=)</code> from its <code>Monad</code> instance. For this reason, I won't be showing their definitions. That said, these instances are still useful. If your <code>IO</code> code doesn't require the full power of monads, it's better to use a weaker constraint. More general programs are better and weaker constraints on what kind of data your functions can work with makes them more generally useful.</p>
+<section id="functor-3" class="level4">
+<h4>Functor</h4>
+<p><code>fmap</code>, when specialized to <code>IO</code>, has the following type:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">IO</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span> b</code></pre>
+<p>It takes a function and an <code>IO</code> action and returns another <code>IO</code> action which represents applying that function to the <em>eventual</em> result returned by the first.</p>
+<p>It's common to see Haskell code like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">readInUpper ::</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">String</span>
+readInUpper fp <span class="fu">=</span> <span class="kw">do</span>
+    contents <span class="ot">&lt;-</span> readFile fp
+
+    return (map toUpper contents)</code></pre>
+<p>All this code does is form a new action that applies a function to the eventual result of another. We can say this more concisely using <code>fmap</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">readInUpper ::</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">String</span>
+readInUpper fp <span class="fu">=</span> fmap (map toUpper) (readFile fp)</code></pre>
+<p>As another example, we can use <code>fmap</code> with the Prelude function <code>lookup</code> to write a safer version of <code>getEnv</code> from the <code>System.Environment</code> module. <code>getEnv</code> has the nasty quality of raising an exception if the environment variable you're looking for isn't present. Hopefully this book has convinced you it's better to return a <code>Maybe</code> in this case. The <code>lookupEnv</code> function was eventually added to the module, but if you intend to support old versions, you'll need to define it yourself:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">System.Environment</span> (getEnvironment)
+
+<span class="co">-- lookup :: Eq a =&gt; a -&gt; [(a, b)] -&gt; Maybe b</span>
+<span class="fu">--</span>
+<span class="co">-- getEnvironment :: IO [(String, String)]</span>
+
+<span class="ot">lookupEnv ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> (<span class="dt">Maybe</span> <span class="dt">String</span>)
+lookupEnv v <span class="fu">=</span> fmap (lookup v) getEnvironment</code></pre>
+</section>
+<section id="applicative-2" class="level4">
+<h4>Applicative</h4>
+<p>Imagine a library function for finding differences between two strings:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Diff</span> <span class="fu">=</span> <span class="dt">Diff</span> [<span class="dt">Difference</span>]
+<span class="kw">data</span> <span class="dt">Difference</span> <span class="fu">=</span> <span class="dt">Added</span> <span class="fu">|</span> <span class="dt">Removed</span> <span class="fu">|</span> <span class="dt">Changed</span>
+
+<span class="ot">diff ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Diff</span>
+diff <span class="fu">=</span> undefined</code></pre>
+<p>How would we run this code on files from the file system? One way, using <code>Monad</code>, would look like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">diffFiles ::</span> FilePath <span class="ot">-&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">Diff</span>
+diffFiles fp1 fp2 <span class="fu">=</span> <span class="kw">do</span>
+    s1 <span class="ot">&lt;-</span> readFile fp1
+    s2 <span class="ot">&lt;-</span> readFile fp2
+
+    return (diff s1 s2)</code></pre>
+<p>Notice that the second <code>readFile</code> does not depend on the result of the first. Both <code>readFile</code> actions produce values that are combined <em>at-once</em> using the pure function <code>diff</code>. We can make this lack of dependency explicit and bring the expression closer to what it would look like without <code>IO</code> values by using <code>Applicative</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">diffFiles ::</span> FilePath <span class="ot">-&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">Diff</span>
+diffFiles fp1 fp2 <span class="fu">=</span> diff <span class="fu">&lt;$&gt;</span> readFile fp1 <span class="fu">&lt;*&gt;</span> readFile fp2</code></pre>
+<p>As an exercise, try breaking down the types of the intermediate expressions here, like we did for <code>Maybe</code> in the Follow the Types sub-section of the Applicative chapter.</p>
+</section>
+</section>
+<section id="learning-more" class="level3">
+<h3>Learning more</h3>
+<p>There are many resources online for learning about <code>Monad</code> and <code>IO</code> in Haskell. I recommend reading them all. Some are better than others and many get a bad rap for using some grandiose analogy that only makes sense to the author. Be mindful of this, but know that no single tutorial can give you a complete understanding because that requires looking at the same abstract thing from a variety of angles. Therefore, the best thing to do is read it all and form your own intuitions.</p>
+<p>If you're interested in the origins of monadic I/O in Haskell, I recommend <a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/mark.pdf">Tackling the Awkward Squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell</a> by Simon Peyton Jones and <a href="http://ncatlab.org/nlab/files/WadlerMonads.pdf">Comprehending Monads</a> by Philip Wadler.</p>
+</section>
+</section>
+</section>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>We could actually use a new feature in GHC called <a href="https://downloads.haskell.org/~ghc/7.8.1/docs/html/users_guide/typed-holes.html">typed holes</a> to find out exactly what type of function we need and use that to guide us in writing it.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>The process of simplifying <code>\x -&gt; f x</code> to the equivalent form <code>f</code>.<a href="#fnref2">↩</a></p></li>
+</ol>
 </section>
 </body>
 </html>

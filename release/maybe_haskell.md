@@ -46,11 +46,11 @@ built-in, language-level constructs. All of it is implemented as libraries,
 written in a very straightforward way. In fact, we'll write most of that code
 ourselves over the course of this short e-book.
 
-Haskell is not the only language to have such a construct. Scala has a similar
-`Option` type and Swift has `Optional` with various built-in syntax elements to
-make its usage more convenient. Many of the ideas implemented in these languages
-were lifted directly from Haskell. If you happen to use one of them, it can be
-good to learn where the ideas originated.
+Haskell is not the only language to have such a construct. For example, Scala
+has a similar `Option` type and Swift has `Optional` with various built-in
+syntax elements to make its usage more convenient. Many of the ideas implemented
+in these languages were lifted directly from Haskell. If you happen to use one
+of them, it can be good to learn where the ideas originated.
 
 ## Required Experience
 
@@ -172,18 +172,19 @@ six = (5 :: Int) + 1
 
 Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
-parts or seeing how it is eventually used. For example, Haskell knows that `six`
-is an `Int` because it saw that `5` is an `Int`. Since you can only use `(+)`
-with arguments of the same type, it *enforced* that `1` is also an `Int`.
-Knowing that `(+)` returns the same type as its arguments, the final result of
-the addition must itself be an `Int`.
+parts or seeing how it is eventually used. This process is called *type
+inferrence*. For example, Haskell knows that `six` is an `Int` because it saw
+that `5` is an `Int`. Since you can only use `(+)` with arguments of the same
+type, it *enforced* that `1` is also an `Int`. Knowing that `(+)` returns the
+same type as its arguments, the final result of the addition must itself be an
+`Int`.
 
 Good Haskellers will include a type signature on all top-level definitions
 anyway. It provides executable documentation and may, in some cases, prevent
 errors which occur when the compiler assigns a more generic type than you might
 otherwise want. For example, if we omitted the type signatures in our first
 example, the compiler would assign the type `five :: Num a => a` which means
-that the type of `five` is `a`ny type that's `Num`eric in nature -- i.e. it can
+that the type of `five` is any type that's `Num`eric in nature -- i.e. it can
 be added, negated and so forth.
 
 *Inferred types*, as these are called, are usually fine but can open you up to
@@ -259,7 +260,7 @@ associates to the left. This means the following expression:
 2 + 2 * 6
 ```
 
-would normally be parsed as
+would normally be treated as
 
 ```haskell
 (((2 +) 2) * 6)
@@ -452,42 +453,23 @@ a quick example, if `appendX` takes a string and appends an "X" on the end, and
 *append y after append x* and represents a function that takes a string and
 appends "XY" on the end.
 
-Its complete, and again deceptively simple, definition is as follows:
+Its complete, and again deceptively simple, definition is as follows (this is not
+the exact definition as stated in the [Haskell Prelude][prelude], but equivalent
+to it):
+
+[prelude]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.
 
 ```haskell
 infixr 9 .
 
-(.) :: (b -> c) -> (a -> b) -> a -> c
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
 
-(.) f g = \x -> f (g x)
-```
-
-This is the definition you'll find if you look it up in the [Haskell
-Prelude][prelude]. It can be a little hard to parse if you're not used to
-[anonymous functions][lambda] and it doesn't take advantage of the fact that
-operators can be placed between their arguments when being defined too. For
-these reasons, I'd like to use an alternate but equivalent definition:
-
-[prelude]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.
-[lambda]: https://wiki.haskell.org/Anonymous_function
-
-```haskell
 (f . g) x = f (g x)
 ```
 
-Going back to the fixity declaration, we can see that `(.)` also associates to
-the right, but that it's given the highest precedence possible. The reason
-should make sense once we see how it works.
-
-`(.)`'s type reads best if we imagine it taking two arguments and returning a
-function:
-
-```haskell
-(.) :: (b -> c) -> (a -> b) -> (a -> c)
-```
-
-Because of how `(->)` itself associates, the two signatures are equivalent. This
-is related to an idea called *currying* which I'll talk more about later.
+In the fixity declaration, we can see that `(.)` also associates to the right,
+but that it's given the highest precedence possible. The reason should make
+sense once we see how it works.
 
 We can read this type as follows: given two functions, one from `b` to `c` and
 the other from `a` to `b`, we get back a new function this time from `a` to `c`.
@@ -557,12 +539,6 @@ trim = f . f
 I would read this as "trim is f after f where f is reverse after drop-spaces".
 Even though it's "full of punctuation" and uses terse variable names, I think
 this Haskell code comes extremely close to expressing my intent.
-
-Functions like `trim` and `f` are known as *point-free*. That can be a source of
-confusion because there's visually more "points". The reason is that the `(.)`s
-are not the points we're talking about. `s` and `x` were "fixed points" of the
-functions `trim` and `f` respectively (in a mathematical sense), so removing
-them makes the functions point-free.
 
 I go through all of this for two reasons:
 
@@ -707,7 +683,7 @@ data Person a = PersonWith String a | PersonWithout String
 ```
 
 Any lowercase value will do, but it's common to use `a` because it's short, and
-a value of type `a` can be thought of as a value of `a`ny type. Rather than
+a value of type `a` can be thought of as a value of any type. Rather than
 hard-coding that a person has an age (or not), we can say a person is holding
 some thing of type `a` (or not).
 
@@ -727,7 +703,7 @@ that thing which I do not have.
 Functions that operate on people can choose if they care about what the person's
 holding or not. For example, getting someone's name shouldn't be affected by
 them holding something or not, so we can leave it unspecified, again using `a`
-to mean `a`ny type:
+to mean any type:
 
 ```haskell
 getName :: Person a -> String
@@ -792,8 +768,7 @@ findUser uid = find (matchesId uid) allUsers
 
 This is a type error since the expression actually returns a `Maybe User`.
 Instead, we have to take that `Maybe User` and inspect it to see if something's
-there or not. We can do this via `case` which supports pattern matching not
-unlike you've seen before:
+there or not. We can do this via `case` which also supports pattern matching:
 
 ```haskell
 findUser :: UserId -> User
@@ -929,7 +904,7 @@ Even though it's good design for every function in our system to pass along a
 and return `Maybe` values. Each function separately checking if they should go
 ahead and perform their computations will become repetitive and tedious.
 Instead, we can completely abstract this "pass along the `Maybe`" concern using
-using [higher-order][] functions and something called *functors*.
+[higher-order][] functions and something called *functors*.
 
 [higher-order]: http://learnyouahaskell.com/higher-order-functions
 
@@ -1313,9 +1288,9 @@ f = map (add 5) [1,2,3]
 ```
 
 While both forms are valid Haskell (in fact, the `curry` and `uncurry` functions
-in the Prelude will convert functions between the two forms), the latter was
-chosen as the default and so Haskell's syntax allows some things that make it
-more convenient.
+in the Prelude convert functions between the two forms), the latter was chosen
+as the default and so Haskell's syntax allows some things that make it more
+convenient.
 
 For example, we can name function arguments in whatever way we like; we don't
 have to always assign a single lambda expression as the function body. In fact,
@@ -1329,7 +1304,7 @@ add x y = x + y
 
 Haskell also defines `->` to be right-associative and function application to be
 left associative. That means we don't need to add any parenthesis unless we want
-to explicitly group in some other way. This means rather than writing:
+to explicitly group in some other way. Rather than writing:
 
 ```haskell
 addThree :: Int -> (Int -> (Int -> Int))
@@ -1534,12 +1509,16 @@ And we want this:
 
 ```haskell
 userFromParams :: Params -> Maybe User
-userFromParams params = x ?+? y
+userFromParams params = x ??? y
 ```
 
-We only have to figure out what that `?+?` should be. What it looks like we need
-is some way to apply a `Maybe` function to a `Maybe` value to get a `Maybe`
-result.
+We only have to figure out what that `???` should be. What it looks like we
+need[^typed-holes] is some way to apply a `Maybe` function to a `Maybe` value to
+get a `Maybe` result.
+
+[^typed-holes]: We could actually use a new feature in GHC called [typed holes][] to find out exactly what type of function we need and use that to guide us in writing it.
+
+[typed holes]: https://downloads.haskell.org/~ghc/7.8.1/docs/html/users_guide/typed-holes.html
 
 ## Apply
 
@@ -1595,7 +1574,7 @@ already been invented -- you'll see it ends up even better than the above.
 Since the `apply` we made up reads best when written infix, it was defined as an
 operator named `(<*>)` in the `Applicative` type class. Like `fmap` it is a type
 class function, meaning it can be implemented by many types. There are actually
-two types in that type class, the first is:
+two member functions in that type class, the first is:
 
 ```haskell
 pure :: a -> f a
@@ -1675,7 +1654,7 @@ sub-parsers into something domain-specific.
 Again, imagine we had a rich `User` data type:
 
 ```haskell
-data User
+data User = User
     String        -- Name
     String        -- Email
     Int           -- Age
@@ -1688,22 +1667,26 @@ type) and returns a `Parser User`:
 
 ```haskell
 parseJSON :: Value -> Parser User
-parseJSON v = User
-    <$> v .: "name"
-    <*> v .: "email"
-    <*> v .: "age"
-    <*> v .: "birth_date"
+parseJSON (Object o) = User
+    <$> o .: "name"
+    <*> o .: "email"
+    <*> o .: "age"
+    <*> o .: "birth_date"
+
+-- If we're given some JSON value besides an object (an array, a string, etc) we
+-- can signal failure by returning the special value mzero
+parseJSON _ = mzero
 ```
 
-Each individual `v .: "..."` call is a function that attempts to pull the value
-for the given key out of the JSON object. Potential failure (missing key,
+Each individual `o .: "..."` expression is a function that attempts to pull the
+value for the given key out of a JSON `Object`. Potential failure (missing key,
 invalid type, etc) is captured by returning a value wrapped in the `Parser`
 type. We can combine the individual `Parser` values together into one `Parser
 User` using `(<$>)` and `(<*>)`.
 
 If any key is missing, the whole thing fails. If they're all there, we get the
 `User` we wanted. This concern is completely isolated within the implementation
-of `(<$>)` and `(<*>)`.
+of `(<$>)` and `(<*>)` for `Parser`.
 
 # Monad
 
@@ -1999,7 +1982,7 @@ findUserShippingCost uid = do
     shippingCost a
 ```
 
-Et Viola, you have the equivalent *do-notation* version of our function. When
+Et Violà, you have the equivalent *do-notation* version of our function. When
 the compiler sees code written like this, it follows (mostly) the same process
 we did, but in reverse:
 
@@ -2028,7 +2011,7 @@ findUserShippingCost uid =
 The compiler can stop here as all remaining steps are stylistic changes only
 (removing whitespace and *eta-reducing*[^eta-reduce] the lambdas).
 
-[eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
+[^eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
 
 ## Will it Pipe?
 
@@ -2226,12 +2209,12 @@ accounted for under an operation like `fmap`?
 ```haskell
 --      (a -> b) -> f        a -> f        b
 --      (a -> b) -> Either e a -> Either e b
-fmap :: (a -> b) -> Parsed a   -> Parsed   b
+fmap :: (a -> b) -> Parsed   a -> Parsed   b
 fmap f (Right v) = Right (f v)
 fmap _ (Left e)  = Left e
 ```
 
-If the value is there, we apply the given function to it. If its not, we pass
+If the value is there, we apply the given function to it. If it's not, we pass
 along the error. Now we can do something like this:
 
 ```haskell
@@ -2262,7 +2245,7 @@ only difference is we're doing it for a different kind of context.
 ```haskell
 -- Given two json objects, merge them. Duplicate keys result in those in the
 -- second object being kept.
-merge :: JSON -> JSON
+merge :: JSON -> JSON -> JSON
 merge = undefined
 
 jsonString1 = "..."
@@ -2280,6 +2263,7 @@ value's not there, that error is preserved as a new `Left` value:
 --       f        (a -> b) -> f        a -> f        b
 --       Either e (a -> b) -> Either e a -> Either e b
 (<*>) :: Parsed   (a -> b) -> Parsed   a -> Parsed   b
+Right f <*> Right x = Right (f x)
 Right _ <*> Left e = Left e
 ```
 
@@ -2347,7 +2331,7 @@ function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
 that that's the `Parsed HTML` we're after.
 
 If both parses succeed, we get a `Right`-constructed value containing the `HTML`
-we want. If either parse, fails we get a `Left`-constructed value containing the
+we want. If either parse fails, we get a `Left`-constructed value containing the
 `ParserError` from whichever failed.
 
 Allowing such a readable expression (*parse JSON and then parse HTML at body*),
@@ -2370,3 +2354,359 @@ This is a great way to reduce a project's maintenance burden: if you start with
 functions returning `Maybe` values but use generalized functions for (e.g.) any
 `Monad m`, you can later upgrade to a fully fledged `Error` type based on
 `Either` without having to change most of the code base.
+
+## List
+
+*TODO*
+
+## IO
+
+So far, we've seen three types: `Maybe a`, `Either e a`, and `[a]` (which can be
+thought of as `List a`). These types all represent a value with some other bit
+of information: a *context*. If `a` is the `User` you're trying to find, the
+`Maybe` says if she was actually found. If the `a` is the `JSON` you're
+attempting to parse, the `Either e` holds information about the error when the
+parse fails. If `a` is a number, then `[]` tells you it is actually many numbers
+at once, and how many.
+
+For all these types, we've seen the behaviors that allow us to add them to the
+`Functor`, `Applicative`, and `Monad` type classes. These behaviors obey certain
+laws which allow us to reason about what will happen when we use functions like
+`fmap` or `(>>=)`. In addition to this, we can also reach in and manually
+resolve the context. We can define a `fromMaybe` function to reduce a `Maybe a`
+to an `a` by providing a default value for the `Nothing` case. We can do a
+similar thing for `Either e a` with the `either` function. Given a `[a]` we can
+resolve it to an `a` by selecting one at a given index (taking care to handle
+the empty list).
+
+The `IO` type, so important to Haskell, is exactly like the three types you've
+seen so far in that it represents a value in some context. With a value of type
+`IO a`, the `a` is the thing you want and the `IO` means some input or output
+will be performed in the real word as part of producing that `a`. The difference
+is that the only way we can combine `IO` values is through their `Functor`,
+`Applicative`, and `Monad` interfaces. In fact, it's really only through its
+`Monad` interface since the `Applicative` and `Functor` instances are defined in
+terms of it. We can't ourselves resolve an `IO a` to an `a`. This has many
+ramifications in how programs must be constructed.
+
+### Effects in a pure world
+
+One question I get asked a lot is, "how is it that Haskell, a *pure* functional
+programming language, can actually do anything? How does it create or read
+files? How does it print to the terminal? How does it serve web requests?"
+
+The short answer is, it doesn't. To show this, let's start with the following
+Ruby program:
+
+```ruby
+def main
+  print "give me a word: "
+
+  x = gets
+
+  puts x
+end
+```
+
+When you run this program with the Ruby interpreter, does anything happen? It
+depends on your definition of *happen*. Certainly, no I/O will happen, but
+that's not *nothing*. Objects will be instantiated, and a method has been
+defined. By defining this method, you've constructed a blue-print for some
+actions to be performed, but then neglected to perform them.
+
+Ruby expects (and allows) you to invoke effecting methods like `main` whenever
+and wherever you want. If you want the above program to do something, you need
+to call `main` at the bottom. This is a blessing and a curse. While the
+flexibility is appreciated, it's a constant source of bugs and makes methods and
+objects impossible to reason about without looking at their implementations. A
+method may look "pure", but internally it might access a database, pull from an
+external source of randomness, or fire nuclear missiles. Haskell doesn't work
+like that.
+
+Here's a translation of the Ruby program into Haskell:
+
+```haskell
+main :: IO ()
+main = do
+  putStr "give me a word: "
+
+  x <- getLine
+
+  putStrLn x
+```
+
+Much like the Ruby example, this code doesn't *do* anything. It defines a
+function `main` that states what should happen when it's executed. It does not
+execute anything itself. Unlike Ruby, Haskell does not expect or allow you to
+call `main` yourself. The Haskell runtime will handle that and perform whatever
+I/O is required for you. This is how I/O happens in a pure language: you define
+the blue-print, a *pure* value that says *how* to perform any I/O, then you give
+that to a separate runtime, which is in charge of actually performing it.
+
+### Statements and the curse of do-notation
+
+The above Haskell function used *do-notation*. I did this to highlight that the
+reason do-notation exists is for Haskell code to look like that equivalent,
+imperative Ruby on which it was based. This fact has the unfortunate consequence
+of tricking new Haskell programmers into thinking that `putStr` (for example) is
+an imperative statement that actually puts the string to the screen when
+evaluated.
+
+In the Ruby code, each statement is implicitly combined with the next as the
+interpreter sees them. There is some initial global state, statements modify
+that global state, and the interpreter handles ensuring that subsequent
+statements see an updated global state from all those that came before. If Ruby
+used a semi-colon instead of whitespace to delimit statements, we could almost
+think of `(;)` as an operator for combining statements and keeping track of the
+global state between them.
+
+In Haskell, there are no statements, only expressions. Every expression has a
+type and compound expressions must be combined in a type-safe way. In the case
+of `IO` expressions, they are combined with `(>>=)`. The semantic result is very
+similar to Ruby's statements. It's because of this that you may hear `(>>=)`
+referred to as a *programmable semicolon*. In truth, it's so much more than
+that. It's a first-class function that can be passed around, built on top of,
+and overloaded from type to type.
+
+To see how this works, let's build an equivalent definition for `main`, only
+this time no do-notation, only `(>>=)`.
+
+### Typed Puzzles
+
+Starting with the type of `main`, we immediately see something worth explaining:
+
+```haskell
+main :: IO ()
+```
+
+The type of `main` is pronounced *IO void*. `()` itself is a type defined with a
+single constructor, it can also be thought of as an empty tuple:
+
+```haskell
+data () = ()
+```
+
+It's used to stand in when a computation affects the *context*, but produces no
+useful *result*. It's not specific to `IO` (or monads for that matter). For
+example, if you were chaining a series of `Maybe` values together using `(>>=)`
+and under some condition you wanted to manually trigger an overall `Nothing`
+result, you could insert a `Nothing` of type `Maybe ()` into the expression.
+
+This is exactly how the [guard][] function works. When specialized to `Maybe`,
+its definition is:
+
+```haskell
+guard :: Bool -> Maybe ()
+guard True = Just ()
+guard False = Nothing
+```
+
+It is used like this:
+
+```haskell
+findAdmin :: UserId -> Maybe User
+findAdmin uid = do
+    user <- findUser uid
+
+    guard (isAdmin user)
+
+    return user
+```
+
+[guard]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Control-Monad.html#v:guard
+
+Next, let's look at the individual pieces we'll be combining into `main`:
+
+```haskell
+putStr :: String -> IO ()
+
+putStrLn :: String -> IO ()
+```
+
+`putStr` also doesn't have any useful result so it uses `()`. It takes the given
+`String` and returns an action that *represents* printing that string, without a
+trailing newline, to the terminal. `putStrLn` is exactly the same, but includes
+a trailing newline.
+
+```haskell
+getLine :: IO String
+```
+
+`getLine` doesn't take any arguments and has type `IO String` which means an
+action that represents reading a line of input from the terminal. It requires
+`IO` and presents the read line as its result.
+
+Next, let's review the type of `(>>=)`:
+
+```haskell
+(>>=) :: m a -> (a -> m b) -> m b
+```
+
+In our case, `m` will always be `IO`, but `a` and `b` will be different each
+time we use `(>>=)`. The first combination we need is `putStr` and `getLine`.
+`putStr "..."` fits as `m a`, because its type is `IO ()`, but `getLine` does
+not have the type `() -> IO b` which is required for things to line up. Remember
+from the previous chapter that there's another operator built on top of `(>>=)`
+designed to fix this problem:
+
+```haskell
+(>>) :: m a -> m b -> m b
+ma >> mb = ma >>= \_ -> mb
+```
+
+It turns its second argument into the right type for `(>>=)` by wrapping it in a
+lambda that accepts and ignores the `a` returned by the first action. With this,
+we can write our first combination:
+
+```haskell
+main = putStr "..." >> getLine
+```
+
+What is the type of this expression? If `(>>)` is `m a -> m b -> m b` and we've
+got `m a` as `IO ()` and `m b` as `IO String`, this combined expression must be
+`IO String`. It represents an action that, *when executed*, would print the
+given string to the terminal, then read in a line.
+
+Our next requirement is to put this action together with `putStrLn`. Our current
+expression has type `IO String` and `putStrLn` has type `String -> IO ()`. This
+lines up perfectly with `(>>=)` by taking `m` as `IO`, `a` as `String`, and `b`
+as `()`:
+
+```haskell
+main = putStr "..." >> getLine >>= putStrLn
+```
+
+This code is equivalent to the do-notation version I showed before. If you're
+not sure, try to manually convert between the two forms. The steps required were
+shown in the do-notation sub-section of the Monad chapter.
+
+Hopefully, this exercise has you convinced you that while I/O in Haskell may
+appear confusing at first, things are quite a bit simpler:
+
+- Any function with an `IO` type *represents* an action to be performed
+- Actions are not executed, only combined into larger actions using `(>>=)`
+- The only way to get the runtime to execute an action is to assign it the
+  special name `main`
+
+From these rules and the general requirement of type-safety, it emerges that any
+value of type `IO a` can only be called directly or indirectly from `main`.
+
+### Other instances
+
+Unlike previous chapters, here I jumped right into `Monad`. This was because
+there's a natural flow from imperative code to monadic programming with
+do-notation, to the underlying expressions combined with `(>>=)`. As I
+mentioned, this is the only way to combine `IO` values. While `IO` does have
+instances for `Functor` and `Applicative`, the functions in these classes
+(`fmap`, `pure`, and `(<*>)`) are defined in terms of `return` and `(>>=)` from
+its `Monad` instance. For this reason, I won't be showing their definitions.
+That said, these instances are still useful. If your `IO` code doesn't require
+the full power of monads, it's better to use a weaker constraint. More general
+programs are better and weaker constraints on what kind of data your functions
+can work with makes them more generally useful.
+
+#### Functor
+
+`fmap`, when specialized to `IO`, has the following type:
+
+```haskell
+fmap :: (a -> b) -> IO a -> IO b
+```
+
+It takes a function and an `IO` action and returns another `IO` action which
+represents applying that function to the *eventual* result returned by the
+first.
+
+It's common to see Haskell code like this:
+
+```haskell
+readInUpper :: FilePath -> IO String
+readInUpper fp = do
+    contents <- readFile fp
+
+    return (map toUpper contents)
+```
+
+All this code does is form a new action that applies a function to the eventual
+result of another. We can say this more concisely using `fmap`:
+
+```haskell
+readInUpper :: FilePath -> IO String
+readInUpper fp = fmap (map toUpper) (readFile fp)
+```
+
+As another example, we can use `fmap` with the Prelude function `lookup` to
+write a safer version of `getEnv` from the `System.Environment` module. `getEnv`
+has the nasty quality of raising an exception if the environment variable you're
+looking for isn't present. Hopefully this book has convinced you it's better to
+return a `Maybe` in this case. The `lookupEnv` function was eventually added to
+the module, but if you intend to support old versions, you'll need to define it
+yourself:
+
+```haskell
+import System.Environment (getEnvironment)
+
+-- lookup :: Eq a => a -> [(a, b)] -> Maybe b
+--
+-- getEnvironment :: IO [(String, String)]
+
+lookupEnv :: String -> IO (Maybe String)
+lookupEnv v = fmap (lookup v) getEnvironment
+```
+
+#### Applicative
+
+Imagine a library function for finding differences between two strings:
+
+```haskell
+data Diff = Diff [Difference]
+data Difference = Added | Removed | Changed
+
+diff :: String -> String -> Diff
+diff = undefined
+```
+
+How would we run this code on files from the file system? One way, using
+`Monad`, would look like this:
+
+```haskell
+diffFiles :: FilePath -> FilePath -> IO Diff
+diffFiles fp1 fp2 = do
+    s1 <- readFile fp1
+    s2 <- readFile fp2
+
+    return (diff s1 s2)
+```
+
+Notice that the second `readFile` does not depend on the result of the first.
+Both `readFile` actions produce values that are combined *at-once* using the
+pure function `diff`. We can make this lack of dependency explicit and bring the
+expression closer to what it would look like without `IO` values by using
+`Applicative`:
+
+```haskell
+diffFiles :: FilePath -> FilePath -> IO Diff
+diffFiles fp1 fp2 = diff <$> readFile fp1 <*> readFile fp2
+```
+
+As an exercise, try breaking down the types of the intermediate expressions
+here, like we did for `Maybe` in the Follow the Types sub-section of the
+Applicative chapter.
+
+### Learning more
+
+There are many resources online for learning about `Monad` and `IO` in Haskell.
+I recommend reading them all. Some are better than others and many get a bad rap
+for using some grandiose analogy that only makes sense to the author. Be mindful
+of this, but know that no single tutorial can give you a complete understanding
+because that requires looking at the same abstract thing from a variety of
+angles. Therefore, the best thing to do is read it all and form your own
+intuitions.
+
+If you're interested in the origins of monadic I/O in Haskell, I recommend
+[Tackling the Awkward Squad: monadic input/output, concurrency, exceptions, and
+foreign-language calls in Haskell][spj] by Simon Peyton Jones and [Comprehending
+Monads][wadler] by Philip Wadler.
+
+[spj]: http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/mark.pdf
+[wadler]: http://ncatlab.org/nlab/files/WadlerMonads.pdf
