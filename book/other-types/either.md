@@ -207,17 +207,25 @@ be the case!), any single failing computation must trigger the omission of all
 subsequent computations (since they could be depending on some result that's not
 there). This means we only need to propagate that first failure.
 
-Let's say that our domain has some JSON responses whose values contain HTML.
-Parsing these values into an `HTML` data type may also fail. Since our `Parsed`
-type is polymorphic in its result (i.e. it's `Parsed a` not `Parsed JSON`), we
-can reuse it here:
+Let's say we're interacting with a JSON web service for getting blog post
+content. The responses include the body of the post as a string of HTML:
+
+```
+{
+  "title": "A sweet blog post",
+  "body": "<p>The post content...</p>"
+}
+```
+
+Parsing JSON like this includes parsing the value at the `"body"` key into a
+structured `HTML` data type. For this, we can re-use our `Parsed` type:
 
 ```haskell
 parseHTML :: Value -> Parsed HTML
 parseHTML = undefined
 ```
 
-We can directly parse a `String` of JSON into the HTML present at one of its
+We can directly parse a `String` of JSON into the `HTML` present at one of its
 keys by binding the two parses together with `(>>=)`:
 
 ```haskell
@@ -230,8 +238,8 @@ parseBody jsonString = parseJSON jsonString >>= parseHTML . at "body"
 ```
 
 First, `parseJSON jsonString` gives us a `Parsed JSON`. This is the `m a` in
-`(>>=)`'s type signature. Then we use `(.)` to compose a function for getting
-the value at the `"body"` key and passing it to `parseHTML`. The type of this
+`(>>=)`'s type signature. Then we use `(.)` to compose a function that gets the
+value at the `"body"` key and passing it to `parseHTML`. The type of this
 function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
 `(>>=)`'s second argument. Knowing that `(>>=)` will return `m b`, we can see
 that that's the `Parsed HTML` we're after.
