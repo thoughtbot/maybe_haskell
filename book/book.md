@@ -63,4 +63,6 @@
 
 # Other Types
 
+<<[other-types/intro.md]
+
 <<[other-types/either.md]
