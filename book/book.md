@@ -67,7 +67,7 @@
 
 <<[other-types/either.md]
 
-
+<<[other-types/list.md]
 
 <<[other-types/io/intro.md]
 
