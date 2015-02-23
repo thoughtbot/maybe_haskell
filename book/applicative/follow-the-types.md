@@ -42,8 +42,8 @@ userFromParams params =
 ```
 
 `Maybe` is not making our lives easier here. Yes, type safety is a huge implicit
-win, but this still looks a lot like tedious, defensive coding you'd find in any
-language:
+win, but this still looks a lot like the tedious, defensive coding you'd find in
+any language:
 
 ```ruby
 def user_from_params(params)

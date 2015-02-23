@@ -33,12 +33,13 @@ userFromParams params =
 ```
 
 With a bit more effort, we could use the same trick with `fmap` and end up with
-the following chaining:
+the following, more readable chaining:
 
 ```haskell
 userFromParams :: Params -> Maybe User
-userFromParams params =
-    User `fmap` getParam "name" params `apply` getParam "email" params
+userFromParams params = User
+    `fmap` getParam "name" params
+    `apply` getParam "email" params
 ```
 
 Making this form compile requires assigning the right *fixity* to `fmap` and

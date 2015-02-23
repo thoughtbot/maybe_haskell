@@ -10,12 +10,12 @@ defining instances for `Functor`, `Applicative` and `Monad`, we were defining an
 instance for `Maybe`, not for `Maybe a`. When we define these instances we're
 not defining how `Maybe a`, a value in some context, behaves under certain
 computations, we're actually defining how `Maybe`, the context itself, behaves
-under certain operations.
+under certain computations.
 
 This kind of separation of concerns is difficult to understand when you're only
 accustomed to languages that don't allow for it. I believe it's why topics like
 monads seem so opaque to those unfamiliar with a type system like this. To
 strengthen the point that what we're really talking about are behaviors and
-contexts, not any one specific *thing*, this chapter will explore types which
+contexts, not any one specific *thing*, this chapter will explore types that
 represent other kinds of contexts and show how they behave under all the same
 computations we saw for `Maybe`.

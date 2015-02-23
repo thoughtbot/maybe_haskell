@@ -239,7 +239,7 @@ parseBody jsonString = parseJSON jsonString >>= parseHTML . at "body"
 
 First, `parseJSON jsonString` gives us a `Parsed JSON`. This is the `m a` in
 `(>>=)`'s type signature. Then we use `(.)` to compose a function that gets the
-value at the `"body"` key and passing it to `parseHTML`. The type of this
+value at the `"body"` key and passes it to `parseHTML`. The type of this
 function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
 `(>>=)`'s second argument. Knowing that `(>>=)` will return `m b`, we can see
 that that's the `Parsed HTML` we're after.
