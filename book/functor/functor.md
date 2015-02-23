@@ -38,7 +38,7 @@ The most familiar example for an implementation of `fmap` is the one for `[]`.
 Like `Maybe` is the type constructor in `Maybe a`, `[]` is the type constructor
 in `[a]`. You can pronounce `[]` as *list* and `[a]` as *list of a*.
 
-The basic `map` function which exists in many languages, including Haskell, has
+The basic `map` function, which exists in many languages, including Haskell, has
 the following type:
 
 ```haskell

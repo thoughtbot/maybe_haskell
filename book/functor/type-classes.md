@@ -48,5 +48,5 @@ negate (negate x) == x -- for any x
 
 Knowing that this law holds gives us a precise understanding of what will happen
 when we use `negate`. Because of the laws, we get this understanding without
-knowing the how `negate` is implemented for various types. This is a simple
-example, but we'll see a more interesting one with the `Functor` type class.
+knowing how `negate` is implemented for various types. This is a simple example,
+but we'll see more interesting laws with the `Functor` type class.
