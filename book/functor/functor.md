@@ -35,8 +35,8 @@ class Functor Maybe where
 ### List
 
 The most familiar example for an implementation of `fmap` is the one for `[]`.
-Like `Maybe` is the type constructor for `Maybe a`, `[]` is the type constructor
-for `[a]`. You can pronounce `[]` as *list* and `[a]` as *list of a*.
+Like `Maybe` is the type constructor in `Maybe a`, `[]` is the type constructor
+in `[a]`. You can pronounce `[]` as *list* and `[a]` as *list of a*.
 
 The basic `map` function which exists in many languages, including Haskell, has
 the following type:
