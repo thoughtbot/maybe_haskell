@@ -64,9 +64,11 @@ expression using those names.
 
 ### Higher-order functions
 
-Functions can take and return other functions. These are known as higher-order
-functions. In type signatures, any function arguments or return values must be
-surrounded by parentheses:
+Functions can take and return other functions. These are known as
+[higher-order][] functions. In type signatures, any function arguments or return
+values must be surrounded by parentheses:
+
+[higher-order]: http://learnyouahaskell.com/higher-order-functions
 
 ```haskell
 twice :: (Int -> Int) -> Int -> Int
