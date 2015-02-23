@@ -9,40 +9,81 @@ we want here is a *person with a thing* or a *person without a thing*.
 One way to do this is to *parameterize* the type:
 
 ```haskell
-data Person a = PersonWith String a | PersonWithout String
---          |                     |
---          |                     ` we can use it as an argument here
+data Person a = PersonWithThing String a | PersonWithoutThing String
+--          |                          |
+--          |                          ` we can use it as an argument here
 --          |
 --          ` By adding a "type variable" here
 ```
 
-Any lowercase value will do, but it's common to use `a` because it's short, and
-a value of type `a` can be thought of as a value of any type. Rather than
-hard-coding that a person has an age (or not), we can say a person is holding
-some thing of type `a` (or not).
+The type we've defined here is `Person a`. We can construct values of type
+`Person a` by giving a `String` and an `a` to `PersonWithThing`, or by giving
+only a `String` to `PersonWithoutThing`. Notice that even if we build our person
+using `PersonWithoutThing`, the constructed value still has type `Person a`.
 
-Now we can construct people with or without something:
+The `a` is called a *type variable*. Any lowercase value will do, but it's
+common to use `a` because it's short, and a value of type `a` can be thought of
+as a value of *any* type. Rather than hard-coding that a person has an `Int`
+representing their age (or not), we can say a person is holding some thing of
+type `a` (or not).
+
+We can still construct people with and without ages, but now we have to specify
+in the type that the `a` is an `Int` in this case:
 
 ```haskell
 patWithAge :: Person Int
-patWithAge = PersonWith "pat" 29
+patWithAge = PersonWithThing "pat" 29
 
 patWithoutAge :: Person Int
-patWithoutAge = PersonWithout "pat"
+patWithoutAge = PersonWithoutThing "pat"
 ```
 
-Notice how even in the case where I have no age, I can still specify the type of
-that thing which I do not have.
+Notice how even in the case where I have no age, we still specify the type of
+that thing which I do not have. In this case, we specified an `Int` for
+`patWithoutAge`, but values can have (or not have) any type of thing:
 
-Functions that operate on people can choose if they care about what the person's
-holding or not. For example, getting someone's name shouldn't be affected by
-them holding something or not, so we can leave it unspecified, again using `a`
-to mean any type:
+```haskell
+patWithEmail :: Person String
+patWithEmail = PersonWithThing "pat" "pat@thoughtbot.com"
+
+patWithoutEmail:: Person String
+patWithoutEmail = PersonWithoutThing "pat"
+```
+
+We don't have to give a concrete `a` when it doesn't matter. `patWithoutAge` and
+`patWithoutEmail` are the same value with different types. We could define a
+single value with the generic type `Person a`:
+
+```haskell
+patWithoutThing :: Person a
+patWithoutThing = PersonWithoutThing "pat"
+```
+
+Because `a` is more general than `Int` or `String`, a value such as this can
+stand in anywhere a `Person Int` or `Person String` is needed:
+
+```haskell
+patWithoutAge :: Person Int
+patWithoutAge = patWithoutThing
+
+patWithoutEmail :: Person String
+patWithoutEmail = patWithoutThing
+```
+
+Similarly, functions that operate on people can choose if they care about what
+the person's holding or not. For example, getting someone's name shouldn't be
+affected by them holding something or not, so we can leave it unspecified:
 
 ```haskell
 getName :: Person a -> String
-getName (PersonWith name _) = name
-getName (PersonWithout name) = name
+getName (PersonWithThing name _) = name
+getName (PersonWithoutThing name) = name
+
+getName patWithAge
+-- => "pat"
+
+getName patWithoutEmail
+-- => "pat"
 ```
 
 But a function which does care, must both specify the type *and* account for the
@@ -50,11 +91,22 @@ case of non-presence:
 
 ```haskell
 doubleAge :: Person Int -> Int
-doubleAge (PersonWith _ age) = 2 * age
-doubleAge (PersonWithout _) = 1 -- perhaps provide a sane default?
+doubleAge (PersonWithThing _ age) = 2 * age
+doubleAge (PersonWithoutThing _) = 1 -- perhaps provide a sane default?
+
+doubleAge patWithAge
+-- => 58
+
+doubleAge patWithoutAge
+-- => 1
+
+doubleAge patWithoutThing
+-- => 1
+
+doubleAge patWithoutEmail
+-- => Type error! Person String != Person Int
 ```
 
 This has been a very brief introduction to higher-kinded types and specifically
-*type variables* (the `a` in `Person a`). If it doesn't make complete sense now,
-that's OK. Using these things in practice is the best way to gain a more
-complete understanding.
+type variables. If it doesn't make complete sense now, that's OK. Using these
+things in practice is the best way to gain a more complete understanding.
