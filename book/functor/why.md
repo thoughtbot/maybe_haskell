@@ -13,11 +13,10 @@ I've left the implementation of `findUser` as `undefined` because it doesn't
 matter for our example. I'll do this frequently throughout the book. `undefined`
 is a function with type `a`. That allows it to stand in for any expression. If
 your program ever tries to evaluate it, it will raise an exception. Still, it
-can be extremely useful while developing because we can confirm that written our
-types correctly without having to think about implementations yet.
+can be extremely useful while developing because we can confirm that we've
+written our types correctly without having to think about implementations yet.
 
-Next, imagine we have a view somewhere that is displaying the user's name in all
-capitals:
+Next, imagine we have want to display a user's name in all capitals:
 
 ```haskell
 userUpperName :: User -> String

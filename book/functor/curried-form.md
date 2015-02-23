@@ -114,7 +114,7 @@ And it has the same meaning as well.
 
 ## Partial Application
 
-I mentioned partial application in an early chapter, but it's worth discussing
+I mentioned partial application in an earlier chapter, but it's worth discussing
 again in the context of the `map` example above. We can partially apply
 functions by supplying only some of their arguments and getting back another
 function which accepts any arguments we left out. Technically, this is not
