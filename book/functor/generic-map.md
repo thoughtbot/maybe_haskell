@@ -14,9 +14,9 @@ map :: (a -> b) -> ([a] -> [b])
 
 The "key" is a function from `a` to `b`. The "value" is a function from `[a]` to
 `[b]`. It's common but incorrect to say "map a function over each element of a
-list". Because the `map` function most commonly found in programming languages
+list." Because the `map` function most commonly found in programming languages
 applies a function to each element in a list, we've taken the word "map" to mean
-"do something to each element in a list". This is unfortunate as taking a
+"do something to each element in a list." This is unfortunate as taking a
 function that operates in some domain (`a`s and `b`s) and mapping it to a
 function that operates in a different, related domain (`[a]`s and `[b]`s) is far
 more accurate and eases the mental leap to the generalized version, `fmap`:
