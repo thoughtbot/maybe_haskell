@@ -44,6 +44,7 @@ Thank you to all who've [contributed][contributors] so far!
 - [x] Other Types
   - [x] Either
   - [ ] List
-  - [ ] IO
+  - [x] IO
+- [x] Conclusion
 - [ ] Technical review
 - [ ] Copy editing
