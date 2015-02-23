@@ -33,7 +33,7 @@ We can read this as `six` *is* `5`, *of type* `Int`, plus `1`
 Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
 parts or seeing how it is eventually used. This process is called *type
-inferrence*. For example, Haskell knows that `six` is an `Int` because it saw
+inference*. For example, Haskell knows that `six` is an `Int` because it saw
 that `5` is an `Int`. Since you can only use `(+)` with arguments of the same
 type, it *enforced* that `1` is also an `Int`. Knowing that `(+)` returns the
 same type as its arguments, the final result of the addition must itself be an
@@ -58,7 +58,7 @@ separated from the return type. There is a good reason for this, but I won't go
 into it yet. For now, feel free to mentally treat the thing after the last arrow
 as the return type.
 
-After the type signature we give the function's name (`add`) and names for any
+After the type signature, we give the function's name (`add`) and names for any
 arguments it takes (`x` and `y`). On the other side of the `=`, we define an
 expression using those names.
 
@@ -78,7 +78,7 @@ twice (add 2) 3
 
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
-(`op`) to the second (`x`) twice returning another `Int`.
+(`op`) to the second (`x`) twice, returning another `Int`.
 
 You also saw an example of *partial application*. The expression `add 2` returns
 a new function that itself takes the argument we left off. Let's break down that
@@ -109,14 +109,15 @@ application as we go.
 ### Operators
 
 In the definition of `add`, I used something called an *operator*: `(+)`.
-Operators like this are not special, they're functions defined and used like
-anything else. Operators have three additional (and convenient) behaviors:
+Operators like this are not special or built-in in any way; we can define and
+use them like any other function. That said, there are three additional (and
+convenient) behaviors operators have:
 
 1. They are used *infix* by default, meaning they appear between their arguments
    (as in `2 + 2`). To use an operator *prefix*, it must be surrounded in
    parentheses (as in `(+) 2 2`).
 2. When defining an operator, we can assign a custom [associativity][] and
-   [precedence][] relative to other operators. This tells Haskell how to treat
+   [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
 3. We can surround an operator and *either* of its arguments in parentheses to
    get a new function that excepts whichever argument we left off. Expressions
@@ -127,10 +128,12 @@ anything else. Operators have three additional (and convenient) behaviors:
 [associativity]: http://en.wikipedia.org/wiki/Associative_property
 [precedence]: http://en.wikipedia.org/wiki/Order_of_operations
 
-In Haskell, any function name made up entirely of punctuation (where [The
-Haskell Report][report] states very exactly what "punctuation" means) behave
-like operators. We can also take any normally-named function and treat it like
+In Haskell, any function with a name made up entirely of punctuation (where [The
+Haskell Report][report] states very exactly what "punctuation" means) behaves
+like an operator. We can also take any normally-named function and treat it like
 an operator by surrounding it in backticks:
+
+[report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
 
 ```haskell
 -- Normal usage of an elem function
@@ -148,9 +151,9 @@ intersects xs ys = any (`elem` xs) ys
 ### Lambdas
 
 The last thing we need to know about functions is that they can be *anonymous*.
-Anonymous functions are called *lambdas* and most frequently used as arguments
-to higher-order functions. Often these functional arguments only exist for a
-single use and giving them a name is not otherwise valuable.
+Anonymous functions are called *lambdas* and are most frequently used as
+arguments to higher-order functions. Often these functional arguments only exist
+for a single use and giving them a name is not otherwise valuable.
 
 The syntax is a back-slash, the arguments to the function, an arrow, then the
 body of the function. A back-slash is used because it looks like the Greek
