@@ -1,11 +1,14 @@
 ## The Functor Laws
 
-Type class laws are a formal way of defining what it means for implementations
-to be "well-behaved". If someone writes a library function and says it can work
-with "any `Functor`", that code can rely both on that type having an `fmap`
-implementation, and that it operates in accordance with these laws.
+As mentioned, type class laws are a formal way of defining what it means for
+implementations to be "well-behaved". If someone writes a library function and
+says it can work with "any `Functor`", that code can rely both on that type
+having an `fmap` implementation, and that it operates in accordance with these
+laws.
 
-For example, let's look at the first Functor law:
+### The first Functor law
+
+The first Functor law states:
 
 ```haskell
 fmap id x == id x
@@ -35,8 +38,70 @@ equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
 element in the list (as `fmap id` does) gives you back the same exact list, and
 that is exactly what you expect to get if you apply `id` directly to the list
-itself. I encourage you to go through the same thought exercise for `Maybe` so
-you can see that the law holds true for its implementation as well.
+itself. Let's go through the same thought exercise for `Maybe` so you can see
+that the law holds for its implementation as well.
+
+We'll use our two example values `actuallyFive` and `notReallyFive` from
+earlier:
+
+```haskell
+actuallyFive :: Maybe Int
+actuallyFive = Just 5
+
+notReallyFive :: Maybe Int
+notReallyFive = Nothing
+```
+
+What do we get by applying the identity function to each of these?
+
+```haskell
+id actuallyFive
+-- => Just 5
+
+id notReallyFive
+-- => Nothing
+```
+
+Not too surprising. Now let's look at `fmap id`:
+
+```haskell
+fmap id actuallyFive
+```
+
+Remember the definition of `fmap` for `Maybe` values:
+
+```haskell
+fmap :: (a -> b) -> Maybe a -> Maybe b
+fmap f (Just x) = Just (f x)
+fmap _ Nothing = Nothing
+```
+
+Since `actuallyFive` matches the `Just` case, `fmap` will apply `id` to `5`,
+then re-wrap the result in `Just`:
+
+```haskll
+fmap id actuallyFive
+-- => fmap id (Just 5) = Just (id 5)
+-- =>                  = Just 5
+```
+
+And for `notReallyFive`?
+
+```haskell
+fmap id notReallyFive
+```
+
+Since `notReallyFive` is `Nothing`, `fmap` will return a new `Nothing`:
+
+```haskell
+fmap id notReallyFive
+-- => fmap _ Nothing = Nothing
+-- =>                = Nothing
+```
+
+As expected, both results are the same as applying `id` directly.
+
+### The second Functor law
 
 The second law has to do with order of operations, it states:
 
@@ -53,14 +118,11 @@ Where `(.)` is a function that takes two functions and *composes* them together:
 
 What this law says is that if we compose two functions together, then `fmap` the
 resulting function, we should get a function which behaves the same as when we
-`fmap` each function individually, then compose the two results.
+`fmap` each function individually, then compose the two results. Let's prove
+again that this law holds for `Maybe` by walking through an example with
+`actuallyFive` and `notReallyFive`.
 
-This one's a little trickier when you're not familiar with function composition.
-Let's prove that this law holds for `Maybe` by walking through an example with
-`actuallyFive` and `notReallyFive`. If you already feel comfortable with what
-the law is stating and why it holds, feel free to skip this section.
-
-First, lets define two concrete functions, `f` and `g`
+First, let's define two concrete functions, `f` and `g`
 
 ```haskell
 f :: Int -> Int
@@ -102,9 +164,10 @@ fmap h notReallyFive
 -- => Nothing
 ```
 
-Similarly, we can give `f` and `g` to `fmap` to produce functions which can add
-2 or multiply 3 to a `Maybe Int` and produce another `Maybe Int`. The resulting
-functions can also be composed with `(.)` to produce a new function, `fh`:
+Similarly, we can give each of `f` and `g` to `fmap` separately to produce
+functions which can add 2 or multiply 3 to a `Maybe Int` and produce another
+`Maybe Int`. The resulting functions can also be composed with `(.)` to produce
+a new function, `fh`:
 
 ```haskell
 fh :: Maybe Int -> Maybe Int
