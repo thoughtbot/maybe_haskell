@@ -86,10 +86,14 @@ jim :: Person
 jim = PersonWithoutAge "Jim"
 ```
 
-Haskell allows for multiple definitions of the same function, so long as they
-match different patterns. They will be tried in the order defined, and the first
-function to match will be used. This works well for pulling the name out of a
-value of our new `Person` type:
+Notice that `pat` and `jim` are both values of type `Person`, but they've been
+constructed differently. We can use pattern matching to inspect how a value was
+constructed and choose what to do accordingly. Syntactically, this is
+accomplished by providing multiple definitions of the same function, each
+matching a different pattern. Each definition will be tried in the order
+defined, and the first function to match will be used.
+
+This works well for pulling the name out of a value of our new `Person` type:
 
 ```haskell
 getName :: Person -> String
