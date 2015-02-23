@@ -46,13 +46,10 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#what-this-book-is-not">What This Book is Not</a></li>
 </ul></li>
 <li><a href="#haskell-basics">Haskell Basics</a><ul>
-<li><a href="#operators">Operators</a><ul>
-<li><a href="#operators-are-placed-between-their-arguments">Operators are placed between their arguments</a></li>
-<li><a href="#operators-can-be-assigned-a-fixity">Operators can be assigned a <em>fixity</em></a></li>
-<li><a href="#operators-can-be-used-in-a-section">Operators can be used in a <em>section</em></a></li>
-<li><a href="#function-application">Function Application</a></li>
-<li><a href="#function-composition">Function Composition</a></li>
-</ul></li>
+<li><a href="#arguments">Arguments</a></li>
+<li><a href="#higher-order-functions">Higher-order functions</a></li>
+<li><a href="#operators">Operators</a></li>
+<li><a href="#lambdas">Lambdas</a></li>
 <li><a href="#our-own-data-types">Our Own Data Types</a></li>
 <li><a href="#pattern-matching">Pattern Matching</a></li>
 <li><a href="#sum-types">Sum Types</a></li>
@@ -64,8 +61,13 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#choices">Choices</a></li>
 <li><a href="#discovering-a-functor">Discovering a Functor</a></li>
 <li><a href="#about-type-classes">About Type Classes</a></li>
-<li><a href="#functor-1">Functor</a></li>
-<li><a href="#the-functor-laws">The Functor Laws</a></li>
+<li><a href="#functor-1">Functor</a><ul>
+<li><a href="#list">List</a></li>
+</ul></li>
+<li><a href="#the-functor-laws">The Functor Laws</a><ul>
+<li><a href="#the-first-functor-law">The first Functor law</a></li>
+<li><a href="#the-second-functor-law">The second Functor law</a></li>
+</ul></li>
 <li><a href="#why-is-this-useful">Why Is This Useful?</a></li>
 <li><a href="#whats-in-a-map">What's in a Map</a></li>
 <li><a href="#curried-form">Curried Form</a></li>
@@ -95,7 +97,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#applicative-1">Applicative</a></li>
 <li><a href="#monad-1">Monad</a></li>
 </ul></li>
-<li><a href="#list">List</a></li>
+<li><a href="#list-1">List</a></li>
 <li><a href="#io">IO</a><ul>
 <li><a href="#effects-in-a-pure-world">Effects in a pure world</a></li>
 <li><a href="#statements-and-the-curse-of-do-notation">Statements and the curse of do-notation</a></li>
@@ -104,19 +106,20 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#learning-more">Learning more</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#whats-next">What's Next</a></li>
 </ul>
 </nav>
 <p></p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>As a programmer, I spend a lot of time dealing with the fallout from one specific problem: partial functions. A partial function is one that can't provide a valid result for all possible inputs. If you write a function (or method) to return the first element in an array that satisfies some condition, what do you do if no such element exists? You've been given an input for which you can't return a valid result. Aside from raising an exception, what can you do?</p>
-<p>The most popular way to to deal with this is to return a special value that indicates failure. Ruby has <code>nil</code>, Java has <code>null</code>, and many C functions return <code>-1</code> in failure cases. This is a huge inconvenience. You now have a system in which any value at any time can either be the value you expect or <code>nil</code>, always.</p>
+<p>The most popular way to to deal with this is to return a special value that indicates failure. Ruby has <code>nil</code>, Java has <code>null</code>, and many C functions return <code>-1</code> in failure cases. This is a huge hassle. You now have a system in which any value at any time can either be the value you expect or <code>nil</code>, always.</p>
 <p>If you try to find a <code>User</code>, and you get back a value, and you try to treat it like a <code>User</code> when it's actually <code>nil</code>, you get a <code>NoMethodError</code>. What's worse, that error may not happen anywhere near the source of the problem. The line of code that created that <code>nil</code> may not even appear in the eventual backtrace. The result is various &quot;<code>nil</code> checks&quot; peppered throughout the code. Is this the best we can do?</p>
 <p>The problem of partial functions is not going away. User input may be invalid, files may not exist, networks may fail. We will always need a way to deal with partial functions. What we don't need is <code>null</code>.</p>
 <section id="an-alternate-solution" class="level2">
 <h2>An Alternate Solution</h2>
-<p>In languages with sufficiently expressive type systems, we have another option: we can encode in a value's type the fact that it may not be present. Any partial function can be made total by always returning a valid value, but returning one that also indicates if it is actually present or not. Not only does it make it explicit and &quot;type checked&quot; that when a value may not be present you have code to handle that case, but it also means that if a value is <em>not</em> of this special &quot;nullable&quot; type, you can feel safe in your assumption that the value's really there -- No <code>nil</code> checks required.</p>
-<p>The focus of this book will be Haskell's implementation of this idea via the <code>Maybe</code> data type. This type and all of the functions that deal with it are not built-in, language-level constructs. All of it is implemented as libraries, written in a very straightforward way. In fact, we'll write most of that code ourselves over the course of this short e-book.</p>
+<p>In languages with sufficiently-expressive type systems, we have another option: we can state in the types that certain values may not be present. Functions normally written in a partial way can instead return a type that captures any potential non-presence. Not only does it make it explicit and &quot;type checked&quot; that when a value may not be present, you have code to handle that case, but it also means that if a value is <em>not</em> of this special &quot;nullable&quot; type, you can feel safe in your assumption that the value's really there -- No <code>nil</code>-checks required.</p>
+<p>The focus of this book will be Haskell's implementation of this idea via the <code>Maybe</code> data type. This type and all of the functions that deal with it are not built-in, language-level constructs. All of it is implemented as libraries, written in a very straightforward way. In fact, we'll write most of that code ourselves over the course of this short book.</p>
 <p>Haskell is not the only language to have such a construct. For example, Scala has a similar <code>Option</code> type and Swift has <code>Optional</code> with various built-in syntax elements to make its usage more convenient. Many of the ideas implemented in these languages were lifted directly from Haskell. If you happen to use one of them, it can be good to learn where the ideas originated.</p>
 </section>
 <section id="required-experience" class="level2">
@@ -125,20 +128,20 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>For example, you're going to see code like this:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">countEvens <span class="fu">=</span> length <span class="fu">.</span> filter even</code></pre>
 <p>This is a function definition written in an entirely different style than you may be used to. Even so, I'll bet you can guess what it does, and even get close to how it does it: <code>filter even</code> probably takes a list and filters it for only even elements. <code>length</code> probably takes a list and returns the number of elements it has.</p>
-<p>Given those fairly obvious facts, you might guess that putting two things together with <code>(.)</code> must mean you do one and then give the result to the other. That makes this expression a function which must take a list and return the number of even elements it has. We then assign this function the name <code>countEvens</code>.</p>
-<p>This is a relatively contrived example, but it's indicative of the sort of thing that can happen at any level: if your first reaction is &quot;So much syntax! What is this crazy dot thing!?&quot;, you're going to have a bad time. Instead, try to internalize the parts that make sense while getting comfortable with <em>not</em> knowing the parts that don't. As you learn more, the various bits will tie together in ways you might not expect.</p>
+<p>Given those fairly obvious facts, you might guess that putting two things together with <code>(.)</code> must mean you do one and then give the result to the other. That makes this expression a function which must take a list and return the number of even elements it has. Without mentioning any actual argument, we can directly assign this function the name <code>countEvens</code>. There's no need in Haskell to say that count-evens <em>of some x</em> is to take the length after filtering for the even values <em>of that x</em>. We can state directly that count-evens is taking the length after filtering for evens.</p>
+<p>This is a relatively contrived example, but it's indicative of the confusion that can happen at any level: if your first reaction is &quot;So much syntax! What is this crazy dot thing!?&quot;, you're going to have a bad time. Instead, try to internalize the parts that make sense while getting comfortable with <em>not</em> knowing the parts that don't. As you learn more, the various bits will tie together in ways you might not expect.</p>
 </section>
 <section id="structure" class="level2">
 <h2>Structure</h2>
-<p>We'll be spending this entire book focused on a single <em>type constructor</em> called <code>Maybe</code>. We'll start by quickly covering the basics of Haskell, but only so far that we need exactly such a type and can't help but invent it ourselves. With that defined, we'll quickly see that it's cumbersome to use. This is because Haskell has taken an inherently cumbersome concept, one that is often swept under the rug by languages supporting <code>null</code>, and put it right in front of us by naming it and requiring we deal with it at every step. Haskell is not a language of short-cuts, and that's a good thing.</p>
-<p>From there, we'll walk through three <em>type classes</em> whose presence will make our lives far less cumbersome. We'll see that <code>Maybe</code> has all of the properties required to call it a <em>functor</em>, an <em>applicative functor</em>, and even a <em>monad</em>. These three <em>interfaces</em> are very important in Haskell. They're used by a number of concrete types and are crucial to how I/O is handled in a purely functional language such as Haskell. Understanding them will open your eyes to a whole new world of abstractions and demystify notoriously opaque topics.</p>
-<p>Finally, with a firm grasp on how these concepts operate in the context of <code>Maybe</code>, I'll discuss other types which share these qualities. This is to reinforce the fact that these abstractions are only that: abstractions. They can be applied to any type that meets certain criteria. Ideas like <em>functor</em> and <em>monad</em> are not specifically tied to the concept of partial functions or nullable values. They apply broadly to things like lists, trees, exceptions, and program evaluation, to name a few.</p>
+<p>We'll spend this entire book focused on a single <em>type constructor</em> called <code>Maybe</code>. We'll start by quickly covering the basics of Haskell, but only so far that we see the opportunity for such a type and can't help but invent it ourselves. With that defined, we'll quickly see that it's cumbersome to use. This is because Haskell has taken an inherently cumbersome concept and put it right in front of us by naming it and requiring we deal with it at every step.</p>
+<p>From there, we'll explore three <em>type classes</em> whose presence will make our lives far less cumbersome. We'll see that <code>Maybe</code> has all of the properties required to call it a <em>functor</em>, an <em>applicative functor</em>, and even a <em>monad</em>. These terms may sound scary, but we'll go through them slowly, each concept building on the last. These three <em>interfaces</em> are crucial to how I/O is handled in a purely functional language such as Haskell. Understanding them will open your eyes to a whole new world of abstractions and demystify notoriously opaque topics.</p>
+<p>Finally, with a firm grasp on how these concepts operate in the context of <code>Maybe</code>, we'll discuss other types which share these qualities. This is to reinforce the fact that these ideas are <em>abstractions</em>. They can be applied to any type that meets certain criteria. Ideas like <em>functor</em> and <em>monad</em> are not specifically tied to the concept of partial functions or nullable values. They apply broadly to things like lists, trees, exceptions, and program evaluation.</p>
 </section>
 <section id="what-this-book-is-not" class="level2">
 <h2>What This Book is Not</h2>
-<p>I don't intend to teach you Haskell. Rather, I want to show you <em>barely enough</em> Haskell so that I can wade into the more interesting topics that show how this <code>Maybe</code> data type can add safety to your code base while remaining convenient, expressive, and powerful. My hope is to show that Haskell and its &quot;academic&quot; ideas are not limited to PhD thesis papers. These ideas result directly in cleaner, more maintainable code that solves practical problems.</p>
-<p>I won't be going into how to set up a Haskell programming environment, showing you how to write and run complete Haskell programs, or diving deeply into every language construct we'll see. If you are interested in going further and actually learning Haskell (and I hope you are!), then I recommend following Chris Allen's great <a href="https://github.com/bitemyapp/learnhaskell">learning path</a>.</p>
-<p>Lastly, a word of general advice for learning Haskell:</p>
+<p>I don't intend to teach you Haskell. Rather, I want to show you <em>barely enough</em> Haskell so that I can wade into more interesting topics. I want to show how this <code>Maybe</code> data type can add safety to your code base while remaining convenient, expressive, and powerful. My hope is to show that Haskell and its &quot;academic&quot; ideas are not limited to PhD thesis papers. These ideas result directly in cleaner, more maintainable code that solves practical problems.</p>
+<p>I won't describe how to set up a Haskell programming environment, show you how to write and run complete Haskell programs, or dive deeply into every language construct we'll see. If you are interested in going further and actually learning Haskell (and I hope you are!), then I recommend following Chris Allen's great <a href="https://github.com/bitemyapp/learnhaskell">learning path</a>.</p>
+<p>Lastly, a word of general advice before you get started:</p>
 <p>The type system is not your enemy, it's your friend. It doesn't slow you down, it keeps you honest. Keep an open mind. Haskell is simpler than you think. Monads are not some mystical burrito, they're a simple abstraction which, when applied to a variety of problems, can lead to elegant solutions. Don't get bogged down in what you don't understand, dig deeper into what you do. And above all, take your time.</p>
 <p></p>
 </section>
@@ -154,170 +157,94 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>In Haskell, <code>=</code> is not variable assignment, it's defining equivalence. We're saying here that the word <code>five</code> <em>is equivalent to</em> the literal <code>5</code>. Anywhere you see one, you can replace it with the other and the program will always give the same answer. This property is called <em>referential transparency</em> and it holds true for any Haskell definition, no matter how complicated.</p>
 <p>It's also possible to specify types with an <em>annotation</em> rather than a signature. We can annotate any expression with <code>:: &lt;type&gt;</code> to explicitly tell the compiler the type we want (or expect) that expression to have.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">six <span class="fu">=</span> (<span class="dv">5</span><span class="ot"> ::</span> <span class="dt">Int</span>) <span class="fu">+</span> <span class="dv">1</span></code></pre>
-<p>Type annotations and signatures are usually optional, as Haskell can almost always tell the type of an expression by inspecting the types of its constituent parts or seeing how it is eventually used. This process is called <em>type inferrence</em>. For example, Haskell knows that <code>six</code> is an <code>Int</code> because it saw that <code>5</code> is an <code>Int</code>. Since you can only use <code>(+)</code> with arguments of the same type, it <em>enforced</em> that <code>1</code> is also an <code>Int</code>. Knowing that <code>(+)</code> returns the same type as its arguments, the final result of the addition must itself be an <code>Int</code>.</p>
-<p>Good Haskellers will include a type signature on all top-level definitions anyway. It provides executable documentation and may, in some cases, prevent errors which occur when the compiler assigns a more generic type than you might otherwise want. For example, if we omitted the type signatures in our first example, the compiler would assign the type <code>five :: Num a =&gt; a</code> which means that the type of <code>five</code> is any type that's <code>Num</code>eric in nature -- i.e. it can be added, negated and so forth.</p>
-<p><em>Inferred types</em>, as these are called, are usually fine but can open you up to unclear error messages. If you were to take the result of our generalized <code>five</code> and use it in two places, treating it as an <code>Int</code> in one and a <code>Float</code> in another, the error message may not immediately identify the problem depending on which expression the compiler sees first. On the other hand, if you explicitly state the type as whichever one you want it to be, then using it incorrectly will produce an error message leading you directly to the line and character of your error.</p>
-<section id="operators" class="level2">
-<h2>Operators</h2>
-<p>One potential source of confusion when seeing Haskell for the first time is the use of <em>operators</em>. This section intends to explain these particular kinds of functions so their use is not so surprising. Hopefully, you'll see that they are not special built-in syntax, they're functions like anything else. All there is to operators is that they can be used in a few special (and useful) ways.</p>
-<p>This section is an attempt to avoid later confusion. We're going to make use of operators throughout the rest of the book and stopping to explain them at their first or every site of use would detract from the actual topic being covered. If you find this section to be dense or unimportant at this time, feel free to skim it now and refer back to it as needed when you come across operators you find confusing later.</p>
-<p><a href="https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2">The Haskell Report</a> states that any functions made up entirely of punctuation (where &quot;punctuation&quot; is defined very exactly in the linked report) can be referred to as an operator. Operators can be defined and used in all the same ways as any other function, but have the following three additional behaviors:</p>
-<section id="operators-are-placed-between-their-arguments" class="level3">
-<h3>Operators are placed between their arguments</h3>
-<p>This is called <em>infix notation</em>. It's very intuitive and looks like this:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">2</span> <span class="fu">+</span> <span class="dv">2</span>
-<span class="co">-- =&gt; 4</span></code></pre>
-<p>Functions are usually called using <em>prefix notation</em>. It's not common, but if you do want to call an operator using prefix notation, you have to surround it in parenthesis:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(<span class="fu">+</span>) <span class="dv">2</span> <span class="dv">2</span>
-<span class="co">-- =&gt; 4</span></code></pre>
-<p>You also have to surround operators with parenthesis if passing them as an argument to another function, as in this <code>sum</code> example:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">sum <span class="fu">=</span> foldl (<span class="fu">+</span>) <span class="dv">0</span></code></pre>
-<p>Without the parenthesis, Haskell would think you were trying to add <code>foldl</code> and <code>0</code> which is most certainly a type error.</p>
+<p>We can read this as <code>six</code> <em>is</em> <code>5</code>, <em>of type</em> <code>Int</code>, plus <code>1</code></p>
+<p>Type annotations and signatures are usually optional, as Haskell can almost always tell the type of an expression by inspecting the types of its constituent parts or seeing how it is eventually used. This process is called <em>type inference</em>. For example, Haskell knows that <code>six</code> is an <code>Int</code> because it saw that <code>5</code> is an <code>Int</code>. Since you can only use <code>(+)</code> with arguments of the same type, it <em>enforced</em> that <code>1</code> is also an <code>Int</code>. Knowing that <code>(+)</code> returns the same type as its arguments, the final result of the addition must itself be an <code>Int</code>.</p>
+<p>Good Haskellers will include a type signature on all top-level definitions anyway. It provides executable documentation and may, in some cases, prevent errors which occur when the compiler assigns a more generic type than you might otherwise want.</p>
+<section id="arguments" class="level3">
+<h3>Arguments</h3>
+<p>Defining functions that take arguments looks like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">add ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+add x y <span class="fu">=</span> x <span class="fu">+</span> y</code></pre>
+<p>The type signature can be confusing because the argument types are note separated from the return type. There is a good reason for this, but I won't go into it yet. For now, feel free to mentally treat the thing after the last arrow as the return type.</p>
+<p>After the type signature, we give the function's name (<code>add</code>) and names for any arguments it takes (<code>x</code> and <code>y</code>). On the other side of the <code>=</code>, we define an expression using those names.</p>
 </section>
-<section id="operators-can-be-assigned-a-fixity" class="level3">
-<h3>Operators can be assigned a <em>fixity</em></h3>
-<p>An operator's <em>fixity</em> is its <a href="http://en.wikipedia.org/wiki/Associative_property">associativity</a> and <a href="http://en.wikipedia.org/wiki/Order_of_operations">precedence</a> relative to other operators. By default, function application binds most tightly and associates to the left. This means the following expression:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">2</span> <span class="fu">+</span> <span class="dv">2</span> <span class="fu">*</span> <span class="dv">6</span></code></pre>
-<p>would normally be treated as</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(((<span class="dv">2</span> <span class="fu">+</span>) <span class="dv">2</span>) <span class="fu">*</span> <span class="dv">6</span>)
-<span class="co">-- =&gt; 24</span></code></pre>
-<p>and that would not give the correct result by the normal rules of mathematics which state that multiplication should occur before addition. We could disambiguate this with explicit parenthesis:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dv">2</span> <span class="fu">+</span> (<span class="dv">2</span> <span class="fu">*</span> <span class="dv">6</span>)
-<span class="co">-- =&gt; 14</span></code></pre>
-<p>This is tedious, noisy, and it's better to say once that <code>(*)</code> binds more tightly than <code>(+)</code>. We'll see examples of declaring exactly that a little later on.</p>
-</section>
-<section id="operators-can-be-used-in-a-section" class="level3">
-<h3>Operators can be used in a <em>section</em></h3>
-<p>If we surround an operator and one of its arguments in parenthesis, we get a function that will accept the missing argument. We can also choose freely which argument to leave out. This can be seen in the following two expressions:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">map (<span class="fu">/</span> <span class="dv">10</span>) [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>]
-<span class="co">-- =&gt; [10, 20, 30]</span>
+<section id="higher-order-functions" class="level3">
+<h3>Higher-order functions</h3>
+<p>Functions can take and return other functions. These are known as <a href="http://learnyouahaskell.com/higher-order-functions">higher-order</a> functions. In type signatures, any function arguments or return values must be surrounded by parentheses:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">twice ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+twice op x <span class="fu">=</span> op (op x)
 
-map (<span class="dv">10</span> <span class="fu">/</span>) [<span class="dv">10</span>, <span class="dv">5</span>, <span class="dv">1</span>]
-<span class="co">-- =&gt; [1, 2, 10]</span></code></pre>
-<p>There is one gotcha to be aware of: the <code>(-)</code> operator. This operator can't do a right section since Haskell syntax interprets <code>(-2)</code> as the number <em>negative two</em>. The function <code>subtract</code> is available to work around this limitation. If you ever need to use <code>(- n)</code>, you can use <code>(subtract n)</code> instead.</p>
-<p>As a final note, all of the things I've described here can also be used for any normally-named Haskell function by surrounding it in backticks:</p>
+twice (add <span class="dv">2</span>) <span class="dv">3</span>
+<span class="co">-- =&gt; 7</span></code></pre>
+<p><code>twice</code> takes as its first argument a function, <code>(Int -&gt; Int)</code>. As its second argument, it takes an <code>Int</code>. The body of the function applies the first argument (<code>op</code>) to the second (<code>x</code>) twice, returning another <code>Int</code>.</p>
+<p>You also saw an example of <em>partial application</em>. The expression <code>add 2</code> returns a new function that itself takes the argument we left off. Let's break down that last expression to see how it works:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Add takes two Ints and returns an Int</span>
+<span class="ot">add ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+add x y <span class="fu">=</span> x <span class="fu">+</span> y
+
+<span class="co">-- Supplying only the first argument gives us a new function that will add 2 to</span>
+<span class="co">-- its argument. Its type is Int -&gt; Int</span>
+add <span class="dv">2</span><span class="ot"> ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+
+<span class="co">-- Which is exactly the type of twice's first argument</span>
+<span class="ot">twice ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
+twice op x <span class="fu">=</span> op (op x)
+
+twice (add <span class="dv">2</span>) <span class="dv">3</span>
+<span class="co">-- =&gt; add 2 (add 2 3)</span>
+<span class="co">-- =&gt; add 2 5</span>
+<span class="co">-- =&gt; 7</span></code></pre>
+<p>It's OK if this doesn't make complete sense now, I'll talk more about partial application as we go.</p>
+</section>
+<section id="operators" class="level3">
+<h3>Operators</h3>
+<p>In the definition of <code>add</code>, I used something called an <em>operator</em>: <code>(+)</code>. Operators like this are not special or built-in in any way; we can define and use them like any other function. That said, there are three additional (and convenient) behaviors operators have:</p>
+<ol type="1">
+<li>They are used <em>infix</em> by default, meaning they appear between their arguments (as in <code>2 + 2</code>). To use an operator <em>prefix</em>, it must be surrounded in parentheses (as in <code>(+) 2 2</code>).</li>
+<li>When defining an operator, we can assign a custom <a href="http://en.wikipedia.org/wiki/Associative_property">associativity</a> and <a href="http://en.wikipedia.org/wiki/Order_of_operations">precedence</a> relative to other operators. This tells Haskell how to group expressions like <code>2 + 3 * 5 / 10</code>.</li>
+<li>We can surround an operator and <em>either</em> of its arguments in parentheses to get a new function that excepts whichever argument we left off. Expressions like <code>(+ 2)</code> and <code>(10 /)</code> are examples. The former adds <code>2</code> to something and the latter divides <code>10</code> by something. Expressions like these are called <em>sections</em>.</li>
+</ol>
+<p>In Haskell, any function with a name made up entirely of punctuation (where <a href="https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2">The Haskell Report</a> states very exactly what &quot;punctuation&quot; means) behaves like an operator. We can also take any normally-named function and treat it like an operator by surrounding it in backticks:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Normal usage of an elem function</span>
-elem needle haystack
+elem <span class="dv">3</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]
+<span class="co">-- =&gt; True</span>
 
 <span class="co">-- Reads a little better infix</span>
-needle <span class="ot">`elem`</span> haystack
+<span class="dv">3</span> <span class="ot">`elem`</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]
+<span class="co">-- =&gt; True</span>
 
 <span class="co">-- Or as a section, leaving out the needle</span>
 intersects xs ys <span class="fu">=</span> any (<span class="ot">`elem`</span> xs) ys</code></pre>
-<p>Now that we understand what operators are, let's explore two such operators whose importance in writing Haskell can't be overstated: <code>($)</code> and <code>(.)</code>.</p>
 </section>
-<section id="function-application" class="level3">
-<h3>Function Application</h3>
-<p><code>($)</code> is an operator which represents applying a function to an argument. Its complete and deceptively simple definition is the following:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">0</span> <span class="fu">$</span>
+<section id="lambdas" class="level3">
+<h3>Lambdas</h3>
+<p>The last thing we need to know about functions is that they can be <em>anonymous</em>. Anonymous functions are called <em>lambdas</em> and are most frequently used as arguments to higher-order functions. Often these functional arguments only exist for a single use and giving them a name is not otherwise valuable.</p>
+<p>The syntax is a back-slash, the arguments to the function, an arrow, then the body of the function. A back-slash is used because it looks like the Greek letter λ.</p>
+<p>Here's an example:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">twice (\x <span class="ot">-&gt;</span> x <span class="fu">*</span> x <span class="fu">+</span> <span class="dv">10</span>) <span class="dv">5</span>
+<span class="co">-- =&gt; 35</span></code></pre>
+<p>If you come across a code example using a lambda, you can always rewrite it to use named functions. Here's the process for this example:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Grab the lambda</span>
+\x <span class="ot">-&gt;</span> x <span class="fu">*</span> x <span class="fu">+</span> <span class="dv">10</span>
 
-<span class="ot">($) ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b
+<span class="co">-- Name it</span>
+f <span class="fu">=</span> \x <span class="ot">-&gt;</span> x <span class="fu">*</span> x <span class="fu">+</span> <span class="dv">10</span>
 
-f <span class="fu">$</span> x <span class="fu">=</span> f x</code></pre>
-<p>First, the <code>infixr</code> statement says that this operator associates to the right and has the lowest precedence possible.</p>
-<p>Next, the type signature is given. Since the operator is appearing alone, we surround it with parenthesis. It takes a function from <code>a</code> to <code>b</code> and value of type <code>a</code>. It returns a value of type <code>b</code>, presumably applying the first argument to the second to produce it. It's worth noting that this is a very reasonable presumption because that's the only definition possible. This is the first of many benefits of Haskell's strict type system that you'll see: there is only one valid definition for a function of this type.</p>
-<p>Finally, we get the expected definition. Operators can appear between their arguments even during definition which can often improve readability, as it does here. We can see that <code>f $ x</code> <em>is</em> (remember <code>=</code> means equivalence, wherever you see the expression on the left it <em>is</em> the expression on the right) the application <code>f x</code>. It can be useful to pronounce expressions using this operator with the word <em>of</em>: f of x is the application <code>f x</code>.</p>
-<p>Technically speaking, the application <code>f x</code> should itself be pronounced &quot;f of x&quot;, so this definition could be read as &quot;f of x is f of x&quot;. In fact, that's exactly right as <code>($)</code> is an <a href="http://en.wikipedia.org/wiki/Identity_function">identity</a> function. If you're not convinced, try exploring the following Haskell code:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">id<span class="ot"> ::</span> a <span class="ot">-&gt;</span> a
-id x <span class="fu">=</span> x
+<span class="co">-- Replace &quot;\... -&gt;&quot; with normal arguments</span>
+f x <span class="fu">=</span> x <span class="fu">*</span> x <span class="fu">+</span> <span class="dv">10</span>
 
-<span class="co">-- Adding explicit parenthesis shows how ($)'s type is the same but specialized</span>
-<span class="co">-- to a specific &quot;shape&quot; of a</span>
-<span class="ot">($) ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
-
-<span class="co">-- This means we could use id as ($)</span>
-id (<span class="fu">+</span><span class="dv">2</span>) <span class="dv">2</span>
-<span class="co">-- =&gt; 4</span></code></pre>
-<p>At first, it can be hard to see why such a circular definition has any use at all. Having this function available comes with (at least) two very real benefits:</p>
-<section id="we-can-speak-precisely-about-function-application-itself" class="level4">
-<h4>We can speak precisely about function application itself</h4>
-<p>Function application is one of the most important things you can do in Haskell. For this reason, the authors of the language ensured the doing so was free of any unnecessary syntax: no parenthesis, no commas, put the function name next to its argument, <code>f x</code>, that's it. This is great, but sometimes it's useful to name this phenomenon.</p>
-<p>Take the following Haskell code:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- A list of functions (using sections)</span>
-fs <span class="fu">=</span> [(<span class="fu">+</span><span class="dv">1</span>), (<span class="fu">+</span><span class="dv">2</span>), (<span class="fu">+</span><span class="dv">3</span>)]
-
-<span class="co">-- A list of values</span>
-xs <span class="fu">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]
-
-<span class="co">-- Zip the lists together by calling ($) with an element of each list as we go</span>
-zipWith (<span class="fu">$</span>) fs xs
-<span class="co">-- =&gt; [2, 4, 6]</span></code></pre>
-<p>Pretty neat right? Here's another example using <code>($)</code> in a section:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- A list of predicate functions (also using sections)</span>
-ps <span class="fu">=</span> [even, (<span class="fu">&lt;</span> <span class="dv">10</span>), (<span class="fu">&gt;</span> <span class="dv">0</span>)]
-
-<span class="co">-- Check if a number matches all of those conditions</span>
-check x <span class="fu">=</span> all (<span class="fu">$</span> x) ps
-
-check <span class="dv">2</span>  <span class="co">-- =&gt; True</span>
-check <span class="dv">5</span>  <span class="co">-- =&gt; False</span>
-check <span class="dv">12</span> <span class="co">-- =&gt; False</span></code></pre>
-</section>
-<section id="we-can-get-rid-of-parenthesis" class="level4">
-<h4>We can get rid of parenthesis</h4>
-<p>Take the following expression:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">take <span class="dv">2</span> drop <span class="dv">5</span> filter even [<span class="dv">1</span><span class="fu">..</span>]</code></pre>
-<p>This expression is a type error, because Haskell's default precedence misaligns with our intention:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">(((take <span class="dv">2</span>) drop <span class="dv">5</span>) filter even) [<span class="dv">1</span><span class="fu">..</span>]</code></pre>
-<p>Our intention was for the applications to &quot;go the other way&quot;. We can state that explicitly through parenthesis and get this to compile:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">take <span class="dv">2</span> (drop <span class="dv">5</span> (filter even [<span class="dv">1</span><span class="fu">..</span>]))
-<span class="co">-- =&gt; [12, 14]</span></code></pre>
-<p>That looks awfully Lispy. Remember the fixity declaration given to <code>($)</code>? It associates to the right, and has the lowest possible precedence. That's exactly what we need in this case (and in fact many cases):</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">take <span class="dv">2</span> <span class="fu">$</span> drop <span class="dv">5</span> <span class="fu">$</span> filter even [<span class="dv">1</span><span class="fu">..</span>]
-<span class="co">-- =&gt; [12, 14]</span></code></pre>
-<p><em>take 2 of drop 5 of filter even 1..</em></p>
-<p>Much better.</p>
-</section>
-</section>
-<section id="function-composition" class="level3">
-<h3>Function Composition</h3>
-<p><code>(.)</code> is a function which denotes <em>composing</em> two functions together. This means to create a new function representing applying one function <em>after</em> another. As a quick example, if <code>appendX</code> takes a string and appends an &quot;X&quot; on the end, and <code>appendY</code> does the same, but with a &quot;Y&quot;, then <code>appendY . appendX</code> can be read as <em>append y after append x</em> and represents a function that takes a string and appends &quot;XY&quot; on the end.</p>
-<p>Its complete, and again deceptively simple, definition is as follows (this is not the exact definition as stated in the <a href="http://hackage.haskell.org/package/base-4.7.0.2/docs/Prelude.html#v:.">Haskell Prelude</a>, but equivalent to it):</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">9</span> <span class="fu">.</span>
-
-<span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> c)
-
-(f <span class="fu">.</span> g) x <span class="fu">=</span> f (g x)</code></pre>
-<p>In the fixity declaration, we can see that <code>(.)</code> also associates to the right, but that it's given the highest precedence possible. The reason should make sense once we see how it works.</p>
-<p>We can read this type as follows: given two functions, one from <code>b</code> to <code>c</code> and the other from <code>a</code> to <code>b</code>, we get back a new function this time from <code>a</code> to <code>c</code>. This is why such a high precedence is desirable. When you glue two functions together with <code>(.)</code>, the result should be treated (syntactically speaking) as a single function would.</p>
-<p>Looking at the definition, we can see how we get from <code>a</code> to <code>c</code>: <code>(f . g)</code>, when given an <code>x</code>, means to call <code>g</code> on <code>x</code>, then call <code>f</code> on the result of that. If <code>g</code> is <code>(a -&gt; b)</code> and we give its result to <code>f</code>, which is <code>(b -&gt; c)</code>, ultimately we have a function going all the way from <code>a</code> to <code>c</code>.</p>
-<p>Using functions to build other functions is another frequent and important thing to do in Haskell, so it should also be devoid of unnecessary syntax. Take the following function for trimming whitespace from a string:</p>
-<pre class="sh"><code>import Data.Char (isSpace)
-
-trim s = reverse $ dropWhile isSpace $ reverse $ dropWhile isSpace s
-
-trim &quot;  foo bar &quot;
--- =&gt; &quot;foo bar&quot;</code></pre>
-<p>Reading right to left, we first strip the trailing whitespace, then we strip the leading whitespace by reversing the string, stripping trailing whitespace again, then reversing it back. We immediately see that the form <code>reverse $ dropWhile isSpace x</code> is repeated twice. We can reduce this repetition with a local definition:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">trim s <span class="fu">=</span> f <span class="fu">$</span> f s
-
-  <span class="kw">where</span>
-    f x <span class="fu">=</span> reverse <span class="fu">$</span> dropWhile isSpace x</code></pre>
-<p>We've used the tiny name <code>f</code> specifically because its meaning should be clear from context, calling it anything else is unnecessary noise. Ruby developers are probably twitching in their chairs at this point, but trust me -- you get used to it. Even so, there is still quite a bit of noise in this definition.</p>
-<p>What we really mean is that <code>f</code> is <code>reverse</code> <em>after</em> <code>dropWhile isSpace</code>. There's no need to name an argument here; we're defining one function (<code>f</code>) as the composition of two others (<code>reverse</code> and <code>dropWhile isSpace</code>). Beginner Haskellers may get confused about which of <code>($)</code> or <code>(.)</code> we should use in this case. Because we would read the function as reverse-after-drop and not reverse-of-drop, we know that <code>(.)</code> is what we want:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">trim s <span class="fu">=</span> f <span class="fu">$</span> f s
-
-  <span class="kw">where</span>
-    f <span class="fu">=</span> reverse <span class="fu">.</span> dropWhile isSpace</code></pre>
-<p>Better, but still noisy. We can pull the same trick with <code>trim</code> itself:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">trim <span class="fu">=</span> f <span class="fu">.</span> f
-
-  <span class="kw">where</span>
-    f <span class="fu">=</span> reverse <span class="fu">.</span> dropWhile isSpace</code></pre>
-<p>I would read this as &quot;trim is f after f where f is reverse after drop-spaces&quot;. Even though it's &quot;full of punctuation&quot; and uses terse variable names, I think this Haskell code comes extremely close to expressing my intent.</p>
-<p>I go through all of this for two reasons:</p>
-<ol type="1">
-<li>Operators can be a huge source of confusion and fear in new Haskell developers. Hopefully this section has pre-emptively reduced that a bit.</li>
-<li>In later sections, we'll be learning some new operators. I wanted to outline the rules ahead of time so I don't need to stop and explain it at points when you've already got a ton of new stuff on your plate.</li>
-</ol>
-<p>Well that's it for functions, next stop: data!</p>
-</section>
+<span class="co">-- Use the name instead</span>
+twice f <span class="dv">5</span></code></pre>
 </section>
 <section id="our-own-data-types" class="level2">
 <h2>Our Own Data Types</h2>
 <p>We're not limited to basic types like <code>Int</code> or <code>String</code>. As you might expect, Haskell allows you to define custom data types:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">MakePerson</span> <span class="dt">String</span> <span class="dt">Int</span></code></pre>
-<p>Here we've stated that the people in our system have a name (a <code>String</code>) and an age (an <code>Int</code>). To the left of the <code>=</code> is the <em>type</em> constructor and to the right can be one or more <em>data</em> constructors. The type constructor is the name of the type and is used in type signatures. The data constructors are functions which produce values of the given type. For example, <code>MakePerson</code> is a function that takes a <code>String</code> and an <code>Int</code>, and returns a <code>Person</code>. Note that I will often use the general term &quot;constructor&quot; to refer to a <em>data</em> constructor if the meaning is clear from context.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">MakePerson</span> <span class="dt">String</span> <span class="dt">Int</span>
+<span class="co">--                       |      |</span>
+<span class="co">--                       |      ` The persons's age</span>
+<span class="co">--                       |</span>
+<span class="co">--                       ` The person's name</span></code></pre>
+<p>To the left of the <code>=</code> is the <em>type</em> constructor and to the right can be one or more <em>data</em> constructors. The type constructor is the name of the type and is used in type signatures. The data constructors are functions which produce values of the given type. For example, <code>MakePerson</code> is a function that takes a <code>String</code> and an <code>Int</code>, and returns a <code>Person</code>. Note that I will often use the general term &quot;constructor&quot; to refer to a <em>data</em> constructor if the meaning is clear from context.</p>
 <p>When there is only one data constructor, it's quite common to give it the same name as the type constructor. This is because it's syntactically impossible to use one in place of the other, so the compiler makes no restriction. Naming is hard, so if you have a good one, you might as well use it in both contexts.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Person</span> <span class="fu">=</span> <span class="dt">Person</span> <span class="dt">String</span> <span class="dt">Int</span>
 <span class="co">--   |        |</span>
@@ -330,13 +257,13 @@ pat <span class="fu">=</span> <span class="dt">Person</span> <span class="st">&q
 </section>
 <section id="pattern-matching" class="level2">
 <h2>Pattern Matching</h2>
-<p>To get the individual parts back out again, we use something called <a href="https://www.haskell.org/tutorial/patterns.html">pattern matching</a>.</p>
+<p>To get the individual parts back out again, we use <a href="https://www.haskell.org/tutorial/patterns.html">pattern matching</a>.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getName ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 getName (<span class="dt">Person</span> name _) <span class="fu">=</span> name
 
 <span class="ot">getAge ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 getAge (<span class="dt">Person</span> _ age) <span class="fu">=</span> age</code></pre>
-<p>In the above definitions, each function is looking for values constructed with <code>Person</code>. If it gets an argument that matches (which in this case is guaranteed since that's the only way to get a <code>Person</code> in our system so far), Haskell will use that function body with each part of the constructed value bound to the variables given. The <code>_</code> pattern (called a <em>wildcard</em>) is used for any parts we don't care about. Again, this is using <code>=</code> for equivalence (as always). We're saying that <code>getName</code>, when given <code>(Person name _)</code>, <em>is equivalent to</em> <code>name</code>. Similarly for <code>getAge</code>.</p>
+<p>In the above definitions, each function is looking for values constructed with <code>Person</code>. If it gets an argument that matches (which is guaranteed since that's the only way to get a <code>Person</code> in our system so far), Haskell will use that function body with each part of the constructed value bound to the variables given. The <code>_</code> pattern (called a <em>wildcard</em>) is used for any parts we don't care about. Again, this is using <code>=</code> for equivalence (as always). We're saying that <code>getName</code>, when given <code>(Person name _)</code>, <em>is equivalent to</em> <code>name</code>. Similarly for <code>getAge</code>.</p>
 <p>There are <a href="http://en.wikibooks.org/wiki/Haskell/More_on_datatypes#Named_Fields_.28Record_Syntax.29">other</a> <a href="http://www.haskellforall.com/2012/01/haskell-for-mainstream-programmers_28.html">ways</a> to do this sort of thing, but we won't get into that here.</p>
 </section>
 <section id="sum-types" class="level2">
@@ -349,7 +276,8 @@ pat <span class="fu">=</span> <span class="dt">PersonWithAge</span> <span class=
 
 <span class="ot">jim ::</span> <span class="dt">Person</span>
 jim <span class="fu">=</span> <span class="dt">PersonWithoutAge</span> <span class="st">&quot;Jim&quot;</span></code></pre>
-<p>Haskell allows for multiple definitions of the same function, so long as they match different patterns. They will be tried in the order defined, and the first function to match will be used. This works well for pulling the name out of a value of our new <code>Person</code> type:</p>
+<p>Notice that <code>pat</code> and <code>jim</code> are both values of type <code>Person</code>, but they've been constructed differently. We can use pattern matching to inspect how a value was constructed and choose what to do accordingly. Syntactically, this is accomplished by providing multiple definitions of the same function, each matching a different pattern. Each definition will be tried in the order defined, and the first function to match will be used.</p>
+<p>This works well for pulling the name out of a value of our new <code>Person</code> type:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getName ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 getName (<span class="dt">PersonWithAge</span> name _) <span class="fu">=</span> name
 getName (<span class="dt">PersonWithoutAge</span> name) <span class="fu">=</span> name</code></pre>
@@ -385,13 +313,13 @@ getName (<span class="dt">PersonWithout</span> name) <span class="fu">=</span> n
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">doubleAge ::</span> <span class="dt">Person</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 doubleAge (<span class="dt">PersonWith</span> _ age) <span class="fu">=</span> <span class="dv">2</span> <span class="fu">*</span> age
 doubleAge (<span class="dt">PersonWithout</span> _) <span class="fu">=</span> <span class="dv">1</span> <span class="co">-- perhaps provide a sane default?</span></code></pre>
-<p>Congrats. You now completely understand parameterized types.</p>
+<p>This has been a very brief introduction to higher-kinded types and specifically <em>type variables</em> (the <code>a</code> in <code>Person a</code>). If it doesn't make complete sense now, that's OK. Using these things in practice is the best way to gain a more complete understanding.</p>
 </section>
 <section id="maybe" class="level2">
 <h2>Maybe</h2>
-<p>Haskell's <code>Maybe</code> type should make all kinds of sense now:</p>
+<p>Haskell's <code>Maybe</code> type is very similar to our <code>Person</code> example:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Maybe</span> a <span class="fu">=</span> <span class="dt">Nothing</span> <span class="fu">|</span> <span class="dt">Just</span> a</code></pre>
-<p>It's a bit like <code>PersonWith | PersonWithout</code>, except we're not dragging along a name this time. This type is only concerned with representing a value (of any type) which is either <em>present</em> or <em>not</em>.</p>
+<p>The difference is we're not dragging along a name this time. This type is only concerned with representing a value (of any type) which is either <em>present</em> or <em>not</em>.</p>
 <p>We can use this to take functions which would otherwise be <em>partial</em> and make them <em>total</em>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- | Find the first element from the list for which the predicate function</span>
 <span class="co">--   returns True. Return Nothing if there is no such element.</span>
@@ -426,7 +354,7 @@ findUser uid <span class="fu">=</span>
     <span class="co"># what to do? error?</span>
   <span class="kw">end</span>
 <span class="kw">end</span></code></pre>
-<p>First of all, the Haskell version is type safe. I'd put money on most Ruby developers returning <code>nil</code> from the <code>else</code> branch. The Haskell type system won't allow that and that's a good thing. I understand that without spending time programming in Haskell it's hard to see the benefits of ruthless type safety employed at every turn. I assure you it's a coding experience like no other, but I'm not here to convince you of that -- at least not directly.</p>
+<p>First of all, the Haskell version is type safe: <code>findUser</code> must always return a <code>User</code> since that's the type we've specified. I'd put money on most Ruby developers returning <code>nil</code> from the <code>else</code> branch. The Haskell type system won't allow that and that's a good thing. Otherwise, we have these values floating throughout our system that we assume are there and in fact are not. I understand that without spending time programming in Haskell, it's hard to see the benefits of ruthless type safety employed at every turn. I assure you it's a coding experience like no other, but I'm not here to convince you of that -- at least not directly.</p>
 <p>The bottom line is that an experienced Haskeller would not write this code this way. <code>case</code> is a code smell when it comes to <code>Maybe</code>. Almost all code using <code>Maybe</code> can be improved from a tedious <code>case</code> evaluation using one of the three abstractions I'll be exploring in this book.</p>
 <p>Let's get started.</p>
 </section>
@@ -474,8 +402,8 @@ fromMaybe <span class="dv">10</span> notReallyFive
 <span class="co">-- =&gt; 10</span></code></pre>
 <p>Option 3 is actually a variation on option 2. By making your own result a <code>Maybe</code> you always have the ability to return <code>Nothing</code> yourself if the value's not present. If the value <em>is</em> present, you can perform whatever computation you need to and wrap what would be your normal result in <code>Just</code>.</p>
 <p>The main downside is that now your callers also have to consider how to deal with the <code>Maybe</code>. Given the same situation, they should again make the same choice (option 3), but that only pushes the problem up to their callers -- any <code>Maybe</code> values tend to go <em>viral</em>.</p>
-<p>Eventually, probably at some UI boundary, someone will need to &quot;deal with&quot; the <code>Maybe</code>, either by providing a substitute or skipping some action that might otherwise take place. This should happen only once, at that boundary. Every function between the source and final use should pass along this context unchanged.</p>
-<p>Even though it's good design for every function in our system to pass along a <code>Maybe</code> value, it would be extremely annoying to force them all to actually take and return <code>Maybe</code> values. Each function separately checking if they should go ahead and perform their computations will become repetitive and tedious. Instead, we can completely abstract this &quot;pass along the <code>Maybe</code>&quot; concern using <a href="http://learnyouahaskell.com/higher-order-functions">higher-order</a> functions and something called <em>functors</em>.</p>
+<p>Eventually, probably at some UI boundary, someone will need to &quot;deal with&quot; the <code>Maybe</code>, either by providing a substitute or skipping some action that might otherwise take place. This should happen only once, at that boundary. Every function between the source and final use should pass along the value's potential non-presence unchanged.</p>
+<p>Even though it's safest for every function in our system to pass along a <code>Maybe</code> value, it would be extremely annoying to force them all to actually take and return <code>Maybe</code> values. Each function separately checking if they should go ahead and perform their computations will become repetitive and tedious. Instead, we can completely abstract this &quot;pass along the <code>Maybe</code>&quot; concern using higher-order functions and something called <em>functors</em>.</p>
 </section>
 <section id="discovering-a-functor" class="level2">
 <h2>Discovering a Functor</h2>
@@ -484,7 +412,7 @@ fromMaybe <span class="dv">10</span> notReallyFive
 whenJust f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x)
 whenJust _ <span class="dt">Nothing</span> <span class="fu">=</span> <span class="dt">Nothing</span></code></pre>
 <p>It takes a function from <code>a</code> to <code>b</code> and a <code>Maybe a</code>. If the value's there, it applies the function and wraps the result in <code>Just</code>. If the value's not there, it returns <code>Nothing</code>. Note that it constructs a new value using the <code>Nothing</code> constructor. This is important because the value we're given is type <code>Maybe a</code> and we must return type <code>Maybe b</code>.</p>
-<p>This allows the internals of our system to be made of functions that take and return normal, non-<code>Maybe</code> values, but still &quot;pass along the <code>Maybe</code>&quot; whenever we need to take a value from some source that may fail and manipulate it in some way. If it's there, we go ahead and manipulate it, but return the result as a <code>Maybe</code> as well. If it's not, we return <code>Nothing</code> directly.</p>
+<p>This allows the internals of our system to be made of functions (e.g. the <code>f</code> given to <code>whenJust</code>) that take and return normal, non-<code>Maybe</code> values, but still &quot;pass along the <code>Maybe</code>&quot; whenever we need to take a value from some source that may fail and manipulate it in some way. If it's there, we go ahead and manipulate it, but return the result as a <code>Maybe</code> as well. If it's not, we return <code>Nothing</code> directly.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">whenJust (<span class="fu">+</span><span class="dv">5</span>) actuallyFive
 <span class="co">-- =&gt; Just 10</span>
 
@@ -494,30 +422,56 @@ whenJust (<span class="fu">+</span><span class="dv">5</span>) notReallyFive
 </section>
 <section id="about-type-classes" class="level2">
 <h2>About Type Classes</h2>
-<p>Haskell uses type classes for functions which may be implemented in different ways for different data types. For example, we can add or negate various kinds of numbers: integers, floating points, rational numbers, etc. To accommodate this, Haskell has a <a href="http://hackage.haskell.org/package/base-4.7.0.1/docs/Prelude.html#t:Num"><code>Num</code></a> type class with functions like <code>(+)</code> and <code>negate</code> as part of it. Each concrete type (<code>Int</code>, <code>Float</code>, etc) then defines its own version of the required functions.</p>
-<p>Being a member of a type class requires you implement any <em>member functions</em> with the correct type signatures. For example, to make <code>Int</code> a <code>Num</code> someone defined a <code>negate</code> function with the type <code>Int -&gt; Int</code>.</p>
-<p>Usually, but not always, there are <em>laws</em> associated with these that your implementations must satisfy. For example, if you negate a number twice, you should get back to the same number. This can be stated formally as:</p>
+<p>Haskell has a concept called <em>type classes</em>. They're not at all related to the classes used in Object-oriented programming. Instead, Haskell uses type classes for functions which may be implemented in different ways for different data types. These are more like the <em>interfaces</em> and <em>protocols</em> you may find in other languages. For example, we can add or negate various kinds of numbers: integers, floating points, rational numbers, etc. To accommodate this, Haskell has a <a href="http://hackage.haskell.org/package/base-4.7.0.1/docs/Prelude.html#t:Num"><code>Num</code></a> type class with functions like <code>(+)</code> and <code>negate</code> as part of it. Each concrete type (<code>Int</code>, <code>Float</code>, etc) then defines its own version of the required functions.</p>
+<p>Type classes are defined with the <code>class</code> keyword and a <code>where</code> clause listing the types of any <em>member functions</em>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Num</span> a <span class="kw">where</span>
+<span class="ot">    (+) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+
+<span class="ot">    negate ::</span> a <span class="ot">-&gt;</span> a</code></pre>
+<p>Being an <em>instance</em> of a type class requires you implement any member functions with the correct type signatures. To make <code>Int</code> an instance of <code>Num</code>, someone defined the <code>(+)</code> and <code>negate</code> functions for it. This is done with the <code>instance</code> keyword and a <code>where</code> clause that implements the functions from the class declaration:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Num</span> <span class="dt">Int</span> <span class="kw">where</span>
+    x <span class="fu">+</span> y <span class="fu">=</span> addInt x y
+
+    negate x <span class="fu">=</span> negateInt x</code></pre>
+<p>Usually, but not always, there are <em>laws</em> associated with these functions that your implementations must satisfy. Type class laws are important for the utility of type classes. They allow us as developers to reason about what will happen when we use type class functions without having to understand all of the concrete types for which they are defined. For example, if you negate a number twice, you should get back to the same number. This can be stated formally as:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">negate (negate x) <span class="fu">==</span> x <span class="co">-- for any x</span></code></pre>
-<p>The first requirement is enforced by the type system. If your code compiles, you got this part right. Unfortunately, the second requirement cannot be enforced by the compiler. You'll need to verify that you got this right using tests. Most laws can be stated as <em>properties</em> and thoroughly tested with a tool like <a href="http://www.haskell.org/haskellwiki/Introduction_to_QuickCheck1">QuickCheck</a>.</p>
+<p>Knowing that this law holds gives us a precise understanding of what will happen when we use <code>negate</code>. Because of the laws, we get this understanding without knowing how <code>negate</code> is implemented for various types. This is a simple example, but we'll see more interesting laws with the <code>Functor</code> type class.</p>
 </section>
 <section id="functor-1" class="level2">
 <h2>Functor</h2>
-<p>To say that a type (like <code>Maybe</code>) is a <code>Functor</code>, we have to define <code>fmap</code>. The <code>Functor</code> class definition states that it must have the following type:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b</code></pre>
-<p>Where <code>f</code> is the type you're instantiating as a <code>Functor</code>, which in our case is <code>Maybe</code>. We can see that <code>whenJust</code> has the correct type:</p>
+<p>Haskell defines the type class <code>Functor</code> with a single member function, <code>fmap</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> f <span class="kw">where</span>
+<span class="ot">    fmap ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b</code></pre>
+<p>Type constructors, like <code>Maybe</code>, implement <code>fmap</code> by defining a function where that <code>f</code> is replaced by themselves. We can see that <code>whenJust</code> has the correct type:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--          (a -&gt; b) -&gt; f     a -&gt; f     b</span>
 <span class="ot">whenJust ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b</code></pre>
-<p>Many types implement <code>fmap</code>. Another notable example is <code>[]</code> (List), it's implementation is the <code>map</code> you're probably familiar with. If we remove some syntactic sugar and write the type for <em>a list of <code>a</code>s</em> as <code>List a</code> rather than <code>[a]</code>, you can confirm it too has the correct type:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- </span>
-<span class="co">-- List a === [a]</span>
-<span class="co">-- </span>
-<span class="co">--     (a -&gt; b) -&gt; f    a -&gt; f    b</span>
-map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> <span class="dt">List</span> b</code></pre>
+<p>Therefore, we could implement a <code>Functor</code> instance for <code>Maybe</code> with the following code:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> <span class="dt">Maybe</span> <span class="kw">where</span>
+    fmap <span class="fu">=</span> whenJust</code></pre>
+<p>In reality, there is no <code>whenJust</code> function; <code>fmap</code> is implemented directly:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> <span class="dt">Maybe</span> <span class="kw">where</span>
+    fmap _ <span class="dt">Nothing</span> <span class="fu">=</span> <span class="dt">Nothing</span>
+    fmap f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x)</code></pre>
+<section id="list" class="level3">
+<h3>List</h3>
+<p>The most familiar example for an implementation of <code>fmap</code> is the one for <code>[]</code>. Like <code>Maybe</code> is the type constructor in <code>Maybe a</code>, <code>[]</code> is the type constructor in <code>[a]</code>. You can pronounce <code>[]</code> as <em>list</em> and <code>[a]</code> as <em>list of a</em>.</p>
+<p>The basic <code>map</code> function, which exists in many languages, including Haskell, has the following type:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]</code></pre>
+<p>It takes a function from <code>a</code> to <code>b</code> and a <em>list of a</em>. It returns a <em>list of b</em> by applying the given function to each element in the list. Knowing that <code>[]</code> is a type constructor, and <code>[a]</code> represents applying that type constructor to some <code>a</code>, we can write this signature in a different way; one that shows it is the same as <code>fmap</code> when we replace the parameter <code>f</code> with <code>[]</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--     (a -&gt; b) -&gt; f  a -&gt; f  b</span>
+map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [] a <span class="ot">-&gt;</span> [] b</code></pre>
+<p>This is the same process as replacing <code>f</code> with <code>Maybe</code> used to show that <code>whenJust</code> and <code>fmap</code> were also equivalent.</p>
+<p><code>map</code> does exist in the Haskell Prelude (unlike <code>whenJust</code>), so the <code>Functor</code> instance for <code>[]</code> is in fact defined in terms of it:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Functor</span> [] <span class="kw">where</span>
+    fmap <span class="fu">=</span> map</code></pre>
+</section>
 </section>
 <section id="the-functor-laws" class="level2">
 <h2>The Functor Laws</h2>
-<p>Type class laws are a formal way of defining what it means for implementations to be &quot;well-behaved&quot;. If someone writes a library function and says it can work with &quot;any <code>Functor</code>&quot;, that code can rely both on that type having an <code>fmap</code> implementation, and that it operates in accordance with these laws.</p>
-<p>For example, let's look at the first Functor law:</p>
+<p>As mentioned, type class laws are a formal way of defining what it means for implementations to be &quot;well-behaved&quot;. If someone writes a library function and says it can work with &quot;any <code>Functor</code>&quot;, that code can rely both on that type having an <code>fmap</code> implementation, and that it operates in accordance with these laws.</p>
+<section id="the-first-functor-law" class="level3">
+<h3>The first Functor law</h3>
+<p>The first Functor law states:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id x <span class="fu">==</span> id x
 <span class="co">-- </span>
 <span class="co">-- for any value x, of type f a (e.g. Maybe a)</span>
@@ -527,54 +481,85 @@ map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="
 id x <span class="fu">=</span> x</code></pre>
 <p>Since pure functions always give the same result given the same input, it's equally correct to say that the functions themselves must be equivalent, rather than applying them to &quot;any <code>x</code>&quot; and saying the results must be equivalent. For this reason, the laws are usually stated as:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id <span class="fu">==</span> id</code></pre>
-<p>This law says that if we call <code>fmap id</code>, the function we get back should be equivalent to <code>id</code> itself. This is what &quot;well-behaved&quot; means in this context. If you think about <code>fmap</code> for <code>[]</code>, you would expect that applying <code>id</code> to every element in the list (as <code>fmap id</code> does) gives you back the same exact list, and that is exactly what you expect to get if you apply <code>id</code> directly to the list itself. I encourage you to go through the same thought exercise for <code>Maybe</code> so you can see that the law holds true for its implementation as well.</p>
+<p>This law says that if we call <code>fmap id</code>, the function we get back should be equivalent to <code>id</code> itself. This is what &quot;well-behaved&quot; means in this context. If you think about <code>fmap</code> for <code>[]</code>, you would expect that applying <code>id</code> to every element in the list (as <code>fmap id</code> does) gives you back the same exact list, and that is exactly what you expect to get if you apply <code>id</code> directly to the list itself. Let's go through the same thought exercise for <code>Maybe</code> so you can see that the law holds for its implementation as well.</p>
+<p>We'll use our two example values <code>actuallyFive</code> and <code>notReallyFive</code> from earlier:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">actuallyFive ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+actuallyFive <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">5</span>
+
+<span class="ot">notReallyFive ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+notReallyFive <span class="fu">=</span> <span class="dt">Nothing</span></code></pre>
+<p>What do we get by applying the identity function to each of these?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">id actuallyFive
+<span class="co">-- =&gt; Just 5</span>
+
+id notReallyFive
+<span class="co">-- =&gt; Nothing</span></code></pre>
+<p>Not too surprising. Now let's look at <code>fmap id</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id actuallyFive</code></pre>
+<p>Remember the definition of <code>fmap</code> for <code>Maybe</code> values:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b
+fmap f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x)
+fmap _ <span class="dt">Nothing</span> <span class="fu">=</span> <span class="dt">Nothing</span></code></pre>
+<p>Since <code>actuallyFive</code> matches the <code>Just</code> case, <code>fmap</code> will apply <code>id</code> to <code>5</code>, then re-wrap the result in <code>Just</code>:</p>
+<pre class="haskll"><code>fmap id actuallyFive
+-- =&gt; fmap id (Just 5) = Just (id 5)
+-- =&gt;                  = Just 5</code></pre>
+<p>And for <code>notReallyFive</code>?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id notReallyFive</code></pre>
+<p>Since <code>notReallyFive</code> is <code>Nothing</code>, <code>fmap</code> will return a new <code>Nothing</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id notReallyFive
+<span class="co">-- =&gt; fmap _ Nothing = Nothing</span>
+<span class="co">-- =&gt;                = Nothing</span></code></pre>
+<p>As expected, both results are the same as applying <code>id</code> directly.</p>
+</section>
+<section id="the-second-functor-law" class="level3">
+<h3>The second Functor law</h3>
 <p>The second law has to do with order of operations, it states:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (f <span class="fu">.</span> g) <span class="fu">==</span> fmap f <span class="fu">.</span> fmap g</code></pre>
 <p>Where <code>(.)</code> is a function that takes two functions and <em>composes</em> them together:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c
 (f <span class="fu">.</span> g) x <span class="fu">=</span> f (g x)</code></pre>
-<p>What this law says is that if we compose two functions together, then <code>fmap</code> the resulting function, we should get a function which behaves the same as when we <code>fmap</code> each function individually, then compose the two results.</p>
-<p>This one's a little trickier when you're not familiar with function composition. Let's prove that this law holds for <code>Maybe</code> by walking through an example with <code>actuallyFive</code> and <code>notReallyFive</code>. If you already feel comfortable with what the law is stating and why it holds, feel free to skip this section.</p>
-<p>First, lets define two concrete functions, <code>f</code> and <code>g</code></p>
+<p>What this law says is that if we compose two functions together, then <code>fmap</code> the resulting function, we should get a function which behaves the same as when we <code>fmap</code> each function individually, then compose the two results. Let's prove again that this law holds for <code>Maybe</code> by walking through an example with <code>actuallyFive</code> and <code>notReallyFive</code>.</p>
+<p>First, let's define two concrete functions, <code>f</code> and <code>g</code></p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 f <span class="fu">=</span> (<span class="fu">+</span><span class="dv">2</span>)
 
 <span class="ot">g ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
-g <span class="fu">=</span> (<span class="fu">+</span><span class="dv">3</span>)</code></pre>
+g <span class="fu">=</span> (<span class="fu">*</span><span class="dv">3</span>)</code></pre>
 <p>We can <em>compose</em> these two functions to get a new function, and call that <code>h</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">h ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 h <span class="fu">=</span> f <span class="fu">.</span> g</code></pre>
 <p>Given the definition of <code>(.)</code>, this is equivalent to:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">h ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 h x <span class="fu">=</span> f (g x)</code></pre>
-<p>This new function takes a number and gives it to <code>(+3)</code>, then it takes the result and gives it to <code>(+2)</code>. The result is a function that will add 5 to its argument.</p>
+<p>This new function takes a number and gives it to <code>(*3)</code>, then it takes the result and gives it to <code>(+2)</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">h <span class="dv">5</span>
-<span class="co">-- =&gt; 10</span></code></pre>
+<span class="co">-- =&gt; 17</span></code></pre>
 <p>We can give this function to <code>fmap</code> to get one that works with <code>Maybe</code> values:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap h actuallyFive
-<span class="co">-- =&gt; Just 10</span>
+<span class="co">-- =&gt; Just 17</span>
 
 fmap h notReallyFive
 <span class="co">-- =&gt; Nothing</span></code></pre>
-<p>Similarly, we can give <code>f</code> and <code>g</code> to <code>fmap</code> to produce functions which can add 2 or 3 to a <code>Maybe Int</code> to produce another <code>Maybe Int</code>. The resulting functions can also be composed with <code>(.)</code> to produce a new function, <code>fh</code>:</p>
+<p>Similarly, we can give each of <code>f</code> and <code>g</code> to <code>fmap</code> separately to produce functions which can add 2 or multiply 3 to a <code>Maybe Int</code> and produce another <code>Maybe Int</code>. The resulting functions can also be composed with <code>(.)</code> to produce a new function, <code>fh</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">fh ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 fh <span class="fu">=</span> fmap f <span class="fu">.</span> fmap g</code></pre>
 <p>Again, given the definition of <code>(.)</code>, this is equivalent to:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">fh ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 fh x <span class="fu">=</span> fmap f (fmap g x)</code></pre>
-<p>This function will call <code>fmap g</code> on its argument which will add 3 if the number's there or return <code>Nothing</code> if it's not, then give that result to <code>fmap f</code> which will add 2 if the number's there, or return <code>Nothing</code> if it's not. This results in a function which will add 5 to a number if it's there, or return <code>Nothing</code> if it's not:</p>
+<p>This function will call <code>fmap g</code> on its argument which will multiply by 3 if the number's there or return <code>Nothing</code> if it's not, then give that result to <code>fmap f</code> which will add 2 if the number's there, or return <code>Nothing</code> if it's not:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fh actuallyFive
-<span class="co">-- =&gt; Just 10</span>
+<span class="co">-- =&gt; Just 17</span>
 
 fh notReallyFive
 <span class="co">-- =&gt; Nothing</span></code></pre>
-<p>You should convince yourself that <code>fh</code> and <code>fmap h</code> behave in exactly the same way. The second functor law states that this must be the case if your type is a valid <code>Functor</code>.</p>
-<p>Because Haskell is referentially transparent, we can replace functions with their implementations freely -- it may require some explicit parenthesis here and there, but the code will always give the same answer. Doing so brings us back directly to the statement of the second law:</p>
+<p>You should convince yourself that <code>fh</code> and <code>fmap h</code> behave in exactly the same way. The second functor law states that this must be the case if your type is to be a valid <code>Functor</code>.</p>
+<p>Because Haskell is referentially transparent, we can replace functions with their implementations freely -- it may require some explicit parentheses here and there, but the code will always give the same answer. Doing so brings us back directly to the statement of the second law:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">(fmap f <span class="fu">.</span> fmap g) actuallyFive
-<span class="co">-- =&gt; Just 10</span>
+<span class="co">-- =&gt; Just 17</span>
 
 fmap (f <span class="fu">.</span> g) actuallyFive
-<span class="co">-- =&gt; Just 10</span>
+<span class="co">-- =&gt; Just 17</span>
 
 (fmap f <span class="fu">.</span> fmap g) notReallyFive
 <span class="co">-- =&gt; Nothing</span>
@@ -584,14 +569,16 @@ fmap (f <span class="fu">.</span> g) notReallyFive
 
 <span class="co">-- Therefore:</span>
 fmap (f <span class="fu">.</span> g) <span class="fu">==</span> fmap f <span class="fu">.</span> fmap g</code></pre>
-<p>Not only can we take normal functions (those which operate on fully present values) and give them to <code>fmap</code> to get ones that can operate on <code>Maybe</code>, but this law states we can do so in any order. We can compose our system of functions together <em>then</em> give that to <code>fmap</code> or we can <code>fmap</code> individual functions and compose <em>those</em> together -- either way, we're guaranteed the same result. We can rely on this fact whenever we use <code>fmap</code> for any type that's in the <code>Functor</code> type class.</p>
+<p>Not only can we take normal functions (those which operate on fully present values) and give them to <code>fmap</code> to get ones that can operate on <code>Maybe</code> values, but this law states we can do so in any order. We can compose our system of functions together <em>then</em> give that to <code>fmap</code> or we can <code>fmap</code> individual functions and compose <em>those</em> together -- either way, we're guaranteed the same result. We can rely on this fact whenever we use <code>fmap</code> for any type that's in the <code>Functor</code> type class.</p>
+</section>
 </section>
 <section id="why-is-this-useful" class="level2">
 <h2>Why Is This Useful?</h2>
 <p>OK, enough theory. Now that we know how it works, let's see how it's used. Say we have a lookup function to get from a <code>UserId</code> to the <code>User</code> for that id. Since the user may not exist, it returns a <code>Maybe User</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">findUser ::</span> <span class="dt">UserId</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">User</span>
 findUser <span class="fu">=</span> undefined</code></pre>
-<p>Now imagine we have a view somewhere that is displaying the user's name in all capitals:</p>
+<p>I've left the implementation of <code>findUser</code> as <code>undefined</code> because it doesn't matter for our example. I'll do this frequently throughout the book. <code>undefined</code> is a function with type <code>a</code>. That allows it to stand in for any expression. If your program ever tries to evaluate it, it will raise an exception. Still, it can be extremely useful while developing because we can confirm that we've written our types correctly without having to think about implementations yet.</p>
+<p>Next, imagine we have want to display a user's name in all capitals:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userUpperName ::</span> <span class="dt">User</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 userUpperName u <span class="fu">=</span> map toUpper (userName u)</code></pre>
 <p>The logic of getting from a <code>User</code> to that capitalized <code>String</code> is not terribly complex, but it could be -- imagine something like getting from a <code>User</code> to their yearly spending on products valued over $1,000. In our case the transformation is only one function, but realistically it could be a whole suite of functions wired together. Ideally, none of these functions should have to think about potential non-presence or contain any &quot;nil-checks&quot; as that's not their purpose; they should all be written to work on values that are fully present.</p>
@@ -599,12 +586,16 @@ userUpperName u <span class="fu">=</span> map toUpper (userName u)</code></pre>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">maybeName ::</span> <span class="dt">Maybe</span> <span class="dt">String</span>
 maybeName <span class="fu">=</span> fmap userUpperName (findUser someId)</code></pre>
 <p>We can do this repeatedly with every function in our system that's required to get from <code>findUser</code> to the eventual display of this name. Because of the second functor law, we know that if we compose all of these functions together then <code>fmap</code> the result, or if we <code>fmap</code> any individual functions and compose the results, we'll always get the same answer. We're free to architect our system as we see fit, but still pass along the <code>Maybe</code>s everywhere we need to.</p>
-<p>The view template, being the only place that has to &quot;deal with&quot; the Maybe value, can do so in a number of ways. Here, I'm using the <code>fromMaybe</code> function to specify a default value of the empty string:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">widget <span class="fu">=</span> <span class="st">&quot;&lt;span class=\&quot;username\&quot;&gt;&quot;</span> <span class="fu">++</span> fromMaybe <span class="st">&quot;&quot;</span> maybeName <span class="fu">++</span> <span class="st">&quot;&lt;/span&gt;&quot;</span></code></pre>
+<p>If we were doing this in the context of a web application, this maybe-name might end up being interpolated into some HTML. It's at this boundary that we'll have to &quot;deal with&quot; the <code>Maybe</code> value. One option is to use the <code>fromMaybe</code> function to specify a default value of the empty string:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">widget ::</span> <span class="dt">Maybe</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+widget mname <span class="fu">=</span> <span class="st">&quot;&lt;span class=\&quot;username\&quot;&gt;&quot;</span> <span class="fu">++</span> name <span class="fu">++</span> <span class="st">&quot;&lt;/span&gt;&quot;</span>
+
+  <span class="kw">where</span>
+    name <span class="fu">=</span> fromMaybe <span class="st">&quot;&quot;</span> mname</code></pre>
 </section>
 <section id="whats-in-a-map" class="level2">
 <h2>What's in a Map</h2>
-<p>The definition of <code>fmap</code> for <code>Maybe</code> is simple and its usage is intuitive, but now that we have two points of reference (<code>Maybe</code> and <code>[]</code>) for this idea of <em>mapping</em>, we can talk about some of the more interesting aspects of what it really means.</p>
+<p>Now that we have two points of reference (<code>Maybe</code> and <code>[]</code>) for this idea of <em>mapping</em>, we can talk about some of the more interesting aspects of what it really means.</p>
 <p>For example, you may have wondered why Haskell type signatures don't separate arguments from return values. The answer to that question should help clarify why the abstract function <code>fmap</code>, which works with far more than only lists, is aptly named.</p>
 </section>
 <section id="curried-form" class="level2">
@@ -641,23 +632,24 @@ f <span class="fu">=</span> map (add <span class="dv">5</span>) [<span class="dv
 <pre class="sourceCode haskell"><code class="sourceCode haskell">add <span class="fu">=</span> \x <span class="ot">-&gt;</span> \y <span class="ot">-&gt;</span> x <span class="fu">+</span> y
 add x <span class="fu">=</span> \y <span class="ot">-&gt;</span> x <span class="fu">+</span> y
 add x y <span class="fu">=</span> x <span class="fu">+</span> y</code></pre>
-<p>Haskell also defines <code>-&gt;</code> to be right-associative and function application to be left associative. That means we don't need to add any parenthesis unless we want to explicitly group in some other way. Rather than writing:</p>
+<p>In type signatures, <code>(-&gt;)</code> is right-associative. This means that instead of writing:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">addThree ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>))
-addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z
-
-<span class="ot">six ::</span> <span class="dt">Int</span>
-six <span class="fu">=</span> ((addThree <span class="dv">1</span>) <span class="dv">2</span>) <span class="dv">3</span></code></pre>
-<p>We can write:</p>
+addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z</code></pre>
+<p>We can write the less-noisy:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">addThree ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
-addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z
-
-<span class="ot">six ::</span> <span class="dt">Int</span>
+addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z</code></pre>
+<p>And it has the same meaning. This is why Haskell type signatures don't appear to separate argument types from return types. Technically, the first type is the only argument, everything else is a functional return type.</p>
+<p>Similarly, function application is left-associative. This means that instead of writing:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">six ::</span> <span class="dt">Int</span>
+six <span class="fu">=</span> ((addThree <span class="dv">1</span>) <span class="dv">2</span>) <span class="dv">3</span></code></pre>
+<p>We can write the less-noisy:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">six ::</span> <span class="dt">Int</span>
 six <span class="fu">=</span> addThree <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></code></pre>
-<p>And that's why Haskell type signatures have the form they do.</p>
+<p>And it has the same meaning as well.</p>
 </section>
 <section id="partial-application" class="level2">
 <h2>Partial Application</h2>
-<p>As in the <code>map</code> example above, we can partially apply functions by supplying only some of their arguments and getting back another function which accepts any arguments we left out. Technically, this is not &quot;partial&quot; at all, since all functions really only take a single argument. In fact, this mechanism happens even in the cases you wouldn't conceptually refer to as &quot;partial application&quot;:</p>
+<p>I mentioned partial application in an earlier chapter, but it's worth discussing again in the context of the <code>map</code> example above. We can partially apply functions by supplying only some of their arguments and getting back another function which accepts any arguments we left out. Technically, this is not &quot;partial&quot; at all, since all functions really only take a single argument. In fact, this mechanism happens even in the cases you wouldn't conceptually refer to as &quot;partial application&quot;:</p>
 <p>When we wrote the following expression:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">maybeName <span class="fu">=</span> fmap userUpperName (findUser someId)</code></pre>
 <p>What really happened is <code>fmap</code> was first applied to the function <code>userUpperName</code> to return a new function of type <code>Maybe User -&gt; Maybe String</code>.</p>
@@ -670,24 +662,12 @@ fmap<span class="ot"> userUpperName ::</span> <span class="dt">Maybe</span> <spa
 </section>
 <section id="map-not-just-for-lists" class="level2">
 <h2>Map, Not Just for Lists</h2>
-<p>Decoupling the concept of <code>map</code> such that it's useful for anything besides lists requires looking at it though this lens of single-argument, single-result functions. Viewed this way, the generic behavior of <code>map</code> is right there in the name: map a key to a value.</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [b])
-<span class="co">--     |           |</span>
-<span class="co">--     |           ` The value, a function that operates on lists of as and bs</span>
-<span class="co">--     |</span>
-<span class="co">--     ` The key, a function that operates on as and bs</span></code></pre>
-<p>We can look at <code>fmap</code> as the same, only not specialized for lists:</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (f a <span class="ot">-&gt;</span> f b)
-<span class="co">--      |           |</span>
-<span class="co">--      |           ` The value, a function that operates on f as and f bs</span>
-<span class="co">--      |</span>
-<span class="co">--      ` The key, a function that operates on as and bs</span></code></pre>
-<p>We can instantiate <code>f</code> as one of any number of types and get a map which takes the functional key and maps it to a different functional value, one that operates in that type's space.</p>
-<figure>
-<img src="data:image/png;base64,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" alt="fmap" /><figcaption>fmap</figcaption>
-</figure>
-<p>Functors come from Category theory, where they represent mapping <em>morphisms</em> from one category to another. In Haskell, <em>morphisms</em> are functions and <code>fmap</code> maps them from the &quot;category&quot; of <code>a</code>s and <code>b</code>s to the &quot;category&quot; of <code>f a</code>s and <code>f b</code>s. Practically speaking, this means that if you have a lot of Maybe values in your domain, you can use <code>fmap</code> to turn all your normal functions into more useful forms.</p>
-<p>For a more in-depth discussion on functors, I recommend Daniel Mlot's <a href="http://duplode.github.io/posts/what-does-fmap-preserve.html">What Does fmap Preserve?</a>.</p>
+<p>Decoupling the concept of <code>map</code> such that it's useful for anything besides lists requires looking at it through this lens of single-argument, single-result functions. Viewed this way, the generic behavior of <code>map</code> is right there in the name: map a key to a value.</p>
+<p>Take another look at the type signature of <code>map</code>, this time with explicit parentheses around the return type:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">map<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [b])</code></pre>
+<p>The &quot;key&quot; is a function from <code>a</code> to <code>b</code>. The &quot;value&quot; is a function from <code>[a]</code> to <code>[b]</code>. It's common but incorrect to say &quot;map a function over each element of a list&quot;. Because the <code>map</code> function most commonly found in programming languages applies a function to each element in a list, we've taken the word &quot;map&quot; to mean &quot;do something to each element in a list&quot;. This is unfortunate as taking a function that operates in some domain (<code>a</code>s and <code>b</code>s) and mapping it to a function that operates in a different, related domain (<code>[a]</code>s and <code>[b]</code>s) is far more accurate and eases the mental leap to the generalized version, <code>fmap</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">fmap<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (f a <span class="ot">-&gt;</span> f b)</code></pre>
+<p>Here, we're still &quot;mapping&quot;, but this time from a function whose domain is <code>a</code>s And <code>b</code>s to one whose domain is <code>f a</code>s and <code>f b</code>s. We make no mention of &quot;each element of a list&quot; because that's an implementation detail not at all related to <code>fmap</code>. By instantiating <code>f</code> as any number of types, we can take all our normal functions and map them to functions that operate on whole new sets of values.</p>
 </section>
 </section>
 <section id="applicative" class="level1">
@@ -711,7 +691,7 @@ userFromParams params <span class="fu">=</span>
             <span class="dt">Just</span> email <span class="ot">-&gt;</span> <span class="dt">Just</span> (<span class="dt">User</span> name email)
             <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span>
         <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span></code></pre>
-<p><code>Maybe</code> is not making our lives easier here. Yes, type safety is a huge implicit win, but this still looks a lot like tedious, defensive coding you'd find in any language:</p>
+<p><code>Maybe</code> is not making our lives easier here. Yes, type safety is a huge implicit win, but this still looks a lot like the tedious, defensive coding you'd find in any language:</p>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">def</span> user_from_params(params)
   <span class="kw">if</span> name = get_param <span class="st">&quot;name&quot;</span> params
     <span class="kw">if</span> email = get_param <span class="st">&quot;email&quot;</span> params
@@ -764,10 +744,11 @@ userFromParams params <span class="fu">=</span> apply
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userFromParams ::</span> <span class="dt">Params</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">User</span>
 userFromParams params <span class="fu">=</span>
     fmap <span class="dt">User</span> (getParam <span class="st">&quot;name&quot;</span> params) <span class="ot">`apply`</span> getParam <span class="st">&quot;email&quot;</span> params</code></pre>
-<p>With a bit more effort, we could use the same trick with <code>fmap</code> and end up with the following chaining:</p>
+<p>With a bit more effort, we could use the same trick with <code>fmap</code> and end up with the following, more readable chaining:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">userFromParams ::</span> <span class="dt">Params</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">User</span>
-userFromParams params <span class="fu">=</span>
-    <span class="dt">User</span> <span class="ot">`fmap`</span> getParam <span class="st">&quot;name&quot;</span> params <span class="ot">`apply`</span> getParam <span class="st">&quot;email&quot;</span> params</code></pre>
+userFromParams params <span class="fu">=</span> <span class="dt">User</span>
+    <span class="ot">`fmap`</span> getParam <span class="st">&quot;name&quot;</span> params
+    <span class="ot">`apply`</span> getParam <span class="st">&quot;email&quot;</span> params</code></pre>
 <p>Making this form compile requires assigning the right <em>fixity</em> to <code>fmap</code> and <code>apply</code> so that Haskell knows which values are to be taken as arguments to which functions. We won't go any further down that route, as it'd be wasted effort. Instead, we'll now shift from inventing things ourselves to looking at what's already been invented -- you'll see it ends up even better than the above.</p>
 </section>
 <section id="applicative-operators" class="level2">
@@ -783,7 +764,7 @@ userFromParams params <span class="fu">=</span>
 userFromParams params <span class="fu">=</span> <span class="dt">User</span>
     <span class="fu">&lt;$&gt;</span> getParam <span class="st">&quot;name&quot;</span> params
     <span class="fu">&lt;*&gt;</span> getParam <span class="st">&quot;email&quot;</span> params</code></pre>
-<p>Since the functions are operators, we don't need any backticks. Since they also have the correct fixity, parenthesis are not required. The result is an elegant expression with minimal noise. Compare <em>that</em> to the stair-<code>case</code> we started with!</p>
+<p>Since the functions are operators, we don't need any backticks. Since they also have the correct fixity, parentheses are not required. The result is an elegant expression with minimal noise. Compare <em>that</em> to the stair-<code>case</code> we started with!</p>
 </section>
 <section id="hiding-details" class="level2">
 <h2>Hiding Details</h2>
@@ -1026,14 +1007,14 @@ createUser params <span class="fu">=</span> buildUser params <span class="fu">&g
 </section>
 <section id="wrapping-up" class="level2">
 <h2>Wrapping Up</h2>
-<p>And thus ends our discussion of monads. This also ends our discussion of <code>Maybe</code>. You've now seen the type itself and three of Haskell's most important abstractions which make its use convenient while still remaining explicit and safe. To highlight the point that these abstractions (<code>Functor</code>, <code>Applicative</code> and <code>Monad</code>) are <em>interfaces</em> shared by many types, the next and final section will briefly show a few other useful types which also have these three interfaces.</p>
+<p>And thus ends our discussion of monads. This also ends our discussion of <code>Maybe</code>. You've now seen the type itself and three of Haskell's most important abstractions which make its use convenient while still remaining explicit and safe. To highlight the point that these abstractions (<code>Functor</code>, <code>Applicative</code>, and <code>Monad</code>) are <em>interfaces</em> shared by many types, the next and final section will briefly show a few other useful types that also have these three interfaces.</p>
 </section>
 </section>
 <section id="other-types" class="level1">
 <h1>Other Types</h1>
 <p>The three abstractions you've seen all require a certain kind of value. Specifically, a value with some other bit of information, often referred to as its <em>context</em>. In the case of a type like <code>Maybe a</code>, the <code>a</code> represents the value itself and <code>Maybe</code> represents the fact that it may or may not be present. This potential non-presence is that other bit of information, its context.</p>
-<p>Haskell's type system is unique in that it lets us speak specifically about this other bit of information without involving the value itself. In fact, when defining instances for <code>Functor</code>, <code>Applicative</code> and <code>Monad</code>, we were defining an instance for <code>Maybe</code>, not for <code>Maybe a</code>. When we define these instances we're not defining how <code>Maybe a</code>, a value in some context, behaves under certain computations, we're actually defining how <code>Maybe</code>, the context itself, behaves under certain operations.</p>
-<p>This kind of separation of concerns is difficult to understand when you're only accustomed to languages that don't allow for it. I believe it's why topics like monads seem so opaque to those unfamiliar with a type system like this. To strengthen the point that what we're really talking about are behaviors and contexts, not any one specific <em>thing</em>, this chapter will explore types which represent other kinds of contexts and show how they behave under all the same computations we saw for <code>Maybe</code>.</p>
+<p>Haskell's type system is unique in that it lets us speak specifically about this other bit of information without involving the value itself. In fact, when defining instances for <code>Functor</code>, <code>Applicative</code> and <code>Monad</code>, we were defining an instance for <code>Maybe</code>, not for <code>Maybe a</code>. When we define these instances we're not defining how <code>Maybe a</code>, a value in some context, behaves under certain computations, we're actually defining how <code>Maybe</code>, the context itself, behaves under certain computations.</p>
+<p>This kind of separation of concerns is difficult to understand when you're only accustomed to languages that don't allow for it. I believe it's why topics like monads seem so opaque to those unfamiliar with a type system like this. To strengthen the point that what we're really talking about are behaviors and contexts, not any one specific <em>thing</em>, this chapter will explore types that represent other kinds of contexts and show how they behave under all the same computations we saw for <code>Maybe</code>.</p>
 <section id="either" class="level2">
 <h2>Either</h2>
 <p>Haskell has another type to help with computations that may fail:</p>
@@ -1117,17 +1098,22 @@ merge <span class="fu">&lt;$&gt;</span> parseJSON jsonString1 <span class="fu">&
 <section id="monad-1" class="level3">
 <h3>Monad</h3>
 <p>When thinking through the <code>Monad</code> instance for our <code>Parsed</code> type, we don't have the same issue of deciding which error to propagate. Remember that the extra power offered by monads is that computations can depend on the results of prior computations. When the context involved represents failure (which may not always be the case!), any single failing computation must trigger the omission of all subsequent computations (since they could be depending on some result that's not there). This means we only need to propagate that first failure.</p>
-<p>Let's say that our domain has some JSON responses whose values contain HTML. Parsing these values into an <code>HTML</code> data type may also fail. Since our <code>Parsed</code> type is polymorphic in its result (i.e. it's <code>Parsed a</code> not <code>Parsed JSON</code>), we can reuse it here:</p>
+<p>Let's say we're interacting with a JSON web service for getting blog post content. The responses include the body of the post as a string of HTML:</p>
+<pre><code>{
+  &quot;title&quot;: &quot;A sweet blog post&quot;,
+  &quot;body&quot;: &quot;&lt;p&gt;The post content...&lt;/p&gt;&quot;
+}</code></pre>
+<p>Parsing JSON like this includes parsing the value at the <code>&quot;body&quot;</code> key into a structured <code>HTML</code> data type. For this, we can re-use our <code>Parsed</code> type:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">parseHTML ::</span> <span class="dt">Value</span> <span class="ot">-&gt;</span> <span class="dt">Parsed</span> <span class="dt">HTML</span>
 parseHTML <span class="fu">=</span> undefined</code></pre>
-<p>We can directly parse a <code>String</code> of JSON into the HTML present at one of its keys by binding the two parses together with <code>(&gt;&gt;=)</code>:</p>
+<p>We can directly parse a <code>String</code> of JSON into the <code>HTML</code> present at one of its keys by binding the two parses together with <code>(&gt;&gt;=)</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Grab the value at the given key</span>
 <span class="ot">at ::</span> <span class="dt">Key</span> <span class="ot">-&gt;</span> <span class="dt">JSON</span> <span class="ot">-&gt;</span> <span class="dt">Value</span>
 at <span class="fu">=</span> undefined
 
 <span class="ot">parseBody ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Parsed</span> <span class="dt">HTML</span>
 parseBody jsonString <span class="fu">=</span> parseJSON jsonString <span class="fu">&gt;&gt;=</span> parseHTML <span class="fu">.</span> at <span class="st">&quot;body&quot;</span></code></pre>
-<p>First, <code>parseJSON jsonString</code> gives us a <code>Parsed JSON</code>. This is the <code>m a</code> in <code>(&gt;&gt;=)</code>'s type signature. Then we use <code>(.)</code> to compose a function for getting the value at the <code>&quot;body&quot;</code> key and passing it to <code>parseHTML</code>. The type of this function is <code>(JSON -&gt; Parsed HTML)</code> which aligns with the <code>(a -&gt; m b)</code> of <code>(&gt;&gt;=)</code>'s second argument. Knowing that <code>(&gt;&gt;=)</code> will return <code>m b</code>, we can see that that's the <code>Parsed HTML</code> we're after.</p>
+<p>First, <code>parseJSON jsonString</code> gives us a <code>Parsed JSON</code>. This is the <code>m a</code> in <code>(&gt;&gt;=)</code>'s type signature. Then we use <code>(.)</code> to compose a function that gets the value at the <code>&quot;body&quot;</code> key and passes it to <code>parseHTML</code>. The type of this function is <code>(JSON -&gt; Parsed HTML)</code> which aligns with the <code>(a -&gt; m b)</code> of <code>(&gt;&gt;=)</code>'s second argument. Knowing that <code>(&gt;&gt;=)</code> will return <code>m b</code>, we can see that that's the <code>Parsed HTML</code> we're after.</p>
 <p>If both parses succeed, we get a <code>Right</code>-constructed value containing the <code>HTML</code> we want. If either parse fails, we get a <code>Left</code>-constructed value containing the <code>ParserError</code> from whichever failed.</p>
 <p>Allowing such a readable expression (<em>parse JSON and then parse HTML at body</em>), requires the following straight-forward implementation for <code>(&gt;&gt;=)</code>:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">--       m        a -&gt; (a -&gt; m        b) -&gt; m        b</span>
@@ -1139,7 +1125,7 @@ parseBody jsonString <span class="fu">=</span> parseJSON jsonString <span class=
 <p>This is a great way to reduce a project's maintenance burden: if you start with functions returning <code>Maybe</code> values but use generalized functions for (e.g.) any <code>Monad m</code>, you can later upgrade to a fully fledged <code>Error</code> type based on <code>Either</code> without having to change most of the code base.</p>
 </section>
 </section>
-<section id="list" class="level2">
+<section id="list-1" class="level2">
 <h2>List</h2>
 <p><em>TODO</em></p>
 </section>
@@ -1277,6 +1263,12 @@ diffFiles fp1 fp2 <span class="fu">=</span> diff <span class="fu">&lt;$&gt;</spa
 <p>If you're interested in the origins of monadic I/O in Haskell, I recommend <a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/marktoberdorf/mark.pdf">Tackling the Awkward Squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell</a> by Simon Peyton Jones and <a href="http://ncatlab.org/nlab/files/WadlerMonads.pdf">Comprehending Monads</a> by Philip Wadler.</p>
 </section>
 </section>
+</section>
+<section id="whats-next" class="level1">
+<h1>What's Next</h1>
+<p>At the start of this book, I said my intention was not to teach you Haskell. Instead, my goal was to give you a sense of writing realistic code that takes advantage of an uncommon feature found in the Haskell language. I wanted to strike a balance between short sound-bites without much depth and the large investment of time required to become proficient in the language.</p>
+<p>The central theme, the <code>Maybe</code> type, is an example of Haskell's principled stance resulting in tangible benefit for programmers. The frustration caused by Tony Hoare's self-proclaimed <a href="http://en.wikipedia.org/wiki/Tony_Hoare#Apologies_and_retractions">&quot;billion-dollar mistake&quot;</a> is something I'll gladly live without. This same principled stance has lead to many similar outcomes in the Haskell language. From monadic I/O to advanced concurrency primitives, Haskell is full of constructs only made possible through slow and thoughtful language design. My hope is that by seeing--and really understanding--the relatively small example that is <code>Maybe</code>, you'll be motivated to explore the language further.</p>
+<p>If you are so inclined, there are many resources online for getting up and running, what to read, etc. I mentioned Chris Allan's <a href="https://github.com/bitemyapp/learnhaskell">learning path</a> already. There's also <a href="https://wiki.haskell.org/Haskell_in_5_steps">Haskell in 5 steps</a>. I'm a huge fan of <a href="http://learnyouahaskell.com/">Learn You a Haskell for Great Good!</a> and <a href="http://book.realworldhaskell.org/">Real World Haskell</a> if you're looking for books. If you prefer an exercise-based approach, we have a <a href="https://upcase.com/haskell-fundamentals">Haskell Fundamentals</a> trail on Upcase. Finally, don't be afraid to read academic papers. They are dense sources of very good information.</p>
 </section>
 <section class="footnotes">
 <hr />
