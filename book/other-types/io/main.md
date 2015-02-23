@@ -1,4 +1,4 @@
-### Typed Puzzles
+### Typed puzzles
 
 Starting with the type of `main`, we immediately see something worth explaining:
 
