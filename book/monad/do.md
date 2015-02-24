@@ -13,7 +13,7 @@ f = do
     y <- anotherThing
     z <- combineThings x y
 
-    return (finalizeThing z)
+    finalizeThing z
 ```
 
 That said, this sugar is available for any `Monad` and so we can use it for
@@ -153,5 +153,6 @@ createUser params = buildUser params >>= \user ->
 ```
 
 Don't worry if you don't follow all of the new information here (i.e. `IO ()` or
-the `(>>)` function). These examples were only to show the differences between
-*do-notation* and relying only on `(>>=)` for composing monadic expressions.
+the `(>>)` and `return` functions). These examples were only to show the
+differences between *do-notation* and relying only on `(>>=)` for composing
+monadic expressions.

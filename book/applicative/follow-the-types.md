@@ -1,68 +1,18 @@
-In the last section we saw how to use `fmap` to take a system full of functions
-which operate on fully present values, free of any `nil`-checks, and employ them
-to safely manipulate values which may in fact not be present. This immediately
-makes many uses of `Maybe` more convenient, while still being explicit and safe
-in the face of failure and partial functions.
+## Follow The Types
 
-There's another notable case where `Maybe` can cause inconvenience, one that
-can't be solved by `fmap` alone. Imagine we're writing some code using a web
-framework. It provides a function `getParam` which takes the name of a query
-parameter (passed as part of the URL in a GET HTTP request), and returns the
-value for that parameter as parsed out of the current URL. Since the parameter
-you name could be missing or invalid, this function returns `Maybe`:
+We can start by trying to do what we want with the only tool we have so far:
+`fmap`.
 
-```haskell
--- Don't worry about how these are represented
-data Params = Params
-
--- Or how this function works internally. All we care about is its type.
-getParam :: String -> Params -> Maybe String
-getParam = undefined
-```
-
-Let's say we have a `User` data type in our system. `User`s have a name and
-email address, both `String`s.
-
-```haskell
-data User = User String String
-```
-
-How do we build a `User` from query params representing their name and email?
-
-The simplest way is the following:
-
-```haskell
-userFromParams :: Params -> Maybe User
-userFromParams params =
-    case getParam "name" params of
-        Just name -> case getParam "email" params of
-            Just email -> Just (User name email)
-            Nothing -> Nothing
-        Nothing -> Nothing
-```
-
-`Maybe` is not making our lives easier here. Yes, type safety is a huge implicit
-win, but this still looks a lot like the tedious, defensive coding you'd find in
-any language:
-
-```ruby
-def user_from_params(params)
-  if name = get_param "name" params
-    if email = get_param "email" params
-      return User.new(name, email)
-    end
-  end
-end
-```
-
-## Follow the Types
-
-`fmap` alone is not powerful enough to address this directly, but it's a start.
 What happens when we apply `fmap` to `User`? It's not immediately clear because
 `User` has the type `String -> String -> User` which doesn't line up with `(a ->
-b)`. To reason about what happens, we have to remember that every function in
-Haskell really only takes one argument: `User` takes a `String` and returns a
-function of type `String -> User`.
+b)`. Fortunately, it only *appears* not to line up. Remember, every function in
+Haskell takes one argument and returns one result: `User`'s actual type is
+`String -> (String -> User)`. In other words, it takes a `String` and returns a
+function, `(String -> User)`. In this light, it indeed lines up with the type
+`(a -> b)` by taking `a` as `String` and `b` as `(String -> User)`.
+
+By substituting our types for `f`, `a`, and `b`, we can see what the type of
+`fmap User` is:
 
 ```haskell
 fmap :: (a -> b) -> f a -> f b
@@ -74,47 +24,59 @@ User :: String -> (String -> User)
 fmap User :: Maybe String -> Maybe (String -> User)
 ```
 
-So now we have a function that takes a `Maybe String`. We happen to have one of
-those. What happens when we apply `fmap User` to `getParam "name" params`?
+So now we have a function that takes a `Maybe String` and returns a `Maybe
+(String -> User)`. We also have a value of type `Maybe String` that we can give
+to this function, `getParam "name" params`:
 
 ```haskell
-getParam "name" params :: Maybe String
+getParam "name" params             :: Maybe String
 
-fmap User :: Maybe String -> Maybe (String -> User)
+fmap User                          :: Maybe String -> Maybe (String -> User)
 
-fmap User (getParam "name") :: Maybe (String -> User)
+fmap User (getParam "name" params) ::                 Maybe (String -> User)
 ```
 
-Interesting. This is a common thing to do when starting out with Haskell or even
-if you're experienced with Haskell but are learning a new abstraction or
-library: follow the types, see what fits together. Through this process, we've
-reduced things down to a smaller problem.
+The `Control.Applicative` module exports an operator synonym for `fmap` called
+`(<$>)` (I pronounce this as *fmap* because that's what it's a synonym for). The
+reason this synonym exists is to get us closer to our original goal of making
+expressions look as if there are no `Maybe`s involved. Since operators are
+placed between their arguments, we can use `(<$>)` to rewrite our above
+expression to an equivalent one with less noise:
+
+```haskell
+User <$> getParam "name" params :: Maybe (String -> User)
+```
+
+This expression represents a "`Maybe` function". We're accustom to *values* in a
+context: a `Maybe Int`, `Maybe String`, etc; and we saw how these were
+*functors*. In this case, we have a *function* in a context: a `Maybe (String ->
+User)`. Since functions are things that *can be applied*, these are called
+*applicative functors*.
+
+By using `fmap`, we reduced our problem space and isolated the functionality
+we're lacking; functionality we'll ultimately get from `Applicative`:
 
 We have this:
 
 ```haskell
-x :: Maybe (String -> User)
-x = fmap User (getParam "name" params)
+fmapUser :: Maybe (String -> User)
+fmapUser = User <$> getParam "name" params
 ```
 
 And we have this:
 
 ```haskell
-y :: Maybe String
-y = getParam "email" params
+aMaybeEmail :: Maybe String
+aMaybeEmail = getParam "email" params
 ```
 
-And we want this:
+And we're trying to ultimately get to this:
 
 ```haskell
 userFromParams :: Params -> Maybe User
-userFromParams params = x ??? y
+userFromParams params = fmapUser <*> aMaybeEmail
 ```
 
-We only have to figure out what that `???` should be. What it looks like we
-need[^typed-holes] is some way to apply a `Maybe` function to a `Maybe` value to
-get a `Maybe` result.
-
-[^typed-holes]: We could actually use a new feature in GHC called [typed holes][] to find out exactly what type of function we need and use that to guide us in writing it.
-
-[typed holes]: https://downloads.haskell.org/~ghc/7.8.1/docs/html/users_guide/typed-holes.html
+We only have to figure out what that `(<*>)` should do. At this point, we have
+enough things defined that we know exactly what its type needs to be. In the
+next section, we'll see how its type pushes us to the correct implementation.

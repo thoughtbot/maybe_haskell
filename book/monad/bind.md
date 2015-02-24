@@ -18,19 +18,6 @@ Again, you can see that `andThen` has the correct signature:
 andThen :: Maybe a -> (a -> Maybe b) -> Maybe b
 ```
 
-`Monad` comes with another function, `return`:
-
-```haskell
-return :: a -> m a
-```
-
-This is the same as `pure` was in `Applicative`. We take a value and place it in
-the *minimal* or *default* context appropriate for your type. In the case of
-`Maybe`, that means wrapping the value in the `Just` constructor. In fact, the
-Haskell language recently made it such that to be a `Monad` you must already be
-an `Applicative` (something that was almost always true in practice) so `return`
-even has a default definition of `pure`.
-
 ## Chaining
 
 `(>>=)` is defined as an operator because it's meant to be used infix. It's also

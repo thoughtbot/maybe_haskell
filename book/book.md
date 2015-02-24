@@ -39,11 +39,13 @@
 
 # Applicative
 
+<<[applicative/hiding-details.md]
+
 <<[applicative/follow-the-types.md]
 
 <<[applicative/apply.md]
 
-<<[applicative/operator.md]
+<<[applicative/chaining.md]
 
 <<[applicative/in-the-wild.md]
 
