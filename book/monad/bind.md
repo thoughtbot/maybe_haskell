@@ -34,12 +34,9 @@ users' addresses and their zip codes:
 findUser :: UserId -> Maybe User
 findUser = undefined
 
--- Returns Maybe because Users aren't required to have Addresses
-userAddress :: User -> Maybe Address
-userAddress = undefined
-
-addressZip :: Address -> ZipCode
-addressZip = undefined
+-- Returns Maybe because Users aren't required to have an address on file
+userZip :: User -> Maybe ZipCode
+userZip = undefined
 ```
 
 Let's also say we have a function to calculate shipping costs by zip code. It
@@ -56,8 +53,8 @@ We could naively calculate the shipping cost for some user given their Id:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     case findUser uid of
-        Just u -> case userAddress u of
-            Just a -> case shippingCost (addressZip a) of
+        Just u -> case userZip u of
+            Just z -> case shippingCost z of
                 Just c  -> Just c
 
                 -- User has an invalid zip code
@@ -78,7 +75,7 @@ How does this code look with `(>>=)`?
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
-findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost . addressZip
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
 You have to admit, that's quite nice. Hopefully even more so when you look back

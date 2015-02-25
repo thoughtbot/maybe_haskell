@@ -30,7 +30,7 @@ first place.
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
-findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
 First, to make things clearer, let's add some arbitrary line breaks:
@@ -39,7 +39,7 @@ First, to make things clearer, let's add some arbitrary line breaks:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>=
-    userAddress >>=
+    userZip >>=
     shippingCost
 ```
 
@@ -51,9 +51,9 @@ add another arbitrary line break to highlight the final expression in the chain.
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>= \u ->
-    userAddress u >>= \a ->
+    userZip u >>= \z ->
 
-    shippingCost a
+    shippingCost z
 ```
 
 Next, we'll take each lambda and translate it into a *binding*, which looks a
@@ -64,9 +64,9 @@ y":
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Finally, we prefix the series of "statements" with `do`:
@@ -75,9 +75,9 @@ Finally, we prefix the series of "statements" with `do`:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid = do
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Et Violà, you have the equivalent *do-notation* version of our function. When
@@ -90,9 +90,9 @@ Remove the `do` keyword:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Translate each binding into a version using `(>>=)` and lambdas:
@@ -101,9 +101,9 @@ Translate each binding into a version using `(>>=)` and lambdas:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>= \u ->
-    userAddress u >>= \a ->
+    userZip u >>= \z ->
 
-    shippingCost a
+    shippingCost z
 ```
 
 The compiler can stop here as all remaining steps are stylistic changes only
