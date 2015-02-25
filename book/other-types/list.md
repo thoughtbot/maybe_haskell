@@ -135,7 +135,7 @@ openSpace <$> [T, M, B] <*> [L, C, R]
 -- => , (\c -> ((B, c), Open)) C
 -- => , (\c -> ((B, c), Open)) R
 -- => ]
---
+-- 
 -- => [ ((T, L), Open)
 -- => , ((T, C), Open)
 -- => , ((T, R), Open)

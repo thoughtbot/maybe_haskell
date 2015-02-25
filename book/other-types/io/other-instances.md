@@ -54,7 +54,7 @@ yourself:
 import System.Environment (getEnvironment)
 
 -- lookup :: Eq a => a -> [(a, b)] -> Maybe b
---
+-- 
 -- getEnvironment :: IO [(String, String)]
 
 lookupEnv :: String -> IO (Maybe String)
