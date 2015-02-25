@@ -1,10 +1,12 @@
-So far, we've seen that using this new `Maybe` type to represent failure can be
-very inconvenient. We addressed a number of scenarios by using `fmap` to
-"upgrade" a system full of normal functions (free of any `nil`-checks) into one
-that can take and pass along `Maybe` values. When confronted with a new scenario
-that could not be handled by `fmap` alone, we discovered a new function `(<*>)`
-which helped ease our pain again. This chapter is about addressing a third
-scenario, one that `fmap` and even `(<*>)` cannot solve: dependent computations.
+So far, we've seen that as `Maybe` makes our code safer, it also makes it less
+convenient. By making potential non-presence explicit, we now need to correctly
+account for it at every step. We addressed a number of scenarios by using `fmap`
+to "upgrade" a system full of normal functions (free of any `nil`-checks) into
+one that can take and pass along `Maybe` values. When confronted with a new
+scenario that could not be handled by `fmap` alone, we discovered a new function
+`(<*>)` which helped ease our pain again. This chapter is about addressing a
+third scenario, one that `fmap` and even `(<*>)` cannot solve: dependent
+computations.
 
 Let's throw a monkey wrench into our `getParam` example from earlier. This time,
 let's say we're accepting logins by either username or password. The user can
