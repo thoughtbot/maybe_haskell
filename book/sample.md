@@ -11,6 +11,8 @@
 
 # Haskell Basics
 
+<<[haskell-basics/functions.md]
+
 <<[haskell-basics/data-types.md]
 
 <<[haskell-basics/maybe.md]
@@ -21,8 +23,16 @@
 
 <<[functor/functor.md]
 
+<<[functor/curried-form.md]
+
 # Applicative
 
 <<[applicative/follow-the-types.md]
 
 <<[applicative/apply.md]
+
+<<[applicative/chaining.md]
+
+# Other Types
+
+<<[other-types/io/other-instances.md]
