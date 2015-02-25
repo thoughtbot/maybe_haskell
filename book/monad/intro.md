@@ -9,9 +9,9 @@ third scenario, one that `fmap` and even `(<*>)` cannot solve: dependent
 computations.
 
 Let's throw a monkey wrench into our `getParam` example from earlier. This time,
-let's say we're accepting logins by either username or password. The user can
-say which method they're using by passing a `type` param specifying "username"
-or "password".
+let's say we're accepting logins by either username or email. The user can say
+which method they're using by passing a `type` param specifying "username" or
+"email".
 
 *Note*: this whole thing is wildly insecure, but bear with me.
 
