@@ -1,12 +1,11 @@
 ## IO
 
-So far, we've seen three types: `Maybe a`, `Either e a`, and `[a]` (which can be
-thought of as `List a`). These types all represent a value with some other bit
-of information: a *context*. If `a` is the `User` you're trying to find, the
-`Maybe` says if she was actually found. If the `a` is the `JSON` you're
-attempting to parse, the `Either e` holds information about the error when the
-parse fails. If `a` is a number, then `[]` tells you it is actually many numbers
-at once, and how many.
+So far, we've seen three types: `Maybe a`, `Either e a`, and `[a]`. These types
+all represent a value with some other bit of information: a *context*. If `a` is
+the `User` you're trying to find, the `Maybe` says if she was actually found. If
+the `a` is the `JSON` you're attempting to parse, the `Either e` holds
+information about the error when the parse fails. If `a` is a number, then `[]`
+tells you it is actually many numbers at once, and how many.
 
 For all these types, we've seen the behaviors that allow us to add them to the
 `Functor`, `Applicative`, and `Monad` type classes. These behaviors obey certain
