@@ -460,40 +460,81 @@ we want here is a *person with a thing* or a *person without a thing*.
 One way to do this is to *parameterize* the type:
 
 ```haskell
-data Person a = PersonWith String a | PersonWithout String
---          |                     |
---          |                     ` we can use it as an argument here
+data Person a = PersonWithThing String a | PersonWithoutThing String
+--          |                          |
+--          |                          ` we can use it as an argument here
 --          |
 --          ` By adding a "type variable" here
 ```
 
-Any lowercase value will do, but it's common to use `a` because it's short, and
-a value of type `a` can be thought of as a value of any type. Rather than
-hard-coding that a person has an age (or not), we can say a person is holding
-some thing of type `a` (or not).
+The type we've defined here is `Person a`. We can construct values of type
+`Person a` by giving a `String` and an `a` to `PersonWithThing`, or by giving
+only a `String` to `PersonWithoutThing`. Notice that even if we build our person
+using `PersonWithoutThing`, the constructed value still has type `Person a`.
 
-Now we can construct people with or without something:
+The `a` is called a *type variable*. Any lowercase value will do, but it's
+common to use `a` because it's short, and a value of type `a` can be thought of
+as a value of *any* type. Rather than hard-coding that a person has an `Int`
+representing their age (or not), we can say a person is holding some thing of
+type `a` (or not).
+
+We can still construct people with and without ages, but now we have to specify
+in the type that the `a` is an `Int` in this case:
 
 ```haskell
 patWithAge :: Person Int
-patWithAge = PersonWith "pat" 29
+patWithAge = PersonWithThing "pat" 29
 
 patWithoutAge :: Person Int
-patWithoutAge = PersonWithout "pat"
+patWithoutAge = PersonWithoutThing "pat"
 ```
 
-Notice how even in the case where I have no age, I can still specify the type of
-that thing which I do not have.
+Notice how even in the case where I have no age, we still specify the type of
+that thing which I do not have. In this case, we specified an `Int` for
+`patWithoutAge`, but values can have (or not have) any type of thing:
 
-Functions that operate on people can choose if they care about what the person's
-holding or not. For example, getting someone's name shouldn't be affected by
-them holding something or not, so we can leave it unspecified, again using `a`
-to mean any type:
+```haskell
+patWithEmail :: Person String
+patWithEmail = PersonWithThing "pat" "pat@thoughtbot.com"
+
+patWithoutEmail:: Person String
+patWithoutEmail = PersonWithoutThing "pat"
+```
+
+We don't have to give a concrete `a` when it doesn't matter. `patWithoutAge` and
+`patWithoutEmail` are the same value with different types. We could define a
+single value with the generic type `Person a`:
+
+```haskell
+patWithoutThing :: Person a
+patWithoutThing = PersonWithoutThing "pat"
+```
+
+Because `a` is more general than `Int` or `String`, a value such as this can
+stand in anywhere a `Person Int` or `Person String` is needed:
+
+```haskell
+patWithoutAge :: Person Int
+patWithoutAge = patWithoutThing
+
+patWithoutEmail :: Person String
+patWithoutEmail = patWithoutThing
+```
+
+Similarly, functions that operate on people can choose if they care about what
+the person's holding or not. For example, getting someone's name shouldn't be
+affected by them holding something or not, so we can leave it unspecified:
 
 ```haskell
 getName :: Person a -> String
-getName (PersonWith name _) = name
-getName (PersonWithout name) = name
+getName (PersonWithThing name _) = name
+getName (PersonWithoutThing name) = name
+
+getName patWithAge
+-- => "pat"
+
+getName patWithoutEmail
+-- => "pat"
 ```
 
 But a function which does care, must both specify the type *and* account for the
@@ -501,14 +542,25 @@ case of non-presence:
 
 ```haskell
 doubleAge :: Person Int -> Int
-doubleAge (PersonWith _ age) = 2 * age
-doubleAge (PersonWithout _) = 1 -- perhaps provide a sane default?
+doubleAge (PersonWithThing _ age) = 2 * age
+doubleAge (PersonWithoutThing _) = 1 -- perhaps provide a sane default?
+
+doubleAge patWithAge
+-- => 58
+
+doubleAge patWithoutAge
+-- => 1
+
+doubleAge patWithoutThing
+-- => 1
+
+doubleAge patWithoutEmail
+-- => Type error! Person String != Person Int
 ```
 
 This has been a very brief introduction to higher-kinded types and specifically
-*type variables* (the `a` in `Person a`). If it doesn't make complete sense now,
-that's OK. Using these things in practice is the best way to gain a more
-complete understanding.
+type variables. If it doesn't make complete sense now, that's OK. Using these
+things in practice is the best way to gain a more complete understanding.
 
 ## Maybe
 
@@ -1305,9 +1357,9 @@ map :: (a -> b) -> ([a] -> [b])
 
 The "key" is a function from `a` to `b`. The "value" is a function from `[a]` to
 `[b]`. It's common but incorrect to say "map a function over each element of a
-list". Because the `map` function most commonly found in programming languages
+list." Because the `map` function most commonly found in programming languages
 applies a function to each element in a list, we've taken the word "map" to mean
-"do something to each element in a list". This is unfortunate as taking a
+"do something to each element in a list." This is unfortunate as taking a
 function that operates in some domain (`a`s and `b`s) and mapping it to a
 function that operates in a different, related domain (`[a]`s and `[b]`s) is far
 more accurate and eases the mental leap to the generalized version, `fmap`:
@@ -1338,16 +1390,12 @@ value for that parameter as parsed out of the current URL. Since the parameter
 you name could be missing or invalid, this function returns `Maybe`:
 
 ```haskell
--- Don't worry about how these are represented
-data Params = Params
-
--- Or how this function works internally. All we care about is its type.
 getParam :: String -> Params -> Maybe String
 getParam = undefined
 ```
 
-Let's say we have a `User` data type in our system. `User`s have a name and
-email address, both `String`s.
+Let's say we also have a `User` data type in our system. `User`s are constructed
+from their name and email address, both `String`s.
 
 ```haskell
 data User = User String String
@@ -1355,7 +1403,7 @@ data User = User String String
 
 How do we build a `User` from query params representing their name and email?
 
-The simplest way is the following:
+The most direct way is the following:
 
 ```haskell
 userFromParams :: Params -> Maybe User
@@ -1381,14 +1429,44 @@ def user_from_params(params)
 end
 ```
 
-## Follow the Types
+## Hiding Details
 
-`fmap` alone is not powerful enough to address this directly, but it's a start.
+So how do we do this better? What we want is code that looks as if there is no
+`Maybe` involved (because that's convenient) but correctly accounts for `Maybe`
+at every step along the way (because that's safe). If there were no `Maybe`s
+involved, and we were constructing a normal `User` value, the code may look like
+this:
+
+```haskell
+userFromValues :: User
+userFromValues = User aName anEmail
+```
+
+An ideal syntax would look very similar, perhaps something like this:
+
+```haskell
+userFromMaybeValues :: Maybe User
+userFromMaybeValues = User <$> aMaybeName <*> aMaybeEmail
+```
+
+The `Applicative` type class and its `Maybe` instance allow us to write exactly
+this code. Let's see how.
+
+## Follow The Types
+
+We can start by trying to do what we want with the only tool we have so far:
+`fmap`.
+
 What happens when we apply `fmap` to `User`? It's not immediately clear because
 `User` has the type `String -> String -> User` which doesn't line up with `(a ->
-b)`. To reason about what happens, we have to remember that every function in
-Haskell really only takes one argument: `User` takes a `String` and returns a
-function of type `String -> User`.
+b)`. Fortunately, it only *appears* not to line up. Remember, every function in
+Haskell takes one argument and returns one result: `User`'s actual type is
+`String -> (String -> User)`. In other words, it takes a `String` and returns a
+function, `(String -> User)`. In this light, it indeed lines up with the type
+`(a -> b)` by taking `a` as `String` and `b` as `(String -> User)`.
+
+By substituting our types for `f`, `a`, and `b`, we can see what the type of
+`fmap User` is:
 
 ```haskell
 fmap :: (a -> b) -> f a -> f b
@@ -1400,136 +1478,113 @@ User :: String -> (String -> User)
 fmap User :: Maybe String -> Maybe (String -> User)
 ```
 
-So now we have a function that takes a `Maybe String`. We happen to have one of
-those. What happens when we apply `fmap User` to `getParam "name" params`?
+So now we have a function that takes a `Maybe String` and returns a `Maybe
+(String -> User)`. We also have a value of type `Maybe String` that we can give
+to this function, `getParam "name" params`:
 
 ```haskell
-getParam "name" params :: Maybe String
+getParam "name" params             :: Maybe String
 
-fmap User :: Maybe String -> Maybe (String -> User)
+fmap User                          :: Maybe String -> Maybe (String -> User)
 
-fmap User (getParam "name") :: Maybe (String -> User)
+fmap User (getParam "name" params) ::                 Maybe (String -> User)
 ```
 
-Interesting. This is a common thing to do when starting out with Haskell or even
-if you're experienced with Haskell but are learning a new abstraction or
-library: follow the types, see what fits together. Through this process, we've
-reduced things down to a smaller problem.
+The `Control.Applicative` module exports an operator synonym for `fmap` called
+`(<$>)` (I pronounce this as *fmap* because that's what it's a synonym for). The
+reason this synonym exists is to get us closer to our original goal of making
+expressions look as if there are no `Maybe`s involved. Since operators are
+placed between their arguments, we can use `(<$>)` to rewrite our above
+expression to an equivalent one with less noise:
+
+```haskell
+User <$> getParam "name" params :: Maybe (String -> User)
+```
+
+This expression represents a "`Maybe` function". We're accustom to *values* in a
+context: a `Maybe Int`, `Maybe String`, etc; and we saw how these were
+*functors*. In this case, we have a *function* in a context: a `Maybe (String ->
+User)`. Since functions are things that *can be applied*, these are called
+*applicative functors*.
+
+By using `fmap`, we reduced our problem space and isolated the functionality
+we're lacking; functionality we'll ultimately get from `Applicative`:
 
 We have this:
 
 ```haskell
-x :: Maybe (String -> User)
-x = fmap User (getParam "name" params)
+fmapUser :: Maybe (String -> User)
+fmapUser = User <$> getParam "name" params
 ```
 
 And we have this:
 
 ```haskell
-y :: Maybe String
-y = getParam "email" params
+aMaybeEmail :: Maybe String
+aMaybeEmail = getParam "email" params
 ```
 
-And we want this:
+And we're trying to ultimately get to this:
 
 ```haskell
 userFromParams :: Params -> Maybe User
-userFromParams params = x ??? y
+userFromParams params = fmapUser <*> aMaybeEmail
 ```
 
-We only have to figure out what that `???` should be. What it looks like we
-need[^typed-holes] is some way to apply a `Maybe` function to a `Maybe` value to
-get a `Maybe` result.
-
-[^typed-holes]: We could actually use a new feature in GHC called [typed holes][] to find out exactly what type of function we need and use that to guide us in writing it.
-
-[typed holes]: https://downloads.haskell.org/~ghc/7.8.1/docs/html/users_guide/typed-holes.html
+We only have to figure out what that `(<*>)` should do. At this point, we have
+enough things defined that we know exactly what its type needs to be. In the
+next section, we'll see how its type pushes us to the correct implementation.
 
 ## Apply
 
-We can define exactly such a function in terms of `Maybe` directly:
+The `(<*>)` operator is pronounced *apply*. Specialized to `Maybe`, its job is
+to apply a `Maybe` function to a `Maybe` value to produce a `Maybe` result.
+
+In our example, we have `fmapUser` of type `Maybe (String -> User)` and
+`aMaybeEmail` of type `Maybe String`. We're trying to use `(<*>)` to put those
+together and get a `Maybe User`. We can write that down as a type signature:
 
 ```haskell
-apply :: Maybe (a -> b) -> Maybe a -> Maybe b
-apply (Just f) (Just x) = Just (f x)
-apply _ _ = Nothing
+(<*>) :: Maybe (String -> User) -> Maybe String -> Maybe User
 ```
 
-If both the function and the value are present, pull them out, apply the
-function, and wrap the result in `Just`. If either are missing, return `Nothing`
-directly.
-
-Here's how things look when we plug it in:
+With such a specific type, this function won't be very useful, so let's
+generalize it away from `String`s and `User`s:
 
 ```haskell
-userFromParams :: Params -> Maybe User
-userFromParams params = apply
-    (fmap User (getParam "name" params))
-    (getParam "email" params)
+(<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
 ```
 
-This type checks and indeed works as expected.
-
-We can make this expression read a bit better if we treat `apply` as an operator
-by surrounding it with backticks:
-
-```haskell
-userFromParams :: Params -> Maybe User
-userFromParams params =
-    fmap User (getParam "name" params) `apply` getParam "email" params
-```
-
-With a bit more effort, we could use the same trick with `fmap` and end up with
-the following, more readable chaining:
-
-```haskell
-userFromParams :: Params -> Maybe User
-userFromParams params = User
-    `fmap` getParam "name" params
-    `apply` getParam "email" params
-```
-
-Making this form compile requires assigning the right *fixity* to `fmap` and
-`apply` so that Haskell knows which values are to be taken as arguments to which
-functions. We won't go any further down that route, as it'd be wasted effort.
-Instead, we'll now shift from inventing things ourselves to looking at what's
-already been invented -- you'll see it ends up even better than the above.
-
-## Applicative Operators
-
-Since the `apply` we made up reads best when written infix, it was defined as an
-operator named `(<*>)` in the `Applicative` type class. Like `fmap` it is a type
-class function, meaning it can be implemented by many types. There are actually
-two member functions in that type class, the first is:
-
-```haskell
-pure :: a -> f a
-```
-
-This is relatively simple and represents taking some value and placing in the
-*minimal* or *default* context of `f`, whatever that means for the particular
-type. For `Maybe`, it is implemented as wrapping the value in `Just`. We won't
-be discussing this function any further since the most common way it is used can
-be accomplished with `fmap`, something you already know.
-
-The second function is our friend, `apply`:
+This function is part of the `Applicative` type class, meaning it will be
+defined for many types. Therefore, its actual type signature is:
 
 ```haskell
 (<*>) :: f (a -> b) -> f a -> f b
 ```
 
-Both of these come with laws, but I won't be going into them. You can read all
-about them in the [module][Control.Applicative] where these functions are
-defined. They're more complicated than the ones for `Functor` and understanding
-them can come later. Generally speaking, you don't need to understand a type
-class's laws to effectively use types in the class, only to define instances for
-your own types (since then you'd have to abide by them).
+Where `f` is any type that has an `Applicative` instance (e.g. `Maybe`).
 
-[Control.Applicative]: http://hackage.haskell.org/package/base-4.7.0.1/docs/Control-Applicative.html
+It's important to mention this because it is the type signature you're going to
+see in any documentation about `Applicative`. Now that I've done so, I'm going
+to go back to type signatures using `Maybe` since that's the specific instance
+we're discussing here.
 
-The same module that defines this type class also exports an operator synonym
-for `fmap` named `(<$>)`. The reason for this should become clear when you see
-the affect the two operators have on our example:
+The semantics of our `(<*>)` function are as follows:
+
+- If both the `Maybe` function and the `Maybe` value are present, apply the
+  function to the value and return the result wrapped in `Just`
+- Otherwise, return `Nothing`
+
+We can translate that directly into code via pattern matching:
+
+```haskell
+(<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+Just f <*> Just x = Just (f x)
+_      <*> _      = Nothing
+```
+
+With this definition, and a few line breaks for readability, we arrive at our
+desired goal:
 
 ```haskell
 userFromParams :: Params -> Maybe User
@@ -1538,42 +1593,108 @@ userFromParams params = User
     <*> getParam "email" params
 ```
 
-Since the functions are operators, we don't need any backticks. Since they also
-have the correct fixity, parentheses are not required. The result is an elegant
-expression with minimal noise. Compare *that* to the stair-`case` we started
-with!
+The result is an elegant expression with minimal noise. Compare *that* to the
+stair-`case` we started with!
 
-## Hiding Details
+Not only is this expression elegant, it's also safe. Because of the semantics of
+`fmap` and `(<*>)`, if any of the `getParam` calls return `Nothing`, our whole
+`userFromParams` expression results in `Nothing`. Only if they all return `Just`
+values, do we get `Just` our user.
 
-The point of all this is to write code that looks as if there is no `Maybe`
-involved (because that's convenient) but correctly accounts for `Maybe` at every
-step along the way (because that's safe). If there were no `Maybe`s involved,
-and we were constructing a normal `User` value, the code may look like this:
+As always, Haskell being referentially transparent means we can prove this by
+substituting the definitions of `fmap` and `(<*>)` and tracing how the
+expression expands given some example `Maybe` values.
 
-```haskell
-userFromValues :: User
-userFromValues = User aName anEmail
-```
-
-Compared with a `Maybe` version:
+If the first value is present, but the second is not:
 
 ```haskell
-userFromMaybeValues :: Maybe User
-userFromMaybeValues = User <$> aMaybeName <*> aMaybeEmail
+User <$> Just "Pat" <*> Nothing
+-- => fmap User (Just "Pat") <*> Nothing        (<$> == fmap)
+-- => Just (User "Pat")      <*> Nothing        (fmap definition, first pattern)
+-- => Nothing                                   (<*> definition, second pattern)
 ```
 
-The resemblance is uncanny.
+If the second value's present but the first is not:
+
+```haskell
+User <$> Nothing <*> Just "pat@thoughtbot.com"
+-- => fmap User Nothing <*> Just "pat@thoughtbot.com"
+-- => Nothing           <*> Just "pat@thoughtbot.com"   (fmap, second pattern)
+-- => Nothing
+```
+
+Finally, if both values are present:
+
+```haskell
+User <$> Just "Pat" <*> Just "pat@thoughtbot.com"
+-- => fmap User (Just "Pat") <*> Just "pat@thoughtbot.com"
+-- => Just (User "Pat")      <*> Just "pat@thoughtbot.com"
+-- => Just (User "Pat" "pat@thoughtbot.com")            (<*>, first pattern)
+```
+
+## Chaining
+
+One of the nice things about this pattern is that it scales up to functions with
+(conceptually) any number of arguments. Imagine that our `User` type had a third
+field representing their age:
+
+```haskell
+data User = User String String Int
+```
+
+Since our `getParam` function can only look up parameters of `String` values,
+we'll also need a `getIntParam` function to pull the user's age out of our
+`Params`:
+
+```haskell
+getIntParam :: String -> Params -> Maybe Int
+getIntParam = undefined
+```
+
+With these defined, let's trace through the types of our applicative expression
+again. This time, we have to remember that our new `User` function is of type
+`String -> (String -> (Int -> User))`:
+
+```haskell
+User :: String -> (String -> (Int -> User))
+
+User <$> getParam "name" params :: Maybe (String -> (Int -> User))
+
+User <$> getParam "name" params <*> getParam "email" params :: Maybe (Int -> User)
+```
+
+This time, we arrive at a `Maybe (Int -> User)`. Knowing that `getIntParam "age"
+params` is of type `Maybe Int`, we're in the exact same position as last time
+when we first discovered a need for `(<*>)`. Being in the same position, we can
+do the same thing again:
+
+```haskell
+userFromParams :: Params -> Maybe User
+userFromParams params = User
+    <$> getParam "name" params
+    <*> getParam "email" params
+    <*> getIntParam "age" params
+```
+
+As our pure function (`User`) gains more arguments, we can continue to apply it
+to values in context by repeatedly using `(<*>)`. The process by which this
+happens may be complicated, but the result is well worth it: an expression that
+is concise, readable, and above all safe.
 
 ## Applicative In the Wild
 
 This pattern is used in a number of places in the Haskell ecosystem.
 
+### JSON parsing
+
 As one example, the [aeson][] package defines a number of functions for parsing
-things out of JSON values, these functions return their results wrapped in a
+things out of JSON values. These functions return their results wrapped in a
 `Parser` type which is very much like `Maybe` except that it holds a bit more
 information about *why* the computation failed, not only *that* the computation
-failed. The `Applicative` instance for this type can be used to combine these
-sub-parsers into something domain-specific.
+failed. Not unlike our `getParam`, these sub-parsers pull basic types (`Int`,
+`String`, etc) out of JSON values. The `Applicative` instance for the `Parser`
+type can then be used to combine them into something domain-specific, like a
+`User`.
 
 [aeson]: http://hackage.haskell.org/package/aeson
 
@@ -1587,9 +1708,9 @@ data User = User
     UTCTime       -- Date of birth
 ```
 
-We can tell aeson how to create one of these values from JSON, by implementing
-the `parseJSON` function which takes a JSON object (represented by the `Value`
-type) and returns a `Parser User`:
+We can tell aeson how to create a `User` from JSON, by implementing the
+`parseJSON` function which takes a JSON object (represented by the `Value` type)
+and returns a `Parser User`:
 
 ```haskell
 parseJSON :: Value -> Parser User
@@ -1599,7 +1720,7 @@ parseJSON (Object o) = User
     <*> o .: "age"
     <*> o .: "birth_date"
 
--- If we're given some JSON value besides an object (an array, a string, etc) we
+-- If we're given some JSON value besides an Object (an Array, a Number, etc) we
 -- can signal failure by returning the special value mzero
 parseJSON _ = mzero
 ```
@@ -1613,6 +1734,40 @@ User` using `(<$>)` and `(<*>)`.
 If any key is missing, the whole thing fails. If they're all there, we get the
 `User` we wanted. This concern is completely isolated within the implementation
 of `(<$>)` and `(<*>)` for `Parser`.
+
+### Option parsing
+
+Another example is command-line options parsing via the [optparse-applicative][]
+library. The process is very similar: the library exposes low-level parsers for
+primitive types like `Flag` or `Argument`. Because this may fail, the values are
+wrapped in another `Parser` type. (Though it behaves similarly, this is this
+library's own `Parser` type, not the same one as above.) The `Applicative`
+instance can again be used to combine these sub-parsers into a domain-specific
+`Options` value:
+
+[optparse-applicative]: https://github.com/pcapriotti/optparse-applicative
+
+```haskell
+-- Example program options:
+-- 
+-- - A bool to indicate if we should be verbose, and
+-- - A list of FilePaths to operate on
+-- 
+data Options = Options Bool [FilePath]
+
+parseOptions :: Parser Options
+parseOptions = Options
+    <$> switch (short 'v' <> long "verbose" <> help "be verbose")
+    <*> many (argument (metavar "FILE" <> help "file to operate on"))
+```
+
+You can ignore some of the functions here, which were included to keep the
+example accurate. What's important is that `switch (...)` is of type `Parser
+Bool` and `many (argument ...)` is of type `Parser [FilePath]`. We use `(<$>)`
+and `(<*>)` to put these two sub-parsers together with `Options` and end up with
+an overall `Parser Options`. If we add more options to our program, all we need
+to do is add more fields to `Options` and continue applying sub-parsers with
+`(<*>)`.
 
 # Monad
 
@@ -1746,19 +1901,6 @@ Again, you can see that `andThen` has the correct signature:
 andThen :: Maybe a -> (a -> Maybe b) -> Maybe b
 ```
 
-`Monad` comes with another function, `return`:
-
-```haskell
-return :: a -> m a
-```
-
-This is the same as `pure` was in `Applicative`. We take a value and place it in
-the *minimal* or *default* context appropriate for your type. In the case of
-`Maybe`, that means wrapping the value in the `Just` constructor. In fact, the
-Haskell language recently made it such that to be a `Monad` you must already be
-an `Applicative` (something that was almost always true in practice) so `return`
-even has a default definition of `pure`.
-
 ## Chaining
 
 `(>>=)` is defined as an operator because it's meant to be used infix. It's also
@@ -1841,7 +1983,7 @@ f = do
     y <- anotherThing
     z <- combineThings x y
 
-    return (finalizeThing z)
+    finalizeThing z
 ```
 
 That said, this sugar is available for any `Monad` and so we can use it for
@@ -1981,8 +2123,9 @@ createUser params = buildUser params >>= \user ->
 ```
 
 Don't worry if you don't follow all of the new information here (i.e. `IO ()` or
-the `(>>)` function). These examples were only to show the differences between
-*do-notation* and relying only on `(>>=)` for composing monadic expressions.
+the `(>>)` and `return` functions). These examples were only to show the
+differences between *do-notation* and relying only on `(>>=)` for composing
+monadic expressions.
 
 ## Wrapping Up
 
@@ -2291,7 +2434,322 @@ functions returning `Maybe` values but use generalized functions for (e.g.) any
 
 ## List
 
-*TODO*
+Throughout the book, I relied on most programmers having an understanding of
+arrays and lists of elements to ease the learning curve up to `Maybe` and
+particularly `fmap`. In this chapter, I'll recap and expand on some of the
+things I've said before and then show that `[a]` is more than a list of elements
+over which we can map. It also has `Applicative` and `Monad` instances that make
+it a natural fit for certain problems.
+
+### Tic-Tac-Toe and the Minimax algorithm
+
+For this chapter's example, I'm going to show portions of a program for playing
+Tic-Tac-Toe. The full program is too large to include, but portions of it are
+well-suited to using the `Applicative` and `Monad` instances for `[]`. The
+program uses an algorithm known as [minimax][] to choose the best move to make
+in a game of Tic-Tac-Toe.
+
+[minimax]: http://en.wikipedia.org/wiki/Minimax
+
+In short, the algorithm plays out all possible moves from the perspective of one
+player and chooses the one that maximizes their score and minimizes their
+opponent's, hence the name. Tic-Tac-Toe is a good game for exploring this
+algorithm because the possible choices are small enough that we can take the
+naive approach of enumerating all of them then choosing the best.
+
+To model our Tic-Tac-Toe game, we'll need some data types:
+
+```haskell
+-- A player is either Xs or Os
+data Player = X | O
+
+-- A square is either open, or taken by one of the players
+data Square = Open | Taken Player
+
+-- A row is top, middle, or bottom
+data Row = T | M | B
+
+-- A column is left, center, or right
+data Column = L | C | R
+
+-- A position is the combination of row and column
+type Position = (Row, Column)
+
+-- A space is the combination of position and square
+type Space = (Position, Square)
+
+-- Finally, the board is a list of spaces
+type Board = [Space]
+```
+
+And some utility functions:
+
+```haskell
+-- Is the game over?
+over :: Board -> Bool
+over = undefined
+
+-- The opponent for the given player
+opponent :: Player -> Player
+opponent = undefined
+
+-- Play a space for the player in the given board
+play :: Player -> Position -> Board -> Board
+play = undefined
+```
+
+### Applicative
+
+One of the things this program needs to do is generate a `Board` with all
+`Square`s `Open`. We could do this directly:
+
+```haskell
+openBoard :: Board
+openBoard =
+    [ ((T, L), Open), ((T, C), Open), ((T, R), Open)
+    , ((M, L), Open), ((M, C), Open), ((M, R), Open)
+    , ((B, L), Open), ((B, C), Open), ((B, R), Open)
+    ]
+```
+
+But that approach is tedious and error-prone. Another way to solve this problem
+is to create an `Open` square for all combinations of `Row`s and `Column`s. We
+can do exactly this with the `Applicative` instance for `[]`:
+
+```haskell
+openSpace :: Row -> Column -> Space
+openSpace r c = ((r, c), Open)
+
+openBoard :: Board
+openBoard = openSpace <$> [T, M, B] <*> [L, C, R]
+```
+
+Let's walk through the body of `openBoard` to see why it gives the result we
+need. First, `openSpace <$> [T, M, B]` maps the two-argument `openSpace` over
+the list `[T, M, B]`. This creates a list of partially-applied functions. Each
+of these functions has been given a `Row` but still needs a `Column` to produce
+a full `Space`. We can show this as a list of lambdas taking a `Column` and
+building a `Space` with the `Row` it has already:
+
+```haskell
+(<$>) :: (a -> b) -> f a -> f b
+
+--           a       b
+openSpace :: Row -> (Column -> Space)
+
+--                         f   b
+openSpace <$> [T, M, B] :: [] (Column -> Space)
+
+openSpace <$> [T, M, B]
+-- => [ (\c -> ((T, c), Open))
+-- => , (\c -> ((M, c), Open))
+-- => , (\c -> ((B, c), Open))
+-- => ]
+```
+
+
+Like the `Maybe` example from the `Applicative` chapter, we've created a
+function in a context. Here we have the function `(Column -> Space)` in the `[]`
+context: `[(Column -> Space)]`. As in previous chapters, separating the type
+constructor from its argument and writing  `[(Column -> Space)]` as `[] (Column
+-> Space)` shows how it matches the `f b` in `(<$>)`s type signature. How do we
+apply a function in a context to a value in a context? With `(<*>)`.
+
+Using `(<*>)` with lists means applying every function to every value:
+
+```haskell
+openSpace <$> [T, M, B] <*> [L, C, R]
+-- => [ (\c -> ((T, c), Open)) L        (first function applied to each value)
+-- => , (\c -> ((T, c), Open)) C
+-- => , (\c -> ((T, c), Open)) R
+-- => , (\c -> ((M, c), Open)) L        (second function applied to each value)
+-- => , (\c -> ((M, c), Open)) C
+-- => , (\c -> ((M, c), Open)) R
+-- => , (\c -> ((B, c), Open)) L        (third function applied to each value)
+-- => , (\c -> ((B, c), Open)) C
+-- => , (\c -> ((B, c), Open)) R
+-- => ]
+--
+-- => [ ((T, L), Open)
+-- => , ((T, C), Open)
+-- => , ((T, R), Open)
+-- => , ((M, L), Open)
+-- => , ((M, C), Open)
+-- => , ((M, R), Open)
+-- => , ((B, L), Open)
+-- => , ((B, C), Open)
+-- => , ((B, R), Open)
+-- => ]
+```
+
+### Monad and non-determinism
+
+The heart of the minimax algorithm is playing out a hypothetical future where
+each available move is made to see which one works out best. The `Monad`
+instance for `[]` is perfect for this problem when we think of lists as
+representing one non-deterministic value rather than a list of many
+deterministic ones.
+
+The list `[1, 2, 3]` represents a single number that is any one of `1`, `2`, or
+`3` at once. The type of this value is `[Int]`. The `Int` tells us the type of
+the value we're dealing with and the `[]` tells us that it's many values at
+once.
+
+Under this interpretation, `Functor`'s `fmap` represents *changing*
+probabilities: we have a number that can be any of `1`, `2`, or `3`. When we
+`fmap (+1)`, we get back a number that can be any of `2`, `3`, or `4`. We've
+changed the non-determinism without changing *how much* non-determinism there
+is. That fact, that `fmap` can't increase or decrease the non-determinism, is
+actually guaranteed through the Functor laws.
+
+```haskell
+fmap (+1) [1, 2, 3]
+-- => [2, 3, 4]
+```
+
+`Applicative`'s `(<*>)` can be thought of as *combining* probabilities. Given a
+function that can be any of `(+1)`, `(+2)`, or `(+3)` and a number that can be
+any of `1`, `2`, or `3`, `(<*>)` will give us a new number that can be any of
+the combined results of applying each possible function to each possible value.
+
+```haskell
+[(+1), (+2), (+3)] <*> [1, 2, 3]
+-- => [2,3,4,3,4,5,4,5,6]
+```
+
+Finally, `Monad`'s `(>>=)` is used to *expand* probabilities. Looking at its
+type again:
+
+```haskell
+(>>=) :: m a -> (a -> m b) -> m b
+```
+
+And specializing this to lists:
+
+```haskell
+--       m  a -> (a -> m  b) -> m  b
+(>>=) :: [] a -> (a -> [] b) -> [] b
+```
+
+We can see that it takes an `a` that can be one of many values, and a function
+from `a` to `[b]`, i.e. a `b` that can be one of many values. `(>>=)` applies
+the function `(a -> [b])` to every `a` in the input list. The result must be
+`[[b]]`. To return the required type `[b]`, the list is then flattened. Because
+the types are so generic, this is the only implementation this function can
+have. If we rule out obvious mistakes like ignoring arguments and returning an
+empty list, reordering the list, or adding or dropping elements, the only way to
+define this function is to map then flatten.
+
+```haskell
+xs >>= f = concat (map f xs)
+```
+
+Given our same number, one that can be any of `1`, `2`, or `3`, and a function
+that takes a (deterministic) number and produces a new set of possibilities,
+`(>>=)` will expand the probability space:
+
+```haskell
+next :: Int -> [Int]
+next n = [n - 1, n, n + 1]
+
+[1, 2, 3] >>= next
+-- => concat (map next [1, 2, 3])
+-- => concat [[1 - 1, 1, 1 + 1], [2 - 1, 2, 2 + 1], [3 - 1, 3, 3 + 1]]
+-- => [0,1,2,1,2,3,2,3,4]
+```
+
+We can continue expanding by repeatedly using `(>>=)`:
+
+```haskell
+[1, 2, 3] >>= next >>= next
+-- => [-1,0,1,0,1,2,1,2,3,0,1,2,1,2,3,2,3,4,1,2,3,2,3,4,3,4,5]
+```
+
+If we picture the `next` function as a step in time, going from some current
+state to multiple possible next states, we can think of `>>= next >>= next` as
+looking two steps into the future, exploring the possible states reachable from
+possible states.
+
+### The Future
+
+If the above theory didn't make complete sense, that's OK. Let's get back to our
+Tic-Tac-Toe program and see how this works in the context of a real-word
+example.
+
+When it's our turn (us being the computer player), we want to play out the next
+turn for every move we have available. For each of those next turns, we want to
+do the same thing again. We want to repeat this process until the game is over.
+At that point, we can see which choice lead to the best result and use that one.
+
+One thing we'll need, and our first opportunity to use `Monad`, is to find all
+available moves for a given `Board`:
+
+```haskell
+available :: Board -> [Position]
+available board = do
+    (position, Open) <- board
+
+    return position
+```
+
+In this expression, we're treating a `Board` as a list of `Space`s. In other
+words, it's one `Space` that is all of the spaces on the board at once. We're
+using `(>>=)`, through *do-notation*, to map-then-flatten each `Space` to its
+`Position`. We're using *do-notation* to take advantage of the fact that if we
+use a pattern in the left-hand side of `(<-)`, but the value doesn't match the
+pattern, it's discarded. This expression is a concise map-filter that relies on
+`(>>=)` to do the mapping and pattern matching to do the filtering.
+
+### Return
+
+The `return` function, seen at the end of `available`, is not like `return`
+statements you'll find in other languages. Specifically, it does not abort the
+computation, presenting its argument as the return value for the function call.
+Nor is it always required at the end of a monadic expression. `return` is
+another function from the `Monad` type class. Its job is to take some value of
+type `a` and make it an `m a`. Conceptually, it should do this by putting the
+value in some default or minimal context. For `Maybe` this means applying
+`Just`, for `[]`, we put the value in a singleton list:
+
+```haskell
+--        a -> m  a
+return :: a -> [] a
+return x = [x]
+```
+
+In our example, `position` is of type `Position` (i.e. `a`) and we need the
+expression to have type `[Position]` (i.e. `m a`), so `return position` does
+that.
+
+Another `Monad`-using function of the minimax algorithm is one that expands a
+given board into the end-states reached when each player plays all potential
+moves:
+
+```haskell
+future :: Player -> Board -> [Board]
+future player board = do
+    if over board
+        then return board
+        else do
+            space <- available board
+
+            future (opponent player) (play player space board)
+```
+
+First we check if the `Board` is `over`. If that's the case, the future is a
+singleton list of only that `Board` -- again, `return board` does that.
+Otherwise, we explore all available spaces. For each of them, we explore into
+the future again, this time for our opponent on a `Board` where we've played
+that space. This process repeats until someone wins or we fill the board in a
+draw. To fit this function into our Tic-Tac-Toe-playing program, we would score
+each path as we explore it and play the path with the best score.
+
+While a full program like this is very interesting, it quickly gets complicated
+with things not important to our discussion. To see a complete definition of a
+minimax-using Tic-Tac-Toe-playing program written in Ruby, check out Never Stop
+Building's [Understanding Minimax][minimax-post].
+
+[minimax-post]: http://neverstopbuilding.com/minimax
 
 ## IO
 
@@ -2405,7 +2863,7 @@ and overloaded from type to type.
 To see how this works, let's build an equivalent definition for `main`, only
 this time no do-notation, only `(>>=)`.
 
-### Typed Puzzles
+### Typed puzzles
 
 Starting with the type of `main`, we immediately see something worth explaining:
 
