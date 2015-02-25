@@ -106,8 +106,8 @@ This code is equivalent to the do-notation version I showed before. If you're
 not sure, try to manually convert between the two forms. The steps required were
 shown in the do-notation sub-section of the Monad chapter.
 
-Hopefully, this exercise has you convinced you that while I/O in Haskell may
-appear confusing at first, things are quite a bit simpler:
+Hopefully, this exercise has convinced you that while I/O in Haskell may appear
+confusing at first, things are quite a bit simpler:
 
 - Any function with an `IO` type *represents* an action to be performed
 - Actions are not executed, only combined into larger actions using `(>>=)`
