@@ -5,10 +5,10 @@ there's a natural flow from imperative code to monadic programming with
 do-notation, to the underlying expressions combined with `(>>=)`. As I
 mentioned, this is the only way to combine `IO` values. While `IO` does have
 instances for `Functor` and `Applicative`, the functions in these classes
-(`fmap`, `pure`, and `(<*>)`) are defined in terms of `return` and `(>>=)` from
-its `Monad` instance. For this reason, I won't be showing their definitions.
-That said, these instances are still useful. If your `IO` code doesn't require
-the full power of monads, it's better to use a weaker constraint. More general
+(`fmap` and `(<*>)`) are defined in terms of `return` and `(>>=)` from its
+`Monad` instance. For this reason, I won't be showing their definitions. That
+said, these instances are still useful. If your `IO` code doesn't require the
+full power of monads, it's better to use a weaker constraint. More general
 programs are better and weaker constraints on what kind of data your functions
 can work with makes them more generally useful.
 
