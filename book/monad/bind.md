@@ -57,7 +57,7 @@ findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     case findUser uid of
         Just u -> case userAddress u of
-            Just a -> case shippingCost a of
+            Just a -> case shippingCost (addressZip a) of
                 Just c  -> Just c
 
                 -- User has an invalid zip code
@@ -78,7 +78,7 @@ How does this code look with `(>>=)`?
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
-findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost
+findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost . addressZip
 ```
 
 You have to admit, that's quite nice. Hopefully even more so when you look back
