@@ -35,4 +35,6 @@
 
 # Other Types
 
+## IO
+
 <<[other-types/io/other-instances.md]
