@@ -72,9 +72,8 @@ Next, let's review the type of `(>>=)`:
 In our case, `m` will always be `IO`, but `a` and `b` will be different each
 time we use `(>>=)`. The first combination we need is `putStr` and `getLine`.
 `putStr "..."` fits as `m a`, because its type is `IO ()`, but `getLine` does
-not have the type `() -> IO b` which is required for things to line up. Remember
-from the previous chapter that there's another operator built on top of `(>>=)`
-designed to fix this problem:
+not have the type `() -> IO b` which is required for things to line up. There's
+another operator built on top of `(>>=)` designed to fix this problem:
 
 ```haskell
 (>>) :: m a -> m b -> m b
