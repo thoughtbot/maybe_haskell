@@ -53,10 +53,10 @@ add :: Int -> Int -> Int
 add x y = x + y
 ```
 
-The type signature can be confusing because the argument types are note
-separated from the return type. There is a good reason for this, but I won't go
-into it yet. For now, feel free to mentally treat the thing after the last arrow
-as the return type.
+The type signature can be confusing because the argument types are not separated
+from the return type. There is a good reason for this, but I won't go into it
+yet. For now, feel free to mentally treat the thing after the last arrow as the
+return type.
 
 After the type signature, we give the function's name (`add`) and names for any
 arguments it takes (`x` and `y`). On the other side of the `=`, we define an
@@ -122,7 +122,7 @@ convenient) behaviors operators have:
    [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
 3. We can surround an operator and *either* of its arguments in parentheses to
-   get a new function that excepts whichever argument we left off. Expressions
+   get a new function that accepts whichever argument we left off. Expressions
    like `(+ 2)` and `(10 /)` are examples. The former adds `2` to something and
    the latter divides `10` by something. Expressions like these are called
    *sections*.
@@ -146,7 +146,7 @@ elem 3 [1, 2, 3, 4, 5]
 3 `elem` [1, 2, 3, 4, 5]
 -- => True
 
--- Or as a section, leaving out the needle
+-- Or as a section, leaving out the first argument
 intersects xs ys = any (`elem` xs) ys
 ```
 

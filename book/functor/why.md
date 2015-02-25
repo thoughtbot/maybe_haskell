@@ -16,7 +16,7 @@ your program ever tries to evaluate it, it will raise an exception. Still, it
 can be extremely useful while developing because we can confirm that we've
 written our types correctly without having to think about implementations yet.
 
-Next, imagine we have want to display a user's name in all capitals:
+Next, imagine we want to display a user's name in all capitals:
 
 ```haskell
 userUpperName :: User -> String
@@ -54,8 +54,8 @@ to "deal with" the `Maybe` value. One option is to use the `fromMaybe` function
 to specify a default value of the empty string:
 
 ```haskell
-widget :: Maybe String -> String
-widget mname = "<span class=\"username\">" ++ name ++ "</span>"
+template :: Maybe String -> String
+template mname = "<span class=\"username\">" ++ name ++ "</span>"
 
   where
     name = fromMaybe "" mname

@@ -57,5 +57,5 @@ findUser uid =
 Depending on your domain and the likelihood of Maybe values, you might find this
 sort of "stair-casing" propagating throughout your system. This can lead to the
 thought that `Maybe` isn't really all that valuable over some *null* value built
-into the language. If you have to have this sort of matching expression peppered
-throughout the code base, how is that better than the analogous "`nil` checks"?
+into the language. If you need these `case` expressions peppered throughout the
+code base, how is that better than the analogous "`nil` checks"?

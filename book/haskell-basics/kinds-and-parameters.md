@@ -92,7 +92,7 @@ case of non-presence:
 ```haskell
 doubleAge :: Person Int -> Int
 doubleAge (PersonWithThing _ age) = 2 * age
-doubleAge (PersonWithoutThing _) = 1 -- perhaps provide a sane default?
+doubleAge (PersonWithoutThing _) = 1
 
 doubleAge patWithAge
 -- => 58
@@ -107,6 +107,8 @@ doubleAge patWithoutEmail
 -- => Type error! Person String != Person Int
 ```
 
-This has been a very brief introduction to higher-kinded types and specifically
-type variables. If it doesn't make complete sense now, that's OK. Using these
-things in practice is the best way to gain a more complete understanding.
+In this example, `doubleAge` had to account for people that had no age. The
+solution it chose was a poor one: return the doubled age or `1`. A better choice
+is to not return an `Int`; instead, return some type capable of holding both the
+doubled age and the fact that we might not have had an age to double in the
+first place. What we need is `Maybe`.

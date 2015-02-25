@@ -43,7 +43,7 @@ pat = Person "Pat" 29
 ## Pattern Matching
 
 To get the individual parts back out again, we use [pattern
-matching][pattern-matching].
+matching][pattern-matching]:
 
 ```haskell
 getName :: Person -> String
@@ -110,10 +110,10 @@ getAge (PersonWithoutAge _) = -- uh-oh
 ```
 
 If we decide to be lazy and not define that second function body, Haskell will
-compile, but warn us about the *non-exhaustive pattern*. What we've created at
-that point is a *partial function*. If such a program ever attempts to match
-`getAge` with a `Person` that has no age, we'll see one of the few runtime
-errors possible in Haskell.
+compile, but warn us about the *non-exhaustive* pattern match. What we've
+created at that point is a *partial function*. If such a program ever attempts
+to match `getAge` with a `Person` that has no age, we'll see one of the few
+runtime errors possible in Haskell.
 
 A person's name is always there, but their age may or may not be. Defining two
 constructors makes both cases explicit and forces anyone attempting to access a

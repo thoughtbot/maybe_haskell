@@ -26,6 +26,6 @@ not directly.
 The bottom line is that an experienced Haskeller would not write this code this
 way. `case` is a code smell when it comes to `Maybe`. Almost all code using
 `Maybe` can be improved from a tedious `case` evaluation using one of the three
-abstractions I'll be exploring in this book.
+abstractions we'll explore in this book.
 
 Let's get started.
