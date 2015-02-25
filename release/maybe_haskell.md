@@ -196,10 +196,10 @@ add :: Int -> Int -> Int
 add x y = x + y
 ```
 
-The type signature can be confusing because the argument types are note
-separated from the return type. There is a good reason for this, but I won't go
-into it yet. For now, feel free to mentally treat the thing after the last arrow
-as the return type.
+The type signature can be confusing because the argument types are not separated
+from the return type. There is a good reason for this, but I won't go into it
+yet. For now, feel free to mentally treat the thing after the last arrow as the
+return type.
 
 After the type signature, we give the function's name (`add`) and names for any
 arguments it takes (`x` and `y`). On the other side of the `=`, we define an
@@ -265,7 +265,7 @@ convenient) behaviors operators have:
    [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
 3. We can surround an operator and *either* of its arguments in parentheses to
-   get a new function that excepts whichever argument we left off. Expressions
+   get a new function that accepts whichever argument we left off. Expressions
    like `(+ 2)` and `(10 /)` are examples. The former adds `2` to something and
    the latter divides `10` by something. Expressions like these are called
    *sections*.
@@ -289,7 +289,7 @@ elem 3 [1, 2, 3, 4, 5]
 3 `elem` [1, 2, 3, 4, 5]
 -- => True
 
--- Or as a section, leaving out the needle
+-- Or as a section, leaving out the first argument
 intersects xs ys = any (`elem` xs) ys
 ```
 
@@ -373,7 +373,7 @@ pat = Person "Pat" 29
 ## Pattern Matching
 
 To get the individual parts back out again, we use [pattern
-matching][pattern-matching].
+matching][pattern-matching]:
 
 ```haskell
 getName :: Person -> String
@@ -440,10 +440,10 @@ getAge (PersonWithoutAge _) = -- uh-oh
 ```
 
 If we decide to be lazy and not define that second function body, Haskell will
-compile, but warn us about the *non-exhaustive pattern*. What we've created at
-that point is a *partial function*. If such a program ever attempts to match
-`getAge` with a `Person` that has no age, we'll see one of the few runtime
-errors possible in Haskell.
+compile, but warn us about the *non-exhaustive* pattern match. What we've
+created at that point is a *partial function*. If such a program ever attempts
+to match `getAge` with a `Person` that has no age, we'll see one of the few
+runtime errors possible in Haskell.
 
 A person's name is always there, but their age may or may not be. Defining two
 constructors makes both cases explicit and forces anyone attempting to access a
@@ -543,7 +543,7 @@ case of non-presence:
 ```haskell
 doubleAge :: Person Int -> Int
 doubleAge (PersonWithThing _ age) = 2 * age
-doubleAge (PersonWithoutThing _) = 1 -- perhaps provide a sane default?
+doubleAge (PersonWithoutThing _) = 1
 
 doubleAge patWithAge
 -- => 58
@@ -558,9 +558,11 @@ doubleAge patWithoutEmail
 -- => Type error! Person String != Person Int
 ```
 
-This has been a very brief introduction to higher-kinded types and specifically
-type variables. If it doesn't make complete sense now, that's OK. Using these
-things in practice is the best way to gain a more complete understanding.
+In this example, `doubleAge` had to account for people that had no age. The
+solution it chose was a poor one: return the doubled age or `1`. A better choice
+is to not return an `Int`; instead, return some type capable of holding both the
+doubled age and the fact that we might not have had an age to double in the
+first place. What we need is `Maybe`.
 
 ## Maybe
 
@@ -621,8 +623,8 @@ findUser uid =
 Depending on your domain and the likelihood of Maybe values, you might find this
 sort of "stair-casing" propagating throughout your system. This can lead to the
 thought that `Maybe` isn't really all that valuable over some *null* value built
-into the language. If you have to have this sort of matching expression peppered
-throughout the code base, how is that better than the analogous "`nil` checks"?
+into the language. If you need these `case` expressions peppered throughout the
+code base, how is that better than the analogous "`nil` checks"?
 
 ## Don't Give Up
 
@@ -652,7 +654,7 @@ not directly.
 The bottom line is that an experienced Haskeller would not write this code this
 way. `case` is a code smell when it comes to `Maybe`. Almost all code using
 `Maybe` can be improved from a tedious `case` evaluation using one of the three
-abstractions I'll be exploring in this book.
+abstractions we'll explore in this book.
 
 Let's get started.
 
@@ -1152,7 +1154,7 @@ your program ever tries to evaluate it, it will raise an exception. Still, it
 can be extremely useful while developing because we can confirm that we've
 written our types correctly without having to think about implementations yet.
 
-Next, imagine we have want to display a user's name in all capitals:
+Next, imagine we want to display a user's name in all capitals:
 
 ```haskell
 userUpperName :: User -> String
@@ -1190,8 +1192,8 @@ to "deal with" the `Maybe` value. One option is to use the `fromMaybe` function
 to specify a default value of the empty string:
 
 ```haskell
-widget :: Maybe String -> String
-widget mname = "<span class=\"username\">" ++ name ++ "</span>"
+template :: Maybe String -> String
+template mname = "<span class=\"username\">" ++ name ++ "</span>"
 
   where
     name = fromMaybe "" mname
@@ -1771,18 +1773,20 @@ to do is add more fields to `Options` and continue applying sub-parsers with
 
 # Monad
 
-So far, we've seen that using this new `Maybe` type to represent failure can be
-very inconvenient. We addressed a number of scenarios by using `fmap` to
-"upgrade" a system full of normal functions (free of any `nil`-checks) into one
-that can take and pass along `Maybe` values. When confronted with a new scenario
-that could not be handled by `fmap` alone, we discovered a new function `(<*>)`
-which helped ease our pain again. This chapter is about addressing a third
-scenario, one that `fmap` and even `(<*>)` cannot solve: dependent computations.
+So far, we've seen that as `Maybe` makes our code safer, it also makes it less
+convenient. By making potential non-presence explicit, we now need to correctly
+account for it at every step. We addressed a number of scenarios by using `fmap`
+to "upgrade" a system full of normal functions (free of any `nil`-checks) into
+one that can take and pass along `Maybe` values. When confronted with a new
+scenario that could not be handled by `fmap` alone, we discovered a new function
+`(<*>)` which helped ease our pain again. This chapter is about addressing a
+third scenario, one that `fmap` and even `(<*>)` cannot solve: dependent
+computations.
 
 Let's throw a monkey wrench into our `getParam` example from earlier. This time,
-let's say we're accepting logins by either username or password. The user can
-say which method they're using by passing a `type` param specifying "username"
-or "password".
+let's say we're accepting logins by either username or email. The user can say
+which method they're using by passing a `type` param specifying "username" or
+"email".
 
 *Note*: this whole thing is wildly insecure, but bear with me.
 
@@ -1859,7 +1863,7 @@ andThen (Just x) f = f x
 andThen _ _ = Nothing
 ```
 
-Again, we'll use the function infix via backticks for readability:
+We'll use the function infix via backticks for readability:
 
 ```haskell
 loginUser :: Params -> Maybe User
@@ -1917,12 +1921,9 @@ users' addresses and their zip codes:
 findUser :: UserId -> Maybe User
 findUser = undefined
 
--- Returns Maybe because Users aren't required to have Addresses
-userAddress :: User -> Maybe Address
-userAddress = undefined
-
-addressZip :: Address -> ZipCode
-addressZip = undefined
+-- Returns Maybe because Users aren't required to have an address on file
+userZip :: User -> Maybe ZipCode
+userZip = undefined
 ```
 
 Let's also say we have a function to calculate shipping costs by zip code. It
@@ -1939,8 +1940,8 @@ We could naively calculate the shipping cost for some user given their Id:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     case findUser uid of
-        Just u -> case userAddress u of
-            Just a -> case shippingCost a of
+        Just u -> case userZip u of
+            Just z -> case shippingCost z of
                 Just c  -> Just c
 
                 -- User has an invalid zip code
@@ -1961,7 +1962,7 @@ How does this code look with `(>>=)`?
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
-findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
 You have to admit, that's quite nice. Hopefully even more so when you look back
@@ -2000,7 +2001,7 @@ first place.
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
-findUserShippingCost uid = findUser uid >>= userAddress >>= shippingCost
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
 First, to make things clearer, let's add some arbitrary line breaks:
@@ -2009,7 +2010,7 @@ First, to make things clearer, let's add some arbitrary line breaks:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>=
-    userAddress >>=
+    userZip >>=
     shippingCost
 ```
 
@@ -2021,9 +2022,9 @@ add another arbitrary line break to highlight the final expression in the chain.
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>= \u ->
-    userAddress u >>= \a ->
+    userZip u >>= \z ->
 
-    shippingCost a
+    shippingCost z
 ```
 
 Next, we'll take each lambda and translate it into a *binding*, which looks a
@@ -2034,9 +2035,9 @@ y":
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Finally, we prefix the series of "statements" with `do`:
@@ -2045,9 +2046,9 @@ Finally, we prefix the series of "statements" with `do`:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid = do
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Et Violà, you have the equivalent *do-notation* version of our function. When
@@ -2060,9 +2061,9 @@ Remove the `do` keyword:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     u <- findUser uid
-    a <- userAddress u
+    z <- userZip u
 
-    shippingCost a
+    shippingCost z
 ```
 
 Translate each binding into a version using `(>>=)` and lambdas:
@@ -2071,9 +2072,9 @@ Translate each binding into a version using `(>>=)` and lambdas:
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>= \u ->
-    userAddress u >>= \a ->
+    userZip u >>= \z ->
 
-    shippingCost a
+    shippingCost z
 ```
 
 The compiler can stop here as all remaining steps are stylistic changes only
@@ -2569,7 +2570,7 @@ openSpace <$> [T, M, B] <*> [L, C, R]
 -- => , (\c -> ((B, c), Open)) C
 -- => , (\c -> ((B, c), Open)) R
 -- => ]
---
+-- 
 -- => [ ((T, L), Open)
 -- => , ((T, C), Open)
 -- => , ((T, R), Open)
@@ -2753,13 +2754,12 @@ Building's [Understanding Minimax][minimax-post].
 
 ## IO
 
-So far, we've seen three types: `Maybe a`, `Either e a`, and `[a]` (which can be
-thought of as `List a`). These types all represent a value with some other bit
-of information: a *context*. If `a` is the `User` you're trying to find, the
-`Maybe` says if she was actually found. If the `a` is the `JSON` you're
-attempting to parse, the `Either e` holds information about the error when the
-parse fails. If `a` is a number, then `[]` tells you it is actually many numbers
-at once, and how many.
+So far, we've seen three types: `Maybe a`, `Either e a`, and `[a]`. These types
+all represent a value with some other bit of information: a *context*. If `a` is
+the `User` you're trying to find, the `Maybe` says if she was actually found. If
+the `a` is the `JSON` you're attempting to parse, the `Either e` holds
+information about the error when the parse fails. If `a` is a number, then `[]`
+tells you it is actually many numbers at once, and how many.
 
 For all these types, we've seen the behaviors that allow us to add them to the
 `Functor`, `Applicative`, and `Monad` type classes. These behaviors obey certain
@@ -2937,9 +2937,8 @@ Next, let's review the type of `(>>=)`:
 In our case, `m` will always be `IO`, but `a` and `b` will be different each
 time we use `(>>=)`. The first combination we need is `putStr` and `getLine`.
 `putStr "..."` fits as `m a`, because its type is `IO ()`, but `getLine` does
-not have the type `() -> IO b` which is required for things to line up. Remember
-from the previous chapter that there's another operator built on top of `(>>=)`
-designed to fix this problem:
+not have the type `() -> IO b` which is required for things to line up. There's
+another operator built on top of `(>>=)` designed to fix this problem:
 
 ```haskell
 (>>) :: m a -> m b -> m b
@@ -2972,8 +2971,8 @@ This code is equivalent to the do-notation version I showed before. If you're
 not sure, try to manually convert between the two forms. The steps required were
 shown in the do-notation sub-section of the Monad chapter.
 
-Hopefully, this exercise has you convinced you that while I/O in Haskell may
-appear confusing at first, things are quite a bit simpler:
+Hopefully, this exercise has convinced you that while I/O in Haskell may appear
+confusing at first, things are quite a bit simpler:
 
 - Any function with an `IO` type *represents* an action to be performed
 - Actions are not executed, only combined into larger actions using `(>>=)`
@@ -2990,10 +2989,10 @@ there's a natural flow from imperative code to monadic programming with
 do-notation, to the underlying expressions combined with `(>>=)`. As I
 mentioned, this is the only way to combine `IO` values. While `IO` does have
 instances for `Functor` and `Applicative`, the functions in these classes
-(`fmap`, `pure`, and `(<*>)`) are defined in terms of `return` and `(>>=)` from
-its `Monad` instance. For this reason, I won't be showing their definitions.
-That said, these instances are still useful. If your `IO` code doesn't require
-the full power of monads, it's better to use a weaker constraint. More general
+(`fmap` and `(<*>)`) are defined in terms of `return` and `(>>=)` from its
+`Monad` instance. For this reason, I won't be showing their definitions. That
+said, these instances are still useful. If your `IO` code doesn't require the
+full power of monads, it's better to use a weaker constraint. More general
 programs are better and weaker constraints on what kind of data your functions
 can work with makes them more generally useful.
 
@@ -3039,7 +3038,7 @@ yourself:
 import System.Environment (getEnvironment)
 
 -- lookup :: Eq a => a -> [(a, b)] -> Maybe b
---
+-- 
 -- getEnvironment :: IO [(String, String)]
 
 lookupEnv :: String -> IO (Maybe String)
