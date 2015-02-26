@@ -71,10 +71,10 @@ get into that here.
 
 ## Sum Types
 
-As alluded to earlier, types can have more than one data constructor, each
-separated by a `|` symbol. This is called a *sum type* because the total number
-of values you can build of this type is the sum of the number of values you can
-build with each constructor.
+As alluded to earlier, types can have more than one data constructor. These are
+called *sum types* because the total number of values you can build of a sum
+type is the sum of the number of values you can build with each of its
+constructors. The syntax is to separate each constructor by a `|` symbol:
 
 ```haskell
 data Person = PersonWithAge String Int | PersonWithoutAge String
