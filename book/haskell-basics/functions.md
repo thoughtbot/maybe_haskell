@@ -25,10 +25,15 @@ signature. We can annotate any expression with `:: <type>` to explicitly tell
 the compiler the type we want (or expect) that expression to have.
 
 ```haskell
-six = (5 :: Int) + 1
+almostThird = (3 :: Float) / 9
+-- => 0.3333334
+
+actualThird = (3 :: Rational) / 9
+-- => 1 % 3
 ```
 
-We can read this as `six` *is* `5`, *of type* `Int`, plus `1`
+We can read these as `almostThird` is `3`, *of type* `Float`, divided by `9` and
+`actualThird` is `3`, *of type* `Rational`, divided by `9`.
 
 Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
