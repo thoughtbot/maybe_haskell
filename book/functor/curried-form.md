@@ -92,8 +92,11 @@ addThree x y z = x + y + z
 ```
 
 And it has the same meaning. This is why Haskell type signatures don't appear to
-separate argument types from return types. Technically, the first type is the
-only argument, everything else is a functional return type.
+separate argument types from return types. Technically, all functions have the
+type `(a -> b)`; one argument, one result, separated by an arrow. In the case of
+`addThree`, `a` is `Int` and `b` is `(Int -> (Int -> Int))`, which is itself of
+the form `(a -> b)` with a `b` of `(Int -> Int)`. This process continues for as
+many arguments as the function (conceptually) takes.
 
 Similarly, function application is left-associative. This means that instead of
 writing:
