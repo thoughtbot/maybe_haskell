@@ -116,8 +116,8 @@ use them like any other function. That said, there are three additional (and
 convenient) behaviors operators have:
 
 1. They are used *infix* by default, meaning they appear between their arguments
-   (as in `2 + 2`). To use an operator *prefix*, it must be surrounded in
-   parentheses (as in `(+) 2 2`).
+   (i.e. `2 + 2`, not `+ 2 2`). To use an operator *prefix*, it must be
+   surrounded in parentheses (as in `(+) 2 2`).
 2. When defining an operator, we can assign a custom [associativity][] and
    [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
@@ -138,7 +138,7 @@ an operator by surrounding it in backticks:
 [report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
 
 ```haskell
--- Normal usage of an elem function
+-- Normal usage of an elem function for checking if a value is present in a list
 elem 3 [1, 2, 3, 4, 5]
 -- => True
 
@@ -165,7 +165,7 @@ Here's an example:
 
 ```haskell
 twice (\x -> x * x + 10) 5
--- => 35
+-- => 1235
 ```
 
 If you come across a code example using a lambda, you can always rewrite it to

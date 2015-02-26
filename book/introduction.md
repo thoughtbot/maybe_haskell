@@ -73,8 +73,8 @@ the even values *of that x*. We can state directly that count-evens is taking
 the length after filtering for evens.
 
 This is a relatively contrived example, but it's indicative of the confusion
-that can happen at any level: if your first reaction is "So much syntax! What is
-this crazy dot thing!?", you're going to have a bad time. Instead, try to
+that can happen at any level: if your first reaction is "such weird syntax! What
+is this crazy dot thing!?", you're going to have a bad time. Instead, try to
 internalize the parts that make sense while getting comfortable with *not*
 knowing the parts that don't. As you learn more, the various bits will tie
 together in ways you might not expect.

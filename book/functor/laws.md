@@ -38,11 +38,11 @@ equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
 element in the list (as `fmap id` does) gives you back the same exact list, and
 that is exactly what you expect to get if you apply `id` directly to the list
-itself. Let's go through the same thought exercise for `Maybe` so you can see
-that the law holds for its implementation as well.
+itself.
 
-We'll use our two example values `actuallyFive` and `notReallyFive` from
-earlier:
+Let's go through the same thought exercise for `Maybe` so you can see that the
+law holds for its implementation as well. We'll use our two example values
+`actuallyFive` and `notReallyFive` from earlier:
 
 ```haskell
 actuallyFive :: Maybe Int
@@ -79,7 +79,7 @@ fmap _ Nothing = Nothing
 Since `actuallyFive` matches the `Just` case, `fmap` will apply `id` to `5`,
 then re-wrap the result in `Just`:
 
-```haskll
+```haskell
 fmap id actuallyFive
 -- => fmap id (Just 5) = Just (id 5)
 -- =>                  = Just 5

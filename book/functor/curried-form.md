@@ -13,8 +13,8 @@ aptly named.
 
 In the implementation of purely functional programming languages, there is value
 in all functions taking exactly one argument and returning exactly one result.
-Therefore, users of Haskell have two choices for defining "multi-argument"
-functions.
+Haskell is written this way, so users have two choices for defining
+"multi-argument" functions.
 
 We could rely solely on tuples:
 

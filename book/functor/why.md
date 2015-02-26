@@ -13,8 +13,8 @@ I've left the implementation of `findUser` as `undefined` because it doesn't
 matter for our example. I'll do this frequently throughout the book. `undefined`
 is a function with type `a`. That allows it to stand in for any expression. If
 your program ever tries to evaluate it, it will raise an exception. Still, it
-can be extremely useful while developing because we can confirm that we've
-written our types correctly without having to think about implementations yet.
+can be extremely useful while developing because we can build our program
+incrementally, but have the compiler check our types as we go.
 
 Next, imagine we want to display a user's name in all capitals:
 
@@ -51,12 +51,12 @@ we see fit, but still pass along the `Maybe`s everywhere we need to.
 If we were doing this in the context of a web application, this maybe-name might
 end up being interpolated into some HTML. It's at this boundary that we'll have
 to "deal with" the `Maybe` value. One option is to use the `fromMaybe` function
-to specify a default value of the empty string:
+to specify a default value:
 
 ```haskell
 template :: Maybe String -> String
 template mname = "<span class=\"username\">" ++ name ++ "</span>"
 
   where
-    name = fromMaybe "" mname
+    name = fromMaybe "(no name given)" mname
 ```
