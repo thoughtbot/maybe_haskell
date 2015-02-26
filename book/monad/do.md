@@ -3,9 +3,10 @@
 There's one more topic I'd like to mention related to monads: *do-notation*.
 
 This bit of syntactic sugar is provided by Haskell for any of its `Monad`s. The
-reason is to allow monadic code to read like imperative code when composing
-monadic expressions. This is valuable because monadic expressions, especially
-those of type `IO a`, are often best understood as a series of imperative steps:
+reason is to allow functional Haskell code to read like imperative code when
+building compound expressions using `Monad`. This is valuable because monadic
+expressions, especially those representing interactions with the outside world,
+are often read best as a series of imperative steps:
 
 ```haskell
 f = do
@@ -33,19 +34,20 @@ findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
-First, to make things clearer, let's add some arbitrary line breaks:
+First, let's add some arbitrary line breaks so the eventual formatting aligns
+with what someone might write by hand:
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>=
     userZip >>=
+
     shippingCost
 ```
 
 Next, let's name the arguments to each expression via anonymous functions,
-rather than relying on partial application and their curried nature. We'll also
-add another arbitrary line break to highlight the final expression in the chain.
+rather than relying on partial application and their curried nature:
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
@@ -106,53 +108,25 @@ findUserShippingCost uid =
     shippingCost z
 ```
 
-The compiler can stop here as all remaining steps are stylistic changes only
-(removing whitespace and *eta-reducing*[^eta-reduce] the lambdas).
+The compiler can stop here as all remaining steps are stylistic changes only. To
+get back to our exact original expression, we only need to
+*eta-reduce*[^eta-reduce] the lambdas:
+
+```haskell
+findUserShippingCost :: UserId -> Maybe Cost
+findUserShippingCost uid =
+    findUser uid >>=
+    userZip >>=
+
+    shippingCost
+```
+
+And remove our arbitrary line breaks:
+
+
+```haskell
+findUserShippingCost :: UserId -> Maybe Cost
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
+```
 
 [^eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
-
-## Will it Pipe?
-
-Both notations have their place and which to use is often up to the individual
-developer, but I do have a personal guideline I can offer.
-
-As mentioned, *do-notation* is typically useful in the `IO` monad where the
-computation is probably representing a series of dependent actions to take place
-in the real world. If your process is a straight pipe-line, chaining expressions
-together with `(>>=)` will usually read better:
-
-```haskell
--- Read stdin, pass it to the given function, and print the result on stdout
-interact :: (String -> String) -> IO ()
-interact f = getContents >>= f >>= putStr
-
--- vs
-interact f = do
-    c <- getContents
-
-    putStr (f c)
-```
-
-If instead you find yourself manipulating one result many times, *do-notation*
-is probably the way to go:
-
-```haskell
--- Build a user instance, then execute some actions with it before returning
-createUser :: Params -> IO User
-createUser params = do
-    user <- buildUser params
-
-    storeInDatabase user
-    sendConfirmationEmail user
-
-    return user
-
--- vs (something like)
-createUser params = buildUser params >>= \user ->
-    storeInDatabase user >> sendConfirmationEmail user >> return user
-```
-
-Don't worry if you don't follow all of the new information here (i.e. `IO ()` or
-the `(>>)` and `return` functions). These examples were only to show the
-differences between *do-notation* and relying only on `(>>=)` for composing
-monadic expressions.

@@ -18,7 +18,7 @@ a lot like what I'm about to walk through here.
 [except]: http://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Except.html
 [example]: http://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Except.html#g:3
 
-With `Maybe`, the `a` was the value and `Maybe` was the context. Therefore, we
+With `Maybe a`, the `a` was the value and `Maybe` was the context. Therefore, we
 made instances of `Functor`, `Applicative`, and `Monad` for `Maybe` (not `Maybe
 a`). With `Either` as we've written it above, `b` is the value and `Either a` is
 the context, therefore Haskell has instances of `Functor`, `Applicative`, and
@@ -46,12 +46,11 @@ fmap :: (a -> b) -> Either e a -> Either e b
 
 ### ParserError
 
-As an example, consider some kind of parser. If the parser fails, it would be
-nice to include the line and character that triggered the failure. To accomplish
-this, we first define a type to represent information about the failure. For our
-purposes, we'll say it's the line and character where something unexpected
-appeared, but it could be much richer than that including what was expected and
-what was seen instead:
+As an example, consider some kind of parser. If parsing fails, it would be nice
+to include some information about what triggered the failure. To accomplish
+this, we first define a type to represent this information. For our purposes,
+it's the line and column where something unexpected appeared, but it could be
+much richer than that including what was expected and what was seen instead:
 
 ```haskell
 data ParserError = ParserError Int Int
@@ -142,15 +141,14 @@ Speaking of `Applicative`...
 
 ### Applicative
 
-It would also be nice if we could take two potentially failed results and pass
+It would also be nice if we could take two potentially-failed results and pass
 them as arguments to some function that takes normal values. If any result
 fails, the overall result is also a failure. If all are successful, we get a
 successful overall result. This sounds a lot like what we did with `Maybe`, the
 only difference is we're doing it for a different kind of context.
 
 ```haskell
--- Given two json objects, merge them. Duplicate keys result in those in the
--- second object being kept.
+-- Given two json objects, merge them into one
 merge :: JSON -> JSON -> JSON
 merge = undefined
 
@@ -160,6 +158,13 @@ jsonString2 = "..."
 
 merge <$> parseJSON jsonString1 <*> parseJSON jsonString2
 ```
+
+`merge <$> parseJSON jsonString1` gives us a `Parsed (JSON -> JSON)`. (If this
+doesn't make sense, glance back at the examples in the Applicative chapter.)
+What we have is a *function* in a `Parsed` context. `parseJSON jsonString2`
+gives us a `Parsed JSON`, a *value* in a `Parsed` context. The job of `(<*>)` is
+to apply the `Parsed` function to the `Parsed` value and produce a `Parsed`
+result.
 
 Defining `(<*>)` starts out all right: if both values are present we'll get the
 result of applying the function wrapped up again in `Right`. If the second

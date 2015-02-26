@@ -21,10 +21,10 @@ andThen :: Maybe a -> (a -> Maybe b) -> Maybe b
 ## Chaining
 
 `(>>=)` is defined as an operator because it's meant to be used infix. It's also
-given an appropriate fixity so that it can be chained together intuitively. The
-word `andThen` comes to mind again as having multiple dependent computations
-lends itself to an `x andThen y andThen z` nature. To see this in action, let's
-walk through another example.
+given an appropriate fixity so it can be chained together intuitively. This is
+why I chose the name `andThen` for my fictitious version: it can sometimes help
+to read `x >>= y >>= z` as *x and-then y and-then z*. To see this in action,
+let's walk through another example.
 
 Suppose we are working on a system with the following functions for dealing with
 users' addresses and their zip codes:
