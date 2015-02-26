@@ -77,7 +77,7 @@ values must be surrounded by parentheses:
 
 ```haskell
 twice :: (Int -> Int) -> Int -> Int
-twice op x = op (op x)
+twice f x = f (f x)
 
 twice (add 2) 3
 -- => 7
@@ -85,7 +85,12 @@ twice (add 2) 3
 
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
-(`op`) to the second (`x`) twice, returning another `Int`.
+(`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
+definition of `twice` are grouping, not application. In Haskell, applying a
+function to some argument is simple: stick them together with a space in
+between. In this case, we need to group the inner `(f x)` so the outer `f` is
+applied to it as single argument. Without these parentheses, Haskell would think
+we were applying `f` to two arguments: another `f` and `x`.
 
 You also saw an example of *partial application*. The expression `add 2` returns
 a new function that itself takes the argument we left off. Let's break down that
@@ -102,7 +107,7 @@ add 2 :: Int -> Int
 
 -- Which is exactly the type of twice's first argument
 twice :: (Int -> Int) -> Int -> Int
-twice op x = op (op x)
+twice f x = f (f x)
 
 twice (add 2) 3
 -- => add 2 (add 2 3)
