@@ -120,5 +120,7 @@ whenJust (+5) notReallyFive
 -- => Nothing
 ```
 
-This function exists in the Haskell Prelude as `fmap` in the `Functor` type
-class.
+This function exists in Haskell's Prelude[^prelude] as `fmap` in the `Functor`
+type class.
+
+[^prelude]: The module of functions available without `import`ing anything.
