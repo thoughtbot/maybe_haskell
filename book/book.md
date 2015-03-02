@@ -35,7 +35,7 @@
 
 <<[functor/curried-form.md]
 
-<<[functor/generic-map.md]
+<<[functor/summary.md]
 
 # Applicative
 

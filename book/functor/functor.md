@@ -20,49 +20,21 @@ Therefore, we could implement a `Functor` instance for `Maybe` with the
 following code:
 
 ```haskell
-class Functor Maybe where
+instance Functor Maybe where
     fmap = whenJust
 ```
 
 In reality, there is no `whenJust` function; `fmap` is implemented directly:
 
 ```haskell
-class Functor Maybe where
-    fmap _ Nothing = Nothing
+instance Functor Maybe where
     fmap f (Just x) = Just (f x)
+    fmap _ Nothing = Nothing
 ```
 
-### List
-
-The most familiar example for an implementation of `fmap` is the one for `[]`.
-Like `Maybe` is the type constructor in `Maybe a`, `[]` is the type constructor
-in `[a]`. You can pronounce `[]` as *list* and `[a]` as *list of a*.
-
-The basic `map` function, which exists in many languages, including Haskell, has
-the following type:
-
-```haskell
-map :: (a -> b) -> [a] -> [b]
-```
-
-It takes a function from `a` to `b` and a *list of a*. It returns a *list of b*
-by applying the given function to each element in the list. Knowing that `[]` is
-a type constructor, and `[a]` represents applying that type constructor to some
-`a`, we can write this signature in a different way; one that shows it is the
-same as `fmap` when we replace the parameter `f` with `[]`:
-
-```haskell
---     (a -> b) -> f  a -> f  b
-map :: (a -> b) -> [] a -> [] b
-```
-
-This is the same process as replacing `f` with `Maybe` used to show that
-`whenJust` and `fmap` were also equivalent.
-
-`map` does exist in the Haskell Prelude (unlike `whenJust`), so the `Functor`
-instance for `[]` is in fact defined in terms of it:
-
-```haskell
-instance Functor [] where
-    fmap = map
-```
+This definition is exactly like the one we saw earlier for `whenJust`. The only
+difference is we're now implementing it as part of the `Functor` instance
+declaration for `Maybe`. For the rest of the book, I'll be omitting the `class`
+and `instance` syntax. Instead, I'll state in prose when a function is part of
+some type class but show its type and definition as if it was a normal,
+top-level function.
