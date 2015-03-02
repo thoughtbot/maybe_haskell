@@ -82,7 +82,7 @@ findUserShippingCost uid = do
     shippingCost z
 ```
 
-Et Violà, you have the equivalent *do-notation* version of our function. When
+Et voilà, you have the equivalent *do-notation* version of our function. When
 the compiler sees code written like this, it follows (mostly) the same process
 we did, but in reverse:
 

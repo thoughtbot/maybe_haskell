@@ -1,6 +1,6 @@
 ## Bind
 
-If you haven't guessed it, Haskell does have exactly this function. It's name is
+If you haven't guessed it, Haskell does have exactly this function. Its name is
 *bind* and it's defined as part of the `Monad` type class. Here is its type
 signature:
 

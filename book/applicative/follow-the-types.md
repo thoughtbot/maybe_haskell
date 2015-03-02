@@ -47,7 +47,7 @@ expression to an equivalent one with less noise:
 User <$> getParam "name" params :: Maybe (String -> User)
 ```
 
-This expression represents a "`Maybe` function". We're accustom to *values* in a
+This expression represents a "`Maybe` function". We're accustomed to *values* in a
 context: a `Maybe Int`, `Maybe String`, etc; and we saw how these were
 *functors*. In this case, we have a *function* in a context: a `Maybe (String ->
 User)`. Since functions are things that *can be applied*, these are called
