@@ -42,6 +42,11 @@ findAdmin uid = do
 
 [guard]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Control-Monad.html#v:guard
 
+If you're having trouble seeing why this expression works, start by de-sugaring
+from *do-notation* to the equivalent expression using `(>>=)`, then use the
+`Maybe`-specific definitions of `(>>=)`, `return`, and `guard` to reduce the
+expression when an admin is found, a non-admin is found, or no user is found.
+
 Next, let's look at the individual pieces we'll be combining into `main`:
 
 ```haskell
