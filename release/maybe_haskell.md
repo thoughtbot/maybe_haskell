@@ -80,8 +80,8 @@ the even values *of that x*. We can state directly that count-evens is taking
 the length after filtering for evens.
 
 This is a relatively contrived example, but it's indicative of the confusion
-that can happen at any level: if your first reaction is "So much syntax! What is
-this crazy dot thing!?", you're going to have a bad time. Instead, try to
+that can happen at any level: if your first reaction is "such weird syntax! What
+is this crazy dot thing!?", you're going to have a bad time. Instead, try to
 internalize the parts that make sense while getting comfortable with *not*
 knowing the parts that don't. As you learn more, the various bits will tie
 together in ways you might not expect.
@@ -168,10 +168,15 @@ signature. We can annotate any expression with `:: <type>` to explicitly tell
 the compiler the type we want (or expect) that expression to have.
 
 ```haskell
-six = (5 :: Int) + 1
+almostThird = (3 :: Float) / 9
+-- => 0.3333334
+
+actualThird = (3 :: Rational) / 9
+-- => 1 % 3
 ```
 
-We can read this as `six` *is* `5`, *of type* `Int`, plus `1`
+We can read these as `almostThird` is `3`, *of type* `Float`, divided by `9` and
+`actualThird` is `3`, *of type* `Rational`, divided by `9`.
 
 Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
@@ -215,7 +220,7 @@ values must be surrounded by parentheses:
 
 ```haskell
 twice :: (Int -> Int) -> Int -> Int
-twice op x = op (op x)
+twice f x = f (f x)
 
 twice (add 2) 3
 -- => 7
@@ -223,7 +228,12 @@ twice (add 2) 3
 
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
-(`op`) to the second (`x`) twice, returning another `Int`.
+(`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
+definition of `twice` are grouping, not application. In Haskell, applying a
+function to some argument is simple: stick them together with a space in
+between. In this case, we need to group the inner `(f x)` so the outer `f` is
+applied to it as single argument. Without these parentheses, Haskell would think
+we were applying `f` to two arguments: another `f` and `x`.
 
 You also saw an example of *partial application*. The expression `add 2` returns
 a new function that itself takes the argument we left off. Let's break down that
@@ -240,7 +250,7 @@ add 2 :: Int -> Int
 
 -- Which is exactly the type of twice's first argument
 twice :: (Int -> Int) -> Int -> Int
-twice op x = op (op x)
+twice f x = f (f x)
 
 twice (add 2) 3
 -- => add 2 (add 2 3)
@@ -259,8 +269,8 @@ use them like any other function. That said, there are three additional (and
 convenient) behaviors operators have:
 
 1. They are used *infix* by default, meaning they appear between their arguments
-   (as in `2 + 2`). To use an operator *prefix*, it must be surrounded in
-   parentheses (as in `(+) 2 2`).
+   (i.e. `2 + 2`, not `+ 2 2`). To use an operator *prefix*, it must be
+   surrounded in parentheses (as in `(+) 2 2`).
 2. When defining an operator, we can assign a custom [associativity][] and
    [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
@@ -281,7 +291,7 @@ an operator by surrounding it in backticks:
 [report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
 
 ```haskell
--- Normal usage of an elem function
+-- Normal usage of an elem function for checking if a value is present in a list
 elem 3 [1, 2, 3, 4, 5]
 -- => True
 
@@ -308,7 +318,7 @@ Here's an example:
 
 ```haskell
 twice (\x -> x * x + 10) 5
--- => 35
+-- => 1235
 ```
 
 If you come across a code example using a lambda, you can always rewrite it to
@@ -401,10 +411,10 @@ get into that here.
 
 ## Sum Types
 
-As alluded to earlier, types can have more than one data constructor, each
-separated by a `|` symbol. This is called a *sum type* because the total number
-of values you can build of this type is the sum of the number of values you can
-build with each constructor.
+As alluded to earlier, types can have more than one data constructor. These are
+called *sum types* because the total number of values you can build of a sum
+type is the sum of the number of values you can build with each of its
+constructors. The syntax is to separate each constructor by a `|` symbol:
 
 ```haskell
 data Person = PersonWithAge String Int | PersonWithoutAge String
@@ -782,8 +792,10 @@ whenJust (+5) notReallyFive
 -- => Nothing
 ```
 
-This function exists in the Haskell Prelude as `fmap` in the `Functor` type
-class.
+This function exists in Haskell's Prelude[^prelude] as `fmap` in the `Functor`
+type class.
+
+[^prelude]: The module of functions available without `import`ing anything.
 
 ## About Type Classes
 
@@ -860,52 +872,24 @@ Therefore, we could implement a `Functor` instance for `Maybe` with the
 following code:
 
 ```haskell
-class Functor Maybe where
+instance Functor Maybe where
     fmap = whenJust
 ```
 
 In reality, there is no `whenJust` function; `fmap` is implemented directly:
 
 ```haskell
-class Functor Maybe where
-    fmap _ Nothing = Nothing
+instance Functor Maybe where
     fmap f (Just x) = Just (f x)
+    fmap _ Nothing = Nothing
 ```
 
-### List
-
-The most familiar example for an implementation of `fmap` is the one for `[]`.
-Like `Maybe` is the type constructor in `Maybe a`, `[]` is the type constructor
-in `[a]`. You can pronounce `[]` as *list* and `[a]` as *list of a*.
-
-The basic `map` function, which exists in many languages, including Haskell, has
-the following type:
-
-```haskell
-map :: (a -> b) -> [a] -> [b]
-```
-
-It takes a function from `a` to `b` and a *list of a*. It returns a *list of b*
-by applying the given function to each element in the list. Knowing that `[]` is
-a type constructor, and `[a]` represents applying that type constructor to some
-`a`, we can write this signature in a different way; one that shows it is the
-same as `fmap` when we replace the parameter `f` with `[]`:
-
-```haskell
---     (a -> b) -> f  a -> f  b
-map :: (a -> b) -> [] a -> [] b
-```
-
-This is the same process as replacing `f` with `Maybe` used to show that
-`whenJust` and `fmap` were also equivalent.
-
-`map` does exist in the Haskell Prelude (unlike `whenJust`), so the `Functor`
-instance for `[]` is in fact defined in terms of it:
-
-```haskell
-instance Functor [] where
-    fmap = map
-```
+This definition is exactly like the one we saw earlier for `whenJust`. The only
+difference is we're now implementing it as part of the `Functor` instance
+declaration for `Maybe`. For the rest of the book, I'll be omitting the `class`
+and `instance` syntax. Instead, I'll state in prose when a function is part of
+some type class but show its type and definition as if it was a normal,
+top-level function.
 
 ## The Functor Laws
 
@@ -947,11 +931,11 @@ equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
 element in the list (as `fmap id` does) gives you back the same exact list, and
 that is exactly what you expect to get if you apply `id` directly to the list
-itself. Let's go through the same thought exercise for `Maybe` so you can see
-that the law holds for its implementation as well.
+itself.
 
-We'll use our two example values `actuallyFive` and `notReallyFive` from
-earlier:
+Let's go through the same thought exercise for `Maybe` so you can see that the
+law holds for its implementation as well. We'll use our two example values
+`actuallyFive` and `notReallyFive` from earlier:
 
 ```haskell
 actuallyFive :: Maybe Int
@@ -988,7 +972,7 @@ fmap _ Nothing = Nothing
 Since `actuallyFive` matches the `Just` case, `fmap` will apply `id` to `5`,
 then re-wrap the result in `Just`:
 
-```haskll
+```haskell
 fmap id actuallyFive
 -- => fmap id (Just 5) = Just (id 5)
 -- =>                  = Just 5
@@ -1151,8 +1135,8 @@ I've left the implementation of `findUser` as `undefined` because it doesn't
 matter for our example. I'll do this frequently throughout the book. `undefined`
 is a function with type `a`. That allows it to stand in for any expression. If
 your program ever tries to evaluate it, it will raise an exception. Still, it
-can be extremely useful while developing because we can confirm that we've
-written our types correctly without having to think about implementations yet.
+can be extremely useful while developing because we can build our program
+incrementally, but have the compiler check our types as we go.
 
 Next, imagine we want to display a user's name in all capitals:
 
@@ -1189,33 +1173,48 @@ we see fit, but still pass along the `Maybe`s everywhere we need to.
 If we were doing this in the context of a web application, this maybe-name might
 end up being interpolated into some HTML. It's at this boundary that we'll have
 to "deal with" the `Maybe` value. One option is to use the `fromMaybe` function
-to specify a default value of the empty string:
+to specify a default value:
 
 ```haskell
 template :: Maybe String -> String
 template mname = "<span class=\"username\">" ++ name ++ "</span>"
 
   where
-    name = fromMaybe "" mname
+    name = fromMaybe "(no name given)" mname
 ```
-
-## What's in a Map
-
-Now that we have two points of reference (`Maybe` and `[]`) for this idea of
-*mapping*, we can talk about some of the more interesting aspects of what it
-really means.
-
-For example, you may have wondered why Haskell type signatures don't separate
-arguments from return values. The answer to that question should help clarify
-why the abstract function `fmap`, which works with far more than only lists, is
-aptly named.
 
 ## Curried Form
 
+Before moving on, I need to pause briefly and answer a question I dodged in the
+Haskell Basics chapter. You may have wondered why Haskell type signatures don't
+separate a function's argument types from its return type. The direct answer is
+that all functions in Haskell are in *curried* form; an idea developed by and
+named for the same [logician][] as Haskell itself.
+
+[logician]: http://en.wikipedia.org/wiki/Haskell_Curry
+
+A curried function is one that *conceptually* accepts multiple arguments by
+actually accepting only one, but returning a function. The returned function
+itself will also be curried and use the same process to accept more arguments.
+This process continues for as many arguments as needed. In short, all functions
+in Haskell are of the form `(a -> b)`. A (conceptually) multi-argument function
+like `add :: Int -> Int -> Int` is really `add :: Int -> (Int -> Int)`; this
+matches `(a -> b)` by taking `a` as `Int` and `b` as `(Int -> Int)`.
+
+The reason I didn't talk about this earlier is that we can mostly ignore it when
+writing Haskell code. We define and apply functions as if they actually accept
+multiple arguments and things work as we intuitively expect. Even partial
+application (a topic I hand-waved a bit at the time) can be used effectively
+without realizing it's a direct result of curried functions. It's when we dive
+into concepts like `Applicative` (the focus of the next chapter) that we need to
+understand a bit more about what's going on under the hood.
+
+### The Case for Currying
+
 In the implementation of purely functional programming languages, there is value
 in all functions taking exactly one argument and returning exactly one result.
-Therefore, users of Haskell have two choices for defining "multi-argument"
-functions.
+Haskell is written this way, so users have two choices for defining
+"multi-argument" functions.
 
 We could rely solely on tuples:
 
@@ -1234,10 +1233,10 @@ f = map add5 [1,2,3]
 
   where
     add5 :: Int -> Int
-    add5 x = add (x, 5)
+    add5 y = add (5, y)
 ```
 
-Alternatively, we could write all functions in "curried" form:
+Alternatively, we could write all functions in curried form:
 
 ```haskell
 -- 
@@ -1292,9 +1291,7 @@ addThree :: Int -> Int -> Int -> Int
 addThree x y z = x + y + z
 ```
 
-And it has the same meaning. This is why Haskell type signatures don't appear to
-separate argument types from return types. Technically, the first type is the
-only argument, everything else is a functional return type.
+And it has the same meaning.
 
 Similarly, function application is left-associative. This means that instead of
 writing:
@@ -1313,15 +1310,18 @@ six = addThree 1 2 3
 
 And it has the same meaning as well.
 
-## Partial Application
+These conveniences are why we don't actively picture functions as curried when
+writing Haskell code. We can define `addThree` naturally, as if it took three
+arguments and the rules of the language handle currying. We can also apply
+`addThree` naturally, as if it took three arguments and again the rules of the
+language handle the currying.
 
-I mentioned partial application in an earlier chapter, but it's worth discussing
-again in the context of the `map` example above. We can partially apply
-functions by supplying only some of their arguments and getting back another
-function which accepts any arguments we left out. Technically, this is not
-"partial" at all, since all functions really only take a single argument. In
-fact, this mechanism happens even in the cases you wouldn't conceptually refer
-to as "partial application":
+### Partial Application
+
+Some languages don't use curried functions but do support *partial application*:
+supplying only some of a function's arguments to get back another function that
+accepts the arguments left out. We can do this in Haskell too, but it's not
+"partial" at all, since all functions truly only accept a single argument.
 
 When we wrote the following expression:
 
@@ -1341,40 +1341,31 @@ fmap userUpperName :: Maybe User -> Maybe String
 ```
 
 This function is then immediately applied to `(findUser someId)` to ultimately
-get that `Maybe String`.
+get that `Maybe String`. This example shows that Haskell's curried functions
+blur the line between partial and total application. The result is a natural and
+consistent syntax for doing either.
 
-## Map, Not Just for Lists
+## Recap
 
-Decoupling the concept of `map` such that it's useful for anything besides lists
-requires looking at it through this lens of single-argument, single-result
-functions. Viewed this way, the generic behavior of `map` is right there in the
-name: map a key to a value.
+So far, we've seen an introduction to Haskell functions and its type system, a
+new and powerful way to use that type system to describe something about your
+domain (that some values may not be present), and a type class (`Functor`) that
+allows for strict separation between value-handling functions and the need to
+apply them to values that may not be present.
 
-Take another look at the type signature of `map`, this time with explicit
-parentheses around the return type:
+We then saw some real-word code that takes advantage of these ideas and
+discussed type class laws as a means of abstraction and encapsulation: they give
+us a precise understanding of how our code will behave without having to know
+its internals. Finally, we took a brief detour into the world of currying, a
+foundational concept responsible for many of the things we'll explore next.
 
-```haskell
-map :: (a -> b) -> ([a] -> [b])
-```
-
-The "key" is a function from `a` to `b`. The "value" is a function from `[a]` to
-`[b]`. It's common but incorrect to say "map a function over each element of a
-list." Because the `map` function most commonly found in programming languages
-applies a function to each element in a list, we've taken the word "map" to mean
-"do something to each element in a list." This is unfortunate as taking a
-function that operates in some domain (`a`s and `b`s) and mapping it to a
-function that operates in a different, related domain (`[a]`s and `[b]`s) is far
-more accurate and eases the mental leap to the generalized version, `fmap`:
-
-```haskell
-fmap :: (a -> b) -> (f a -> f b)
-```
-
-Here, we're still "mapping", but this time from a function whose domain is `a`s
-And `b`s to one whose domain is `f a`s and `f b`s. We make no mention of "each
-element of a list" because that's an implementation detail not at all related to
-`fmap`. By instantiating `f` as any number of types, we can take all our normal
-functions and map them to functions that operate on whole new sets of values.
+In the next chapter, we'll talk about *applicative functors*. If we think of a
+*functor* as a value in some context, supporting an `fmap` operation for
+applying a function to that value while preserving its context, *applicative
+functors* are functors where the value itself *can be applied*, i.e. it's a
+function. These structures must then support another operation for applying that
+function from within its context. That operation, combined with currying, will
+grant us more power and convenience when working with `Maybe` values.
 
 # Applicative
 
@@ -1503,7 +1494,7 @@ expression to an equivalent one with less noise:
 User <$> getParam "name" params :: Maybe (String -> User)
 ```
 
-This expression represents a "`Maybe` function". We're accustom to *values* in a
+This expression represents a "`Maybe` function". We're accustomed to *values* in a
 context: a `Maybe Int`, `Maybe String`, etc; and we saw how these were
 *functors*. In this case, we have a *function* in a context: a `Maybe (String ->
 User)`. Since functions are things that *can be applied*, these are called
@@ -1887,7 +1878,7 @@ nature of *our* computation. If only Haskell had such a function...
 
 ## Bind
 
-If you haven't guessed it, Haskell does have exactly this function. It's name is
+If you haven't guessed it, Haskell does have exactly this function. Its name is
 *bind* and it's defined as part of the `Monad` type class. Here is its type
 signature:
 
@@ -1908,10 +1899,10 @@ andThen :: Maybe a -> (a -> Maybe b) -> Maybe b
 ## Chaining
 
 `(>>=)` is defined as an operator because it's meant to be used infix. It's also
-given an appropriate fixity so that it can be chained together intuitively. The
-word `andThen` comes to mind again as having multiple dependent computations
-lends itself to an `x andThen y andThen z` nature. To see this in action, let's
-walk through another example.
+given an appropriate fixity so it can be chained together intuitively. This is
+why I chose the name `andThen` for my fictitious version: it can sometimes help
+to read `x >>= y >>= z` as *x and-then y and-then z*. To see this in action,
+let's walk through another example.
 
 Suppose we are working on a system with the following functions for dealing with
 users' addresses and their zip codes:
@@ -1974,9 +1965,10 @@ boilerplate.
 There's one more topic I'd like to mention related to monads: *do-notation*.
 
 This bit of syntactic sugar is provided by Haskell for any of its `Monad`s. The
-reason is to allow monadic code to read like imperative code when composing
-monadic expressions. This is valuable because monadic expressions, especially
-those of type `IO a`, are often best understood as a series of imperative steps:
+reason is to allow functional Haskell code to read like imperative code when
+building compound expressions using `Monad`. This is valuable because monadic
+expressions, especially those representing interactions with the outside world,
+are often read best as a series of imperative steps:
 
 ```haskell
 f = do
@@ -2004,19 +1996,20 @@ findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 ```
 
-First, to make things clearer, let's add some arbitrary line breaks:
+First, let's add some arbitrary line breaks so the eventual formatting aligns
+with what someone might write by hand:
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
 findUserShippingCost uid =
     findUser uid >>=
     userZip >>=
+
     shippingCost
 ```
 
 Next, let's name the arguments to each expression via anonymous functions,
-rather than relying on partial application and their curried nature. We'll also
-add another arbitrary line break to highlight the final expression in the chain.
+rather than relying on partial application and their curried nature:
 
 ```haskell
 findUserShippingCost :: UserId -> Maybe Cost
@@ -2051,7 +2044,7 @@ findUserShippingCost uid = do
     shippingCost z
 ```
 
-Et Violà, you have the equivalent *do-notation* version of our function. When
+Et voilà, you have the equivalent *do-notation* version of our function. When
 the compiler sees code written like this, it follows (mostly) the same process
 we did, but in reverse:
 
@@ -2077,56 +2070,28 @@ findUserShippingCost uid =
     shippingCost z
 ```
 
-The compiler can stop here as all remaining steps are stylistic changes only
-(removing whitespace and *eta-reducing*[^eta-reduce] the lambdas).
+The compiler can stop here as all remaining steps are stylistic changes only. To
+get back to our exact original expression, we only need to
+*eta-reduce*[^eta-reduce] the lambdas:
+
+```haskell
+findUserShippingCost :: UserId -> Maybe Cost
+findUserShippingCost uid =
+    findUser uid >>=
+    userZip >>=
+
+    shippingCost
+```
+
+And remove our arbitrary line breaks:
+
+
+```haskell
+findUserShippingCost :: UserId -> Maybe Cost
+findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
+```
 
 [^eta-reduce]: The process of simplifying `\x -> f x` to the equivalent form `f`.
-
-## Will it Pipe?
-
-Both notations have their place and which to use is often up to the individual
-developer, but I do have a personal guideline I can offer.
-
-As mentioned, *do-notation* is typically useful in the `IO` monad where the
-computation is probably representing a series of dependent actions to take place
-in the real world. If your process is a straight pipe-line, chaining expressions
-together with `(>>=)` will usually read better:
-
-```haskell
--- Read stdin, pass it to the given function, and print the result on stdout
-interact :: (String -> String) -> IO ()
-interact f = getContents >>= f >>= putStr
-
--- vs
-interact f = do
-    c <- getContents
-
-    putStr (f c)
-```
-
-If instead you find yourself manipulating one result many times, *do-notation*
-is probably the way to go:
-
-```haskell
--- Build a user instance, then execute some actions with it before returning
-createUser :: Params -> IO User
-createUser params = do
-    user <- buildUser params
-
-    storeInDatabase user
-    sendConfirmationEmail user
-
-    return user
-
--- vs (something like)
-createUser params = buildUser params >>= \user ->
-    storeInDatabase user >> sendConfirmationEmail user >> return user
-```
-
-Don't worry if you don't follow all of the new information here (i.e. `IO ()` or
-the `(>>)` and `return` functions). These examples were only to show the
-differences between *do-notation* and relying only on `(>>=)` for composing
-monadic expressions.
 
 ## Wrapping Up
 
@@ -2182,7 +2147,7 @@ a lot like what I'm about to walk through here.
 [except]: http://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Except.html
 [example]: http://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Except.html#g:3
 
-With `Maybe`, the `a` was the value and `Maybe` was the context. Therefore, we
+With `Maybe a`, the `a` was the value and `Maybe` was the context. Therefore, we
 made instances of `Functor`, `Applicative`, and `Monad` for `Maybe` (not `Maybe
 a`). With `Either` as we've written it above, `b` is the value and `Either a` is
 the context, therefore Haskell has instances of `Functor`, `Applicative`, and
@@ -2210,12 +2175,11 @@ fmap :: (a -> b) -> Either e a -> Either e b
 
 ### ParserError
 
-As an example, consider some kind of parser. If the parser fails, it would be
-nice to include the line and character that triggered the failure. To accomplish
-this, we first define a type to represent information about the failure. For our
-purposes, we'll say it's the line and character where something unexpected
-appeared, but it could be much richer than that including what was expected and
-what was seen instead:
+As an example, consider some kind of parser. If parsing fails, it would be nice
+to include some information about what triggered the failure. To accomplish
+this, we first define a type to represent this information. For our purposes,
+it's the line and column where something unexpected appeared, but it could be
+much richer than that including what was expected and what was seen instead:
 
 ```haskell
 data ParserError = ParserError Int Int
@@ -2306,15 +2270,14 @@ Speaking of `Applicative`...
 
 ### Applicative
 
-It would also be nice if we could take two potentially failed results and pass
+It would also be nice if we could take two potentially-failed results and pass
 them as arguments to some function that takes normal values. If any result
 fails, the overall result is also a failure. If all are successful, we get a
 successful overall result. This sounds a lot like what we did with `Maybe`, the
 only difference is we're doing it for a different kind of context.
 
 ```haskell
--- Given two json objects, merge them. Duplicate keys result in those in the
--- second object being kept.
+-- Given two json objects, merge them into one
 merge :: JSON -> JSON -> JSON
 merge = undefined
 
@@ -2324,6 +2287,13 @@ jsonString2 = "..."
 
 merge <$> parseJSON jsonString1 <*> parseJSON jsonString2
 ```
+
+`merge <$> parseJSON jsonString1` gives us a `Parsed (JSON -> JSON)`. (If this
+doesn't make sense, glance back at the examples in the Applicative chapter.)
+What we have is a *function* in a `Parsed` context. `parseJSON jsonString2`
+gives us a `Parsed JSON`, a *value* in a `Parsed` context. The job of `(<*>)` is
+to apply the `Parsed` function to the `Parsed` value and produce a `Parsed`
+result.
 
 Defining `(<*>)` starts out all right: if both values are present we'll get the
 result of applying the function wrapped up again in `Right`. If the second
@@ -2906,6 +2876,11 @@ findAdmin uid = do
 ```
 
 [guard]: http://hackage.haskell.org/package/base-4.7.0.2/docs/Control-Monad.html#v:guard
+
+If you're having trouble seeing why this expression works, start by de-sugaring
+from *do-notation* to the equivalent expression using `(>>=)`, then use the
+`Maybe`-specific definitions of `(>>=)`, `return`, and `guard` to reduce the
+expression when an admin is found, a non-admin is found, or no user is found.
 
 Next, let's look at the individual pieces we'll be combining into `main`:
 
