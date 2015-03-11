@@ -181,11 +181,11 @@ We can read these as `almostThird` is `3`, *of type* `Float`, divided by `9` and
 Type annotations and signatures are usually optional, as Haskell can almost
 always tell the type of an expression by inspecting the types of its constituent
 parts or seeing how it is eventually used. This process is called *type
-inference*. For example, Haskell knows that `six` is an `Int` because it saw
-that `5` is an `Int`. Since you can only use `(+)` with arguments of the same
-type, it *enforced* that `1` is also an `Int`. Knowing that `(+)` returns the
-same type as its arguments, the final result of the addition must itself be an
-`Int`.
+inference*. For example, Haskell knows that `actualThird` is a `Rational`
+because it saw that `3` is a `Rational`. Since you can only use `(/)` with
+arguments of the same type, it *enforced* that `9` is also a `Rational`. Knowing
+that `(/)` returns the same type as its arguments, the final result of the
+division must itself be a `Rational`.
 
 Good Haskellers will include a type signature on all top-level definitions
 anyway. It provides executable documentation and may, in some cases, prevent
