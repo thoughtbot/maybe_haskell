@@ -6,4 +6,4 @@
 # installation instructions.
 #
 ###
-docker run -v $PWD:/source thoughtbot/paperback build
+docker run -v $PWD:/book thoughtbot/paperback build "$@"
