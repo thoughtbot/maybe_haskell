@@ -2,6 +2,14 @@
 
 A book about Haskell's approach to the `null` problem.
 
+## Reading the Book
+
+You can find the current release in a variety of formats under the [release][]
+directory. To view older releases, check out a specific Git [tag][tags].
+
+[release]: https://github.com/thoughtbot/maybe_haskell/tree/master/release
+[tags]: https://github.com/thoughtbot/maybe_haskell/releases
+
 ## Providing Feedback
 
 Please provide feedback via [GitHub][], or [email][].
