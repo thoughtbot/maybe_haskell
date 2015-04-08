@@ -22,5 +22,5 @@ Thank you to all who've [contributed][contributors] so far!
 - [x] Monad
 - [x] Other Types
 - [x] Conclusion
-- [ ] Technical review
+- [x] Technical review
 - [ ] Copy editing
