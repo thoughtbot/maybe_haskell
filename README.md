@@ -12,10 +12,9 @@ directory. To view older releases, check out a specific Git [tag][tags].
 
 ## Providing Feedback
 
-Please provide feedback via [GitHub][], or [email][].
+Please provide feedback via [GitHub][].
 
 [github]: https://github.com/thoughtbot/maybe_haskell/issues
-[email]: mailto:pat+maybe-haskell@thoughtbot.com
 
 Thank you to all who've [contributed][contributors] so far!
 
