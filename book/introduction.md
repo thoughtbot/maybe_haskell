@@ -11,9 +11,8 @@ indicates failure. Ruby has `nil`, Java has `null`, and many C functions return
 `-1` in failure cases. This is a huge hassle. You now have a system in which any
 value at any time can either be the value you expect or `nil`, always.
 
-If you try to find a `User`, and you get back a value, and you try to treat it
-like a `User` when it's actually `nil`, you get a `NoMethodError`. What's worse,
-that error may not happen anywhere near the source of the problem. The line of
+For instance, if you try to find a `User`, and you try to treat the value you get back as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's worse,
+that error may not happen anywhere near the problem's source. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
 result is various "`nil` checks" peppered throughout the code. Is this the best
 we can do?
@@ -24,18 +23,18 @@ partial functions. What we don't need is `null`.
 
 ## An Alternate Solution
 
-In languages with sufficiently-expressive type systems, we have another option:
+In languages with sufficiently expressive type systems, we have another option:
 we can state in the types that certain values may not be present. Functions
-normally written in a partial way can instead return a type that captures any
-potential non-presence. Not only does it make it explicit and "type checked"
-that when a value may not be present, you have code to handle that case, but it
+that typically are written in a partial way can instead be designed to return a type that captures any
+potential non-presence. Not only does this make it explicit and "type checked"
+that you have code to handle the case when a value isn't present, it
 also means that if a value is *not* of this special "nullable" type, you can
-feel safe in your assumption that the value's really there -- No `nil`-checks
+feel safe in assuming the value is really there. In short: no `nil` checks are 
 required.
 
-The focus of this book will be Haskell's implementation of this idea via the
-`Maybe` data type. This type and all of the functions that deal with it are not
-built-in, language-level constructs. All of it is implemented as libraries,
+The focus of this book will be how Haskell implements this idea via the
+`Maybe` data type. This type and all the functions that deal with it are not
+built-in, language-level constructs. Instead, this is all implemented as libraries,
 written in a very straightforward way. In fact, we'll write most of that code
 ourselves over the course of this short book.
 
@@ -61,18 +60,18 @@ This is a function definition written in an entirely different style than you
 may be used to. Even so, I'll bet you can guess what it does, and even get close
 to how it does it: `filter even` probably takes a list and filters it for only
 even elements. `length` probably takes a list and returns the number of elements
-it has.
+it contains.
 
 Given those fairly obvious facts, you might guess that putting two things
 together with `(.)` must mean you do one and then give the result to the other.
-That makes this expression a function which must take a list and return the
-number of even elements it has. Without mentioning any actual argument, we can
+That makes this expression a function that must take a list and return the
+number of even elements it contains. Without mentioning any actual argument, we can
 directly assign this function the name `countEvens`. There's no need in Haskell
 to say that count-evens *of some x* is to take the length after filtering for
 the even values *of that x*. We can state directly that count-evens is taking
 the length after filtering for evens.
 
-This is a relatively contrived example, but it's indicative of the confusion
+This is a relatively contrived example, but it's an indication of the confusion
 that can happen at any level: if your first reaction is "such weird syntax! What
 is this crazy dot thing!?", you're going to have a bad time. Instead, try to
 internalize the parts that make sense while getting comfortable with *not*
@@ -82,50 +81,50 @@ together in ways you might not expect.
 ## Structure
 
 We'll spend this entire book focused on a single *type constructor* called
-`Maybe`. We'll start by quickly covering the basics of Haskell, but only so far
-that we see the opportunity for such a type and can't help but invent it
-ourselves. With that defined, we'll quickly see that it's cumbersome to use.
+`Maybe`. We'll start by quickly covering the basics of Haskell, but only far enough
+that we can see the opportunity for such a type and can't help but invent it
+ourselves. With that type defined, we'll quickly see that it's cumbersome to use.
 This is because Haskell has taken an inherently cumbersome concept and put it
-right in front of us by naming it and requiring we deal with it at every step.
+right in front of us by naming it, and by requiring we deal with it at every step.
 
 From there, we'll explore three *type classes* whose presence will make our
-lives far less cumbersome. We'll see that `Maybe` has all of the properties
+lives far simpler. We'll see that `Maybe` has all the properties
 required to call it a *functor*, an *applicative functor*, and even a *monad*.
 These terms may sound scary, but we'll go through them slowly, each concept
-building on the last. These three *interfaces* are crucial to how I/O is handled
+building on the one before. These three *interfaces* are crucial to how I/O is handled
 in a purely functional language such as Haskell. Understanding them will open
-your eyes to a whole new world of abstractions and demystify notoriously opaque
+your eyes to a whole new world of abstractions and demystify some notoriously opaque
 topics.
 
 Finally, with a firm grasp on how these concepts operate in the context of
-`Maybe`, we'll discuss other types which share these qualities. This is to
+`Maybe`, we'll discuss other types that share these qualities. This is to
 reinforce the fact that these ideas are *abstractions*. They can be applied to
 any type that meets certain criteria. Ideas like *functor* and *monad* are not
-specifically tied to the concept of partial functions or nullable values. They
-apply broadly to things like lists, trees, exceptions, and program evaluation.
+limited to, or specifically tied to, the concept of partial functions or nullable values. They
+apply much more broadly to things like lists, trees, exceptions, and program evaluation.
 
 ## What This Book is Not
 
 I don't intend to teach you Haskell. Rather, I want to show you *barely enough*
-Haskell so that I can wade into more interesting topics. I want to show how this
+Haskell that I can wade into some more interesting topics. I want to show how this
 `Maybe` data type can add safety to your code base while remaining convenient,
 expressive, and powerful. My hope is to show that Haskell and its "academic"
-ideas are not limited to PhD thesis papers. These ideas result directly in
+ideas are not limited to PhD thesis papers. These ideas can result directly in
 cleaner, more maintainable code that solves practical problems.
 
 I won't describe how to set up a Haskell programming environment, show you how
 to write and run complete Haskell programs, or dive deeply into every language
-construct we'll see. If you are interested in going further and actually
+construct that we'll encounter. If you are interested in going further and actually
 learning Haskell (and I hope you are!), then I recommend following Chris Allen's
 great [learning path][learnhaskell].
 
 [learnhaskell]: https://github.com/bitemyapp/learnhaskell
 
-Lastly, a word of general advice before you get started:
+Finally, a word of general advice before you get started:
 
-The type system is not your enemy, it's your friend. It doesn't slow you down,
+The type system is not your enemy. It's your friend. It doesn't slow you down;
 it keeps you honest. Keep an open mind. Haskell is simpler than you think.
-Monads are not some mystical burrito, they're a simple abstraction which, when
+Likewise, monads are not some mystical burrito. They're a simple abstraction that, when
 applied to a variety of problems, can lead to elegant solutions. Don't get
-bogged down in what you don't understand, dig deeper into what you do. And above
+bogged down in what you don't understand. Instead, dig deeper into what you do. And above
 all, take your time.
