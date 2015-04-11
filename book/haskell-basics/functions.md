@@ -46,7 +46,7 @@ division must itself be a `Rational`.
 
 Good Haskellers will include a type signature on all top-level definitions
 anyway. It provides executable documentation and may, in some cases, prevent
-errors which occur when the compiler assigns a more generic type than you might
+errors that occur when the compiler assigns a more generic type than you might
 otherwise want.
 
 ### Arguments
@@ -86,7 +86,7 @@ twice (add 2) 3
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
 (`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
-definition of `twice` are grouping, not application. In Haskell, applying a
+definition of `twice` indicate a grouping, not an application. In Haskell, applying a
 function to some argument is simple: stick them together with a space in
 between. In this case, we need to group the inner `(f x)` so the outer `f` is
 applied to it as single argument. Without these parentheses, Haskell would think
@@ -115,22 +115,22 @@ twice (add 2) 3
 -- => 7
 ```
 
-It's OK if this doesn't make complete sense now, I'll talk more about partial
+It's OK if this doesn't make complete sense now. I'll talk more about partial
 application as we go.
 
 ### Operators
 
 In the definition of `add`, I used something called an *operator*: `(+)`.
-Operators like this are not special or built-in in any way; we can define and
-use them like any other function. That said, there are three additional (and
-convenient) behaviors operators have:
+Operators like this are not in any way special or built-in; we can define and
+use them like any other function. That said, operators have three additional (and
+convenient) behaviors:
 
 1. They are used *infix* by default, meaning they appear between their arguments
    (i.e. `2 + 2`, not `+ 2 2`). To use an operator *prefix*, it must be
    surrounded in parentheses (as in `(+) 2 2`).
-2. When defining an operator, we can assign a custom [associativity][] and
+2. When defining an operator, we can assign custom [associativity][] and
    [precedence][] relative to other operators. This tells Haskell how to group
-   expressions like `2 + 3 * 5 / 10`.
+   expressions like `2 + 3 * 5 / 10`. For more on these concepts, see the following links.
 3. We can surround an operator and *either* of its arguments in parentheses to
    get a new function that accepts whichever argument we left off. Expressions
    like `(+ 2)` and `(10 /)` are examples. The former adds `2` to something and
@@ -141,8 +141,8 @@ convenient) behaviors operators have:
 [precedence]: http://en.wikipedia.org/wiki/Order_of_operations
 
 In Haskell, any function with a name made up entirely of punctuation (where [The
-Haskell Report][report] states very exactly what "punctuation" means) behaves
-like an operator. We can also take any normally-named function and treat it like
+Haskell Report][report] states very precisely what "punctuation" means) behaves
+like an operator. We can also take any normally named function and treat it like
 an operator by surrounding it in backticks:
 
 [report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
@@ -164,11 +164,11 @@ intersects xs ys = any (`elem` xs) ys
 
 The last thing we need to know about functions is that they can be *anonymous*.
 Anonymous functions are called *lambdas* and are most frequently used as
-arguments to higher-order functions. Often these functional arguments only exist
-for a single use and giving them a name is not otherwise valuable.
+arguments to higher-order functions. Often these functional arguments exist
+for only a single use and giving them a name is not otherwise valuable.
 
-The syntax is a back-slash, the arguments to the function, an arrow, then the
-body of the function. A back-slash is used because it looks like the Greek
+The syntax is a back-slash, followed by the arguments to the function, an arrow, and finally the
+body of the function. A back-slash is used because it looks similar to the Greek
 letter λ.
 
 Here's an example:
