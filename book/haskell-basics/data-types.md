@@ -12,17 +12,17 @@ data Person = MakePerson String Int
 ```
 
 To the left of the `=` is the *type* constructor and to the right can be one or
-more *data* constructors. The type constructor is the name of the type and is
-used in type signatures. The data constructors are functions which produce
+more *data* constructors. The type constructor is the name of the type, which is
+used in type signatures. The data constructors are functions that produce
 values of the given type. For example, `MakePerson` is a function that takes a
 `String` and an `Int`, and returns a `Person`. Note that I will often use the
 general term "constructor" to refer to a *data* constructor if the meaning is
-clear from context.
+clear from the context.
 
-When there is only one data constructor, it's quite common to give it the same
+When working with only one data constructor, it's quite common to give it the same
 name as the type constructor. This is because it's syntactically impossible to
 use one in place of the other, so the compiler makes no restriction. Naming is
-hard, so if you have a good one, you might as well use it in both contexts.
+hard. So when you have a good name, you might as well use it in both contexts.
 
 ```haskell
 data Person = Person String Int
@@ -32,7 +32,7 @@ data Person = Person String Int
 --   ` Type constructor
 ```
 
-With this data type declared, we can now use it to write functions that
+Once we have declared the data type, we can now use it to write functions that
 construct values of this type:
 
 ```haskell
@@ -53,17 +53,17 @@ getAge :: Person -> Int
 getAge (Person _ age) = age
 ```
 
-In the above definitions, each function is looking for values constructed with
+In the definitions above, each function is looking for values constructed with
 `Person`. If it gets an argument that matches (which is guaranteed since that's
 the only way to get a `Person` in our system so far), Haskell will use that
-function body with each part of the constructed value bound to the variables
+function body, in which each part of the constructed value is bound to the variables
 given. The `_` pattern (called a *wildcard*) is used for any parts we don't care
 about. Again, this is using `=` for equivalence (as always). We're saying that
-`getName`, when given `(Person name _)`, *is equivalent to* `name`. Similarly
+`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works similarly
 for `getAge`.
 
-There are [other][records] [ways][lenses] to do this sort of thing, but we won't
-get into that here.
+Haskell offers [other][records] [ways][lenses] to do this sort of thing, but we won't
+get into those here.
 
 [pattern-matching]: https://www.haskell.org/tutorial/patterns.html
 [records]: http://en.wikibooks.org/wiki/Haskell/More_on_datatypes#Named_Fields_.28Record_Syntax.29
@@ -71,7 +71,7 @@ get into that here.
 
 ## Sum Types
 
-As alluded to earlier, types can have more than one data constructor. These are
+As mentioned earlier, types can have more than one data constructor. These are
 called *sum types* because the total number of values you can build of a sum
 type is the sum of the number of values you can build with each of its
 constructors. The syntax is to separate each constructor by a `|` symbol:
@@ -88,7 +88,7 @@ jim = PersonWithoutAge "Jim"
 
 Notice that `pat` and `jim` are both values of type `Person`, but they've been
 constructed differently. We can use pattern matching to inspect how a value was
-constructed and choose what to do accordingly. Syntactically, this is
+constructed and accordingly choose what to do. Syntactically, this is
 accomplished by providing multiple definitions of the same function, each
 matching a different pattern. Each definition will be tried in the order
 defined, and the first function to match will be used.
@@ -110,7 +110,7 @@ getAge (PersonWithoutAge _) = -- uh-oh
 ```
 
 If we decide to be lazy and not define that second function body, Haskell will
-compile, but warn us about the *non-exhaustive* pattern match. What we've
+compile, but warn us about a *non-exhaustive* pattern match. What we've
 created at that point is a *partial function*. If such a program ever attempts
 to match `getAge` with a `Person` that has no age, we'll see one of the few
 runtime errors possible in Haskell.
