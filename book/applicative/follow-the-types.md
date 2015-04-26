@@ -24,8 +24,8 @@ User :: String -> (String -> User)
 fmap User :: Maybe String -> Maybe (String -> User)
 ```
 
-So now we have a function that takes a `Maybe String` and returns a `Maybe
-(String -> User)`. We also have a value of type `Maybe String` that we can give
+So now we have a function that takes a `Maybe String` and returns a 
+`Maybe (String -> User)`. We also have a value of type `Maybe String` that we can give
 to this function, `getParam "name" params`:
 
 ```haskell
@@ -40,8 +40,8 @@ The `Control.Applicative` module exports an operator synonym for `fmap` called
 `(<$>)` (I pronounce this as *fmap* because that's what it's a synonym for). The
 reason this synonym exists is to get us closer to our original goal of making
 expressions look as if there are no `Maybe`s involved. Since operators are
-placed between their arguments, we can use `(<$>)` to rewrite our above
-expression to an equivalent one with less noise:
+placed between their arguments, we can use `(<$>)` to rewrite our
+expression above to an equivalent one with less noise:
 
 ```haskell
 User <$> getParam "name" params :: Maybe (String -> User)
@@ -54,7 +54,7 @@ User)`. Since functions are things that *can be applied*, these are called
 *applicative functors*.
 
 By using `fmap`, we reduced our problem space and isolated the functionality
-we're lacking; functionality we'll ultimately get from `Applicative`:
+we're lacking, functionality we'll ultimately get from `Applicative`:
 
 We have this:
 
