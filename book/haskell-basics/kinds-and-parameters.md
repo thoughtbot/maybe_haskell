@@ -2,9 +2,9 @@
 
 Imagine we wanted to generalize this `Person` type. What if people were able to
 hold arbitrary things? What if what that thing is (its type) doesn't really
-matter, the only meaningful thing we can say about it is if it's there or not.
-What we had before was a *person with an age* or a *person without an age*, what
-we want here is a *person with a thing* or a *person without a thing*.
+matter, if the only meaningful thing we can say about it is if it's there or not?
+What we had before was a *person with an age* or a *person without an age*. What
+we want now is a *person with a thing* or a *person without a thing*.
 
 One way to do this is to *parameterize* the type:
 
@@ -28,7 +28,7 @@ representing their age (or not), we can say a person is holding some thing of
 type `a` (or not).
 
 We can still construct people with and without ages, but now we have to specify
-in the type that the `a` is an `Int` in this case:
+in the type that in this case the `a` is an `Int`:
 
 ```haskell
 patWithAge :: Person Int
@@ -39,7 +39,7 @@ patWithoutAge = PersonWithoutThing "pat"
 ```
 
 Notice how even in the case where I have no age, we still specify the type of
-that thing which I do not have. In this case, we specified an `Int` for
+that thing that I do not have. In this case, we specified an `Int` for
 `patWithoutAge`, but values can have (or not have) any type of thing:
 
 ```haskell
@@ -70,9 +70,9 @@ patWithoutEmail :: Person String
 patWithoutEmail = patWithoutThing
 ```
 
-Similarly, functions that operate on people can choose if they care about what
-the person's holding or not. For example, getting someone's name shouldn't be
-affected by them holding something or not, so we can leave it unspecified:
+Similarly, functions that operate on people can choose whether they care about what
+the person's holding--or not. For example, getting someone's name shouldn't be
+affected by whether they hold something, so we can leave it unspecified:
 
 ```haskell
 getName :: Person a -> String
@@ -86,7 +86,7 @@ getName patWithoutEmail
 -- => "pat"
 ```
 
-But a function which does care, must both specify the type *and* account for the
+But a function that does care must specify both the type *and* account for the
 case of non-presence:
 
 ```haskell
