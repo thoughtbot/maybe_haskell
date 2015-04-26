@@ -1,5 +1,5 @@
 In the last chapter, we defined a type that allows any value of type `a` to
-carry with it additional information about if it's actually there or not:
+carry with it additional information about whether it's actually there or not:
 
 ```haskell
 data Maybe a = Nothing | Just a
@@ -35,14 +35,14 @@ you have three choices:
 
 1. Use the value if you can, otherwise throw an exception
 2. Use the value if you can, but still have some way of returning a valid result
-   if it's not there
-3. Pass the buck, return a `Maybe` result yourself
+   if the value's not there
+3. Pass the buck and return a `Maybe` result yourself
 
 The first option is a non-starter. As you saw, it is possible to throw runtime
 exceptions in Haskell via the `error` function, but you should avoid this at all
-costs. We're trying to remove runtime exceptions, not add them.
+costs. We're trying to eliminate runtime exceptions, not add them.
 
-The second option is only possible in certain scenarios. You need to have some
+The second option is possible only in certain scenarios. You need to have some
 way to handle an incoming `Nothing`. That may mean skipping certain aspects of
 your computation or substituting another appropriate value. Usually, if you're
 given a completely abstract `Maybe a`, it's not possible to determine a
@@ -67,25 +67,24 @@ fromMaybe 10 notReallyFive
 ```
 
 Option 3 is actually a variation on option 2. By making your own result a
-`Maybe` you always have the ability to return `Nothing` yourself if the value's
-not present. If the value *is* present, you can perform whatever computation you
+`Maybe` you always have the ability to return `Nothing` yourself if the value isn't present. If the value *is* present, you can perform whatever computation you
 need to and wrap what would be your normal result in `Just`.
 
 The main downside is that now your callers also have to consider how to deal
 with the `Maybe`. Given the same situation, they should again make the same
-choice (option 3), but that only pushes the problem up to their callers -- any
+choice (option 3), but that only pushes the problem up to their callers--which means any
 `Maybe` values tend to go *viral*.
 
 Eventually, probably at some UI boundary, someone will need to "deal with" the
 `Maybe`, either by providing a substitute or skipping some action that might
 otherwise take place. This should happen only once, at that boundary. Every
-function between the source and final use should pass along the value's
+function between the source and the final use should pass along the value's
 potential non-presence unchanged.
 
 Even though it's safest for every function in our system to pass along a `Maybe`
 value, it would be extremely annoying to force them all to actually take and
-return `Maybe` values. Each function separately checking if they should go ahead
-and perform their computations will become repetitive and tedious. Instead, we
+return `Maybe` values. Each function separately checking whether it should go ahead
+and perform its computations will become repetitive and tedious. Instead, we
 can completely abstract this "pass along the `Maybe`" concern using higher-order
 functions and something called *functors*.
 
@@ -108,7 +107,7 @@ and we must return type `Maybe b`.
 This allows the internals of our system to be made of functions (e.g. the `f`
 given to `whenJust`) that take and return normal, non-`Maybe` values, but still
 "pass along the `Maybe`" whenever we need to take a value from some source that
-may fail and manipulate it in some way. If it's there, we go ahead and
+may fail and manipulate that value in some way. If it's there, we go ahead and
 manipulate it, but return the result as a `Maybe` as well. If it's not, we
 return `Nothing` directly.
 
