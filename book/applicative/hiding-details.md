@@ -1,13 +1,13 @@
 In the last section we saw how to use `fmap` to take a system full of functions
-which operate on fully present values, free of any `nil`-checks, and employ them
-to safely manipulate values which may in fact not be present. This immediately
+that operate on fully present values, free of any `nil`-checks, and employ them
+to safely manipulate values that may in fact not be present. This immediately
 makes many uses of `Maybe` more convenient, while still being explicit and safe
 in the face of failure and partial functions.
 
 There's another notable case where `Maybe` can cause inconvenience, one that
 can't be solved by `fmap` alone. Imagine we're writing some code using a web
-framework. It provides a function `getParam` which takes the name of a query
-parameter (passed as part of the URL in a GET HTTP request), and returns the
+framework. It provides a function `getParam` that takes the name of a query
+parameter (passed as part of the URL in a GET HTTP request) and returns the
 value for that parameter as parsed out of the current URL. Since the parameter
 you name could be missing or invalid, this function returns `Maybe`:
 
@@ -55,8 +55,8 @@ end
 
 So how do we do this better? What we want is code that looks as if there is no
 `Maybe` involved (because that's convenient) but correctly accounts for `Maybe`
-at every step along the way (because that's safe). If there were no `Maybe`s
-involved, and we were constructing a normal `User` value, the code may look like
+at every step along the way (because that's safe). If no `Maybe`s
+were involved, and we were constructing a normal `User` value, the code might look like
 this:
 
 ```haskell
