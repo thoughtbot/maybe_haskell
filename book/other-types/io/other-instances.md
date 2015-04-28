@@ -9,7 +9,7 @@ instances for `Functor` and `Applicative`, the functions in these classes
 `Monad` instance. For this reason, I won't be showing their definitions. That
 said, these instances are still useful. If your `IO` code doesn't require the
 full power of monads, it's better to use a weaker constraint. More general
-programs are better and weaker constraints on what kind of data your functions
+programs are better; weaker constraints on what kind of data your functions
 can work with makes them more generally useful.
 
 #### Functor
@@ -20,7 +20,7 @@ can work with makes them more generally useful.
 fmap :: (a -> b) -> IO a -> IO b
 ```
 
-It takes a function and an `IO` action and returns another `IO` action which
+It takes a function and an `IO` action and returns another `IO` action, which
 represents applying that function to the *eventual* result returned by the
 first.
 
@@ -86,7 +86,7 @@ diffFiles fp1 fp2 = do
 ```
 
 Notice that the second `readFile` does not depend on the result of the first.
-Both `readFile` actions produce values that are combined *at-once* using the
+Both `readFile` actions produce values that are combined *at once* using the
 pure function `diff`. We can make this lack of dependency explicit and bring the
 expression closer to what it would look like without `IO` values by using
 `Applicative`:
