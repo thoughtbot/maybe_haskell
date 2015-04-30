@@ -21,7 +21,7 @@ In short, the algorithm plays out all possible moves from the perspective of one
 player and chooses the one that maximizes their score and minimizes their
 opponent's, hence the name. Tic-Tac-Toe is a good game for exploring this
 algorithm because the possible choices are small enough that we can take the
-naive approach of enumerating all of them then choosing the best.
+naive approach of enumerating all of them, then choosing the best.
 
 To model our Tic-Tac-Toe game, we'll need some data types:
 
@@ -92,7 +92,7 @@ openBoard = openSpace <$> [T, M, B] <*> [L, C, R]
 
 Let's walk through the body of `openBoard` to see why it gives the result we
 need. First, `openSpace <$> [T, M, B]` maps the two-argument `openSpace` over
-the list `[T, M, B]`. This creates a list of partially-applied functions. Each
+the list `[T, M, B]`. This creates a list of partially applied functions. Each
 of these functions has been given a `Row` but still needs a `Column` to produce
 a full `Space`. We can show this as a list of lambdas taking a `Column` and
 building a `Space` with the `Row` it has already:
@@ -204,7 +204,7 @@ the function `(a -> [b])` to every `a` in the input list. The result must be
 the types are so generic, this is the only implementation this function can
 have. If we rule out obvious mistakes like ignoring arguments and returning an
 empty list, reordering the list, or adding or dropping elements, the only way to
-define this function is to map then flatten.
+define this function is to map, then flatten.
 
 ```haskell
 xs >>= f = concat (map f xs)
@@ -238,14 +238,14 @@ possible states.
 
 ### The Future
 
-If the above theory didn't make complete sense, that's OK. Let's get back to our
+If the theory above didn't make complete sense, that's OK. Let's get back to our
 Tic-Tac-Toe program and see how this works in the context of a real-word
 example.
 
 When it's our turn (us being the computer player), we want to play out the next
 turn for every move we have available. For each of those next turns, we want to
 do the same thing again. We want to repeat this process until the game is over.
-At that point, we can see which choice lead to the best result and use that one.
+At that point, we can see which choice led to the best result and use that one.
 
 One thing we'll need, and our first opportunity to use `Monad`, is to find all
 available moves for a given `Board`:
@@ -260,7 +260,7 @@ available board = do
 
 In this expression, we're treating a `Board` as a list of `Space`s. In other
 words, it's one `Space` that is all of the spaces on the board at once. We're
-using `(>>=)`, through *do-notation*, to map-then-flatten each `Space` to its
+using `(>>=)`, through *do-notation*, to map, then flatten, each `Space` to its
 `Position`. We're using *do-notation* to take advantage of the fact that if we
 use a pattern in the left-hand side of `(<-)`, but the value doesn't match the
 pattern, it's discarded. This expression is a concise map-filter that relies on
@@ -275,7 +275,7 @@ Nor is it always required at the end of a monadic expression. `return` is
 another function from the `Monad` type class. Its job is to take some value of
 type `a` and make it an `m a`. Conceptually, it should do this by putting the
 value in some default or minimal context. For `Maybe` this means applying
-`Just`, for `[]`, we put the value in a singleton list:
+`Just`. For `[]`, we put the value in a singleton list:
 
 ```haskell
 --        a -> m  a
@@ -303,7 +303,7 @@ future player board = do
 ```
 
 First we check if the `Board` is `over`. If that's the case, the future is a
-singleton list of only that `Board` -- again, `return board` does that.
+singleton list of only that `Board`--again, `return board` does that.
 Otherwise, we explore all available spaces. For each of them, we explore into
 the future again, this time for our opponent on a `Board` where we've played
 that space. This process repeats until someone wins or we fill the board in a
