@@ -19,7 +19,7 @@ value of the "type" param to know what to do next. We need... *monads*.
 
 ## And Then?
 
-Let's start with a minor refactor; let's pull out a `loginByType` function:
+Let's start with a minor refactor. We'll pull out a `loginByType` function:
 
 ```haskell
 loginUser :: Params -> Maybe User
@@ -70,6 +70,6 @@ loginByType params "email" =
 loginByType _ _ = Nothing
 ```
 
-This cleans things up nicely. The "passing along the `Maybe`" concern is
+This cleans things up nicely. The concern about "passing along the `Maybe`" is
 completely abstracted away behind `andThen` and we're free to describe the
 nature of *our* computation. If only Haskell had such a function...
