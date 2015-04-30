@@ -22,11 +22,11 @@ That said, this sugar is available for any `Monad` and so we can use it for
 works. Then, if and when you come across some `IO` expressions using
 *do-notation*, you won't be as surprised or confused.
 
-De-sugaring *do-notation* is a straight-forward process followed out during
-Haskell compilation and can be understood best by doing it manually. Let's start
+De-sugaring *do-notation* is a straightforward process followed out during
+Haskell compilation. It can be understood best by doing it manually. Let's start
 with our end result from the last example. We'll translate this code
-step-by-step into the equivalent *do-notation* form, then follow the same
-process backward, as the compiler would if we had written it that way in the
+step by step into the equivalent *do-notation* form, then follow the same
+process backward, as the compiler would do if we had written it that way in the
 first place.
 
 ```haskell
