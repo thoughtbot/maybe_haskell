@@ -70,6 +70,6 @@ loginByType params "email" =
 loginByType _ _ = Nothing
 ```
 
-This cleans things up nicely. The concern about "passing along the `Maybe`" is
+This cleans things up nicely. The concern of "passing along the `Maybe`" is
 completely abstracted away behind `andThen` and we're free to describe the
 nature of *our* computation. If only Haskell had such a function...
