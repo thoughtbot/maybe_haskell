@@ -56,11 +56,11 @@ getAge (Person _ age) = age
 In the definitions above, each function is looking for values constructed with
 `Person`. If it gets an argument that matches (which is guaranteed since that's
 the only way to get a `Person` in our system so far), Haskell will use that
-function body, in which each part of the constructed value is bound to the variables
+function body with each part of the constructed value bound to the variables
 given. The `_` pattern (called a *wildcard*) is used for any parts we don't care
 about. Again, this is using `=` for equivalence (as always). We're saying that
-`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works similarly
-for `getAge`.
+`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works
+similarly for `getAge`.
 
 Haskell offers [other][records] [ways][lenses] to do this sort of thing, but we won't
 get into those here.

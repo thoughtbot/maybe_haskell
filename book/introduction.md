@@ -12,7 +12,7 @@ indicates failure. Ruby has `nil`, Java has `null`, and many C functions return
 value at any time can either be the value you expect or `nil`, always.
 
 For instance, if you try to find a `User`, and then treat the value you get back
-as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
+as if it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
 worse, that error may not happen anywhere near the problem's source. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
 result is various "`nil` checks" peppered throughout the code. Is this the best
@@ -125,7 +125,7 @@ Finally, a word of general advice before you get started:
 
 The type system is not your enemy. It's your friend. It doesn't slow you down;
 it keeps you honest. Keep an open mind. Haskell is simpler than you think.
-Likewise, monads are not some mystical burrito. They're a simple abstraction that, when
+Monads are not some mystical burrito. They're a simple abstraction that, when
 applied to a variety of problems, can lead to elegant solutions. Don't get
-bogged down in what you don't understand. Instead, dig deeper into what you do. And above
-all, take your time.
+bogged down in what you don't understand. Instead, dig deeper into what you do.
+And above all, take your time.

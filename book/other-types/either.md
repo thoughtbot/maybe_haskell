@@ -80,8 +80,8 @@ invalid character and line can be found:
 jsonString = "..."
 
 case parseJSON jsonString of
-   Right json ->                -- do something with json
-   Left (ParserError ln ch) ->  -- do something with the error information
+   Right json ->                 -- do something with json
+   Left (ParserError ln col) ->  -- do something with the error information
 ```
 
 ### Functor

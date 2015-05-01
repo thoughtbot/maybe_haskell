@@ -45,7 +45,7 @@ any language:
 def user_from_params(params)
   if name = get_param "name" params
     if email = get_param "email" params
-      return User.new(name, email)
+      User.new(name, email)
     end
   end
 end
