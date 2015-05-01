@@ -18,9 +18,9 @@ indicates failure. Ruby has `nil`, Java has `null`, and many C functions return
 `-1` in failure cases. This is a huge hassle. You now have a system in which any
 value at any time can either be the value you expect or `nil`, always.
 
-If you try to find a `User`, and you get back a value, and you try to treat it
-like a `User` when it's actually `nil`, you get a `NoMethodError`. What's worse,
-that error may not happen anywhere near the source of the problem. The line of
+For instance, if you try to find a `User`, and then treat the value you get back
+as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
+worse, that error may not happen anywhere near the problem's source. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
 result is various "`nil` checks" peppered throughout the code. Is this the best
 we can do?
@@ -31,18 +31,18 @@ partial functions. What we don't need is `null`.
 
 ## An Alternate Solution
 
-In languages with sufficiently-expressive type systems, we have another option:
-we can state in the types that certain values may not be present. Functions
-normally written in a partial way can instead return a type that captures any
-potential non-presence. Not only does it make it explicit and "type checked"
-that when a value may not be present, you have code to handle that case, but it
-also means that if a value is *not* of this special "nullable" type, you can
-feel safe in your assumption that the value's really there -- No `nil`-checks
-required.
+In languages with sufficiently expressive type systems, we have another option:
+we can state in the types that certain values may not be present. Functions that
+typically are written in a partial way can instead be defined to return a type
+that captures any potential non-presence. Not only does this make it explicit
+and "type checked" that you have code to handle the case when a value isn't
+present, it also means that if a value is *not* of this special "nullable" type,
+you can feel safe in assuming the value is really there. In short: no `nil`
+checks are required.
 
-The focus of this book will be Haskell's implementation of this idea via the
-`Maybe` data type. This type and all of the functions that deal with it are not
-built-in, language-level constructs. All of it is implemented as libraries,
+The focus of this book will be how Haskell implements this idea via the
+`Maybe` data type. This type and all the functions that deal with it are not
+built-in, language-level constructs. Instead, this is all implemented as libraries,
 written in a very straightforward way. In fact, we'll write most of that code
 ourselves over the course of this short book.
 
@@ -68,18 +68,18 @@ This is a function definition written in an entirely different style than you
 may be used to. Even so, I'll bet you can guess what it does, and even get close
 to how it does it: `filter even` probably takes a list and filters it for only
 even elements. `length` probably takes a list and returns the number of elements
-it has.
+it contains.
 
 Given those fairly obvious facts, you might guess that putting two things
 together with `(.)` must mean you do one and then give the result to the other.
-That makes this expression a function which must take a list and return the
-number of even elements it has. Without mentioning any actual argument, we can
+That makes this expression a function that must take a list and return the
+number of even elements it contains. Without mentioning any actual argument, we can
 directly assign this function the name `countEvens`. There's no need in Haskell
 to say that count-evens *of some x* is to take the length after filtering for
 the even values *of that x*. We can state directly that count-evens is taking
 the length after filtering for evens.
 
-This is a relatively contrived example, but it's indicative of the confusion
+This is a relatively contrived example, but it's an indication of the confusion
 that can happen at any level: if your first reaction is "such weird syntax! What
 is this crazy dot thing!?", you're going to have a bad time. Instead, try to
 internalize the parts that make sense while getting comfortable with *not*
@@ -89,52 +89,52 @@ together in ways you might not expect.
 ## Structure
 
 We'll spend this entire book focused on a single *type constructor* called
-`Maybe`. We'll start by quickly covering the basics of Haskell, but only so far
-that we see the opportunity for such a type and can't help but invent it
-ourselves. With that defined, we'll quickly see that it's cumbersome to use.
+`Maybe`. We'll start by quickly covering the basics of Haskell, but only far enough
+that we can see the opportunity for such a type and can't help but invent it
+ourselves. With that type defined, we'll quickly see that it's cumbersome to use.
 This is because Haskell has taken an inherently cumbersome concept and put it
-right in front of us by naming it and requiring we deal with it at every step.
+right in front of us by naming it, and by requiring we deal with it at every step.
 
 From there, we'll explore three *type classes* whose presence will make our
-lives far less cumbersome. We'll see that `Maybe` has all of the properties
+lives far simpler. We'll see that `Maybe` has all the properties
 required to call it a *functor*, an *applicative functor*, and even a *monad*.
 These terms may sound scary, but we'll go through them slowly, each concept
-building on the last. These three *interfaces* are crucial to how I/O is handled
+building on the one before. These three *interfaces* are crucial to how I/O is handled
 in a purely functional language such as Haskell. Understanding them will open
-your eyes to a whole new world of abstractions and demystify notoriously opaque
+your eyes to a whole new world of abstractions and demystify some notoriously opaque
 topics.
 
 Finally, with a firm grasp on how these concepts operate in the context of
-`Maybe`, we'll discuss other types which share these qualities. This is to
+`Maybe`, we'll discuss other types that share these qualities. This is to
 reinforce the fact that these ideas are *abstractions*. They can be applied to
 any type that meets certain criteria. Ideas like *functor* and *monad* are not
-specifically tied to the concept of partial functions or nullable values. They
-apply broadly to things like lists, trees, exceptions, and program evaluation.
+limited to, or specifically tied to, the concept of partial functions or nullable values. They
+apply much more broadly to things like lists, trees, exceptions, and program evaluation.
 
 ## What This Book is Not
 
 I don't intend to teach you Haskell. Rather, I want to show you *barely enough*
-Haskell so that I can wade into more interesting topics. I want to show how this
+Haskell that I can wade into some more interesting topics. I want to show how this
 `Maybe` data type can add safety to your code base while remaining convenient,
 expressive, and powerful. My hope is to show that Haskell and its "academic"
-ideas are not limited to PhD thesis papers. These ideas result directly in
+ideas are not limited to PhD thesis papers. These ideas can result directly in
 cleaner, more maintainable code that solves practical problems.
 
 I won't describe how to set up a Haskell programming environment, show you how
 to write and run complete Haskell programs, or dive deeply into every language
-construct we'll see. If you are interested in going further and actually
+construct that we'll encounter. If you are interested in going further and actually
 learning Haskell (and I hope you are!), then I recommend following Chris Allen's
 great [learning path][learnhaskell].
 
 [learnhaskell]: https://github.com/bitemyapp/learnhaskell
 
-Lastly, a word of general advice before you get started:
+Finally, a word of general advice before you get started:
 
-The type system is not your enemy, it's your friend. It doesn't slow you down,
+The type system is not your enemy. It's your friend. It doesn't slow you down;
 it keeps you honest. Keep an open mind. Haskell is simpler than you think.
-Monads are not some mystical burrito, they're a simple abstraction which, when
+Likewise, monads are not some mystical burrito. They're a simple abstraction that, when
 applied to a variety of problems, can lead to elegant solutions. Don't get
-bogged down in what you don't understand, dig deeper into what you do. And above
+bogged down in what you don't understand. Instead, dig deeper into what you do. And above
 all, take your time.
 
 \mainmatter
@@ -189,7 +189,7 @@ division must itself be a `Rational`.
 
 Good Haskellers will include a type signature on all top-level definitions
 anyway. It provides executable documentation and may, in some cases, prevent
-errors which occur when the compiler assigns a more generic type than you might
+errors that occur when the compiler assigns a more generic type than you might
 otherwise want.
 
 ### Arguments
@@ -229,7 +229,7 @@ twice (add 2) 3
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
 (`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
-definition of `twice` are grouping, not application. In Haskell, applying a
+definition of `twice` indicate grouping, not application. In Haskell, applying a
 function to some argument is simple: stick them together with a space in
 between. In this case, we need to group the inner `(f x)` so the outer `f` is
 applied to it as single argument. Without these parentheses, Haskell would think
@@ -258,20 +258,20 @@ twice (add 2) 3
 -- => 7
 ```
 
-It's OK if this doesn't make complete sense now, I'll talk more about partial
+It's OK if this doesn't make complete sense now. I'll talk more about partial
 application as we go.
 
 ### Operators
 
 In the definition of `add`, I used something called an *operator*: `(+)`.
-Operators like this are not special or built-in in any way; we can define and
-use them like any other function. That said, there are three additional (and
-convenient) behaviors operators have:
+Operators like this are not in any way special or built-in; we can define and
+use them like any other function. That said, operators have three additional (and
+convenient) behaviors:
 
 1. They are used *infix* by default, meaning they appear between their arguments
    (i.e. `2 + 2`, not `+ 2 2`). To use an operator *prefix*, it must be
    surrounded in parentheses (as in `(+) 2 2`).
-2. When defining an operator, we can assign a custom [associativity][] and
+2. When defining an operator, we can assign custom [associativity][] and
    [precedence][] relative to other operators. This tells Haskell how to group
    expressions like `2 + 3 * 5 / 10`.
 3. We can surround an operator and *either* of its arguments in parentheses to
@@ -284,8 +284,8 @@ convenient) behaviors operators have:
 [precedence]: http://en.wikipedia.org/wiki/Order_of_operations
 
 In Haskell, any function with a name made up entirely of punctuation (where [The
-Haskell Report][report] states very exactly what "punctuation" means) behaves
-like an operator. We can also take any normally-named function and treat it like
+Haskell Report][report] states very precisely what "punctuation" means) behaves
+like an operator. We can also take any normally named function and treat it like
 an operator by surrounding it in backticks:
 
 [report]: https://www.haskell.org/onlinereport/haskell2010/haskellch2.html#x7-160002.2
@@ -307,11 +307,11 @@ intersects xs ys = any (`elem` xs) ys
 
 The last thing we need to know about functions is that they can be *anonymous*.
 Anonymous functions are called *lambdas* and are most frequently used as
-arguments to higher-order functions. Often these functional arguments only exist
-for a single use and giving them a name is not otherwise valuable.
+arguments to higher-order functions. Often these functional arguments exist
+for only a single use and giving them a name is not otherwise valuable.
 
-The syntax is a back-slash, the arguments to the function, an arrow, then the
-body of the function. A back-slash is used because it looks like the Greek
+The syntax is a back-slash, followed by the arguments to the function, an arrow, and finally the
+body of the function. A back-slash is used because it looks similar to the Greek
 letter λ.
 
 Here's an example:
@@ -352,17 +352,17 @@ data Person = MakePerson String Int
 ```
 
 To the left of the `=` is the *type* constructor and to the right can be one or
-more *data* constructors. The type constructor is the name of the type and is
-used in type signatures. The data constructors are functions which produce
+more *data* constructors. The type constructor is the name of the type, which is
+used in type signatures. The data constructors are functions that produce
 values of the given type. For example, `MakePerson` is a function that takes a
 `String` and an `Int`, and returns a `Person`. Note that I will often use the
 general term "constructor" to refer to a *data* constructor if the meaning is
-clear from context.
+clear from the context.
 
-When there is only one data constructor, it's quite common to give it the same
+When working with only one data constructor, it's quite common to give it the same
 name as the type constructor. This is because it's syntactically impossible to
 use one in place of the other, so the compiler makes no restriction. Naming is
-hard, so if you have a good one, you might as well use it in both contexts.
+hard. So when you have a good name, you might as well use it in both contexts.
 
 ```haskell
 data Person = Person String Int
@@ -372,7 +372,7 @@ data Person = Person String Int
 --   ` Type constructor
 ```
 
-With this data type declared, we can now use it to write functions that
+Once we have declared the data type, we can now use it to write functions that
 construct values of this type:
 
 ```haskell
@@ -393,17 +393,17 @@ getAge :: Person -> Int
 getAge (Person _ age) = age
 ```
 
-In the above definitions, each function is looking for values constructed with
+In the definitions above, each function is looking for values constructed with
 `Person`. If it gets an argument that matches (which is guaranteed since that's
 the only way to get a `Person` in our system so far), Haskell will use that
-function body with each part of the constructed value bound to the variables
+function body, in which each part of the constructed value is bound to the variables
 given. The `_` pattern (called a *wildcard*) is used for any parts we don't care
 about. Again, this is using `=` for equivalence (as always). We're saying that
-`getName`, when given `(Person name _)`, *is equivalent to* `name`. Similarly
+`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works similarly
 for `getAge`.
 
-There are [other][records] [ways][lenses] to do this sort of thing, but we won't
-get into that here.
+Haskell offers [other][records] [ways][lenses] to do this sort of thing, but we won't
+get into those here.
 
 [pattern-matching]: https://www.haskell.org/tutorial/patterns.html
 [records]: http://en.wikibooks.org/wiki/Haskell/More_on_datatypes#Named_Fields_.28Record_Syntax.29
@@ -411,7 +411,7 @@ get into that here.
 
 ## Sum Types
 
-As alluded to earlier, types can have more than one data constructor. These are
+As mentioned earlier, types can have more than one data constructor. These are
 called *sum types* because the total number of values you can build of a sum
 type is the sum of the number of values you can build with each of its
 constructors. The syntax is to separate each constructor by a `|` symbol:
@@ -428,7 +428,7 @@ jim = PersonWithoutAge "Jim"
 
 Notice that `pat` and `jim` are both values of type `Person`, but they've been
 constructed differently. We can use pattern matching to inspect how a value was
-constructed and choose what to do accordingly. Syntactically, this is
+constructed and accordingly choose what to do. Syntactically, this is
 accomplished by providing multiple definitions of the same function, each
 matching a different pattern. Each definition will be tried in the order
 defined, and the first function to match will be used.
@@ -450,7 +450,7 @@ getAge (PersonWithoutAge _) = -- uh-oh
 ```
 
 If we decide to be lazy and not define that second function body, Haskell will
-compile, but warn us about the *non-exhaustive* pattern match. What we've
+compile, but warn us about a *non-exhaustive* pattern match. What we've
 created at that point is a *partial function*. If such a program ever attempts
 to match `getAge` with a `Person` that has no age, we'll see one of the few
 runtime errors possible in Haskell.
@@ -463,9 +463,9 @@ person's age to deal with its potential non-presence.
 
 Imagine we wanted to generalize this `Person` type. What if people were able to
 hold arbitrary things? What if what that thing is (its type) doesn't really
-matter, the only meaningful thing we can say about it is if it's there or not.
-What we had before was a *person with an age* or a *person without an age*, what
-we want here is a *person with a thing* or a *person without a thing*.
+matter, if the only meaningful thing we can say about it is if it's there or not?
+What we had before was a *person with an age* or a *person without an age*. What
+we want now is a *person with a thing* or a *person without a thing*.
 
 One way to do this is to *parameterize* the type:
 
@@ -489,7 +489,7 @@ representing their age (or not), we can say a person is holding some thing of
 type `a` (or not).
 
 We can still construct people with and without ages, but now we have to specify
-in the type that the `a` is an `Int` in this case:
+in the type that in this case the `a` is an `Int`:
 
 ```haskell
 patWithAge :: Person Int
@@ -500,7 +500,7 @@ patWithoutAge = PersonWithoutThing "pat"
 ```
 
 Notice how even in the case where I have no age, we still specify the type of
-that thing which I do not have. In this case, we specified an `Int` for
+that thing that I do not have. In this case, we specified an `Int` for
 `patWithoutAge`, but values can have (or not have) any type of thing:
 
 ```haskell
@@ -531,9 +531,9 @@ patWithoutEmail :: Person String
 patWithoutEmail = patWithoutThing
 ```
 
-Similarly, functions that operate on people can choose if they care about what
-the person's holding or not. For example, getting someone's name shouldn't be
-affected by them holding something or not, so we can leave it unspecified:
+Similarly, functions that operate on people can choose whether they care about what
+the person's holding--or not. For example, getting someone's name shouldn't be
+affected by whether they hold something, so we can leave it unspecified:
 
 ```haskell
 getName :: Person a -> String
@@ -547,7 +547,7 @@ getName patWithoutEmail
 -- => "pat"
 ```
 
-But a function which does care, must both specify the type *and* account for the
+But a function that does care must specify both the type *and* account for the
 case of non-presence:
 
 ```haskell
@@ -582,11 +582,11 @@ Haskell's `Maybe` type is very similar to our `Person` example:
 data Maybe a = Nothing | Just a
 ```
 
-The difference is we're not dragging along a name this time. This type is only
-concerned with representing a value (of any type) which is either *present* or
+The difference is that we're not dragging along a name this time. This type is only
+concerned with representing a value (of any type) that is either *present* or
 *not*.
 
-We can use this to take functions which would otherwise be *partial* and make
+We can use this to take functions that otherwise would be *partial* and make
 them *total*:
 
 ```haskell
@@ -603,8 +603,8 @@ find predicate (first:rest) =
 This function has two definitions matching two different patterns: if given the
 empty list, we immediately return `Nothing`. Otherwise, the (non-empty) list is
 de-constructed into its `first` element and the `rest` of the list by matching
-on the `(:)` (pronounced *cons*) constructor. Then we test if applying the
-`predicate` function to `first` returns `True`. If it does, we return `Just` it.
+on the `(:)` (pronounced *cons*) constructor. Then we test whether applying the
+`predicate` function to `first` returns `True`. If it does, we return `Just` that.
 Otherwise, we recurse and try to find the element in the `rest` of the list.
 
 Returning a `Maybe` value forces all callers of `find` to deal with the
@@ -620,7 +620,7 @@ findUser uid = find (matchesId uid) allUsers
 
 This is a type error since the expression actually returns a `Maybe User`.
 Instead, we have to take that `Maybe User` and inspect it to see if something's
-there or not. We can do this via `case` which also supports pattern matching:
+there or not. We can do this via `case`, which also supports pattern matching:
 
 ```haskell
 findUser :: UserId -> User
@@ -671,7 +671,7 @@ Let's get started.
 # Functor
 
 In the last chapter, we defined a type that allows any value of type `a` to
-carry with it additional information about if it's actually there or not:
+carry with it additional information about whether it's actually there or not:
 
 ```haskell
 data Maybe a = Nothing | Just a
@@ -707,14 +707,14 @@ you have three choices:
 
 1. Use the value if you can, otherwise throw an exception
 2. Use the value if you can, but still have some way of returning a valid result
-   if it's not there
-3. Pass the buck, return a `Maybe` result yourself
+   if the value's not there
+3. Pass the buck and return a `Maybe` result yourself
 
 The first option is a non-starter. As you saw, it is possible to throw runtime
 exceptions in Haskell via the `error` function, but you should avoid this at all
-costs. We're trying to remove runtime exceptions, not add them.
+costs. We're trying to eliminate runtime exceptions, not add them.
 
-The second option is only possible in certain scenarios. You need to have some
+The second option is possible only in certain scenarios. You need to have some
 way to handle an incoming `Nothing`. That may mean skipping certain aspects of
 your computation or substituting another appropriate value. Usually, if you're
 given a completely abstract `Maybe a`, it's not possible to determine a
@@ -739,25 +739,24 @@ fromMaybe 10 notReallyFive
 ```
 
 Option 3 is actually a variation on option 2. By making your own result a
-`Maybe` you always have the ability to return `Nothing` yourself if the value's
-not present. If the value *is* present, you can perform whatever computation you
+`Maybe` you always have the ability to return `Nothing` yourself if the value isn't present. If the value *is* present, you can perform whatever computation you
 need to and wrap what would be your normal result in `Just`.
 
 The main downside is that now your callers also have to consider how to deal
 with the `Maybe`. Given the same situation, they should again make the same
-choice (option 3), but that only pushes the problem up to their callers -- any
+choice (option 3), but that only pushes the problem up to their callers--which means any
 `Maybe` values tend to go *viral*.
 
 Eventually, probably at some UI boundary, someone will need to "deal with" the
 `Maybe`, either by providing a substitute or skipping some action that might
 otherwise take place. This should happen only once, at that boundary. Every
-function between the source and final use should pass along the value's
+function between the source and the final use should pass along the value's
 potential non-presence unchanged.
 
 Even though it's safest for every function in our system to pass along a `Maybe`
 value, it would be extremely annoying to force them all to actually take and
-return `Maybe` values. Each function separately checking if they should go ahead
-and perform their computations will become repetitive and tedious. Instead, we
+return `Maybe` values. Each function separately checking whether it should go ahead
+and perform its computations will become repetitive and tedious. Instead, we
 can completely abstract this "pass along the `Maybe`" concern using higher-order
 functions and something called *functors*.
 
@@ -780,7 +779,7 @@ and we must return type `Maybe b`.
 This allows the internals of our system to be made of functions (e.g. the `f`
 given to `whenJust`) that take and return normal, non-`Maybe` values, but still
 "pass along the `Maybe`" whenever we need to take a value from some source that
-may fail and manipulate it in some way. If it's there, we go ahead and
+may fail and manipulate that value in some way. If it's there, we go ahead and
 manipulate it, but return the result as a `Maybe` as well. If it's not, we
 return `Nothing` directly.
 
@@ -799,13 +798,13 @@ type class.
 
 ## About Type Classes
 
-Haskell has a concept called *type classes*. They're not at all related to the
+Haskell has a concept called *type classes*. These are not at all related to the
 classes used in Object-oriented programming. Instead, Haskell uses type classes
-for functions which may be implemented in different ways for different data
+for functions that may be implemented in different ways for different data
 types. These are more like the *interfaces* and *protocols* you may find in
 other languages. For example, we can add or negate various kinds of numbers:
 integers, floating points, rational numbers, etc. To accommodate this, Haskell
-has a [`Num`][] type class with functions like `(+)` and `negate` as part of it.
+has a [`Num`][] type class that includes functions like `(+)` and `negate`.
 Each concrete type (`Int`, `Float`, etc) then defines its own version of the
 required functions.
 
@@ -821,7 +820,7 @@ class Num a where
     negate :: a -> a
 ```
 
-Being an *instance* of a type class requires you implement any member functions
+Being an *instance* of a type class requires that you implement any member functions
 with the correct type signatures. To make `Int` an instance of `Num`, someone
 defined the `(+)` and `negate` functions for it. This is done with the
 `instance` keyword and a `where` clause that implements the functions from the
@@ -834,9 +833,8 @@ instance Num Int where
     negate x = negateInt x
 ```
 
-Usually, but not always, there are *laws* associated with these functions that
-your implementations must satisfy. Type class laws are important for the utility
-of type classes. They allow us as developers to reason about what will happen
+Usually, but not always, *laws* are associated with these functions that
+your implementations must satisfy. Type class laws are important for ensuring that type classes are useful. They allow us as developers to reason about what will happen
 when we use type class functions without having to understand all of the
 concrete types for which they are defined. For example, if you negate a number
 twice, you should get back to the same number. This can be stated formally as:
@@ -847,7 +845,7 @@ negate (negate x) == x -- for any x
 
 Knowing that this law holds gives us a precise understanding of what will happen
 when we use `negate`. Because of the laws, we get this understanding without
-knowing how `negate` is implemented for various types. This is a simple example,
+having to know how `negate` is implemented for various types. This is a simple example,
 but we'll see more interesting laws with the `Functor` type class.
 
 ## Functor
@@ -886,7 +884,7 @@ instance Functor Maybe where
 
 This definition is exactly like the one we saw earlier for `whenJust`. The only
 difference is we're now implementing it as part of the `Functor` instance
-declaration for `Maybe`. For the rest of the book, I'll be omitting the `class`
+declaration for `Maybe`. For the rest of this book, I'll be omitting the `class`
 and `instance` syntax. Instead, I'll state in prose when a function is part of
 some type class but show its type and definition as if it was a normal,
 top-level function.
@@ -894,9 +892,9 @@ top-level function.
 ## The Functor Laws
 
 As mentioned, type class laws are a formal way of defining what it means for
-implementations to be "well-behaved". If someone writes a library function and
+implementations to be "well-behaved." If someone writes a library function and
 says it can work with "any `Functor`", that code can rely both on that type
-having an `fmap` implementation, and that it operates in accordance with these
+having an `fmap` implementation, and on its operating in accordance with these
 laws.
 
 ### The first Functor law
@@ -917,8 +915,8 @@ id :: a -> a
 id x = x
 ```
 
-Since pure functions always give the same result given the same input, it's
-equally correct to say that the functions themselves must be equivalent, rather
+Since pure functions always give the same result when given the same input, it's
+equally correct to say the functions themselves must be equivalent, rather
 than applying them to "any `x`" and saying the results must be equivalent. For
 this reason, the laws are usually stated as:
 
@@ -929,11 +927,11 @@ fmap id == id
 This law says that if we call `fmap id`, the function we get back should be
 equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
-element in the list (as `fmap id` does) gives you back the same exact list, and
-that is exactly what you expect to get if you apply `id` directly to the list
+element in the list (as `fmap id` does) gives you back the exact same list.
+That is exactly what you expect to get if you apply `id` directly to the list
 itself.
 
-Let's go through the same thought exercise for `Maybe` so you can see that the
+Let's go through the same thought exercise for `Maybe` so you can see that this
 law holds for its implementation as well. We'll use our two example values
 `actuallyFive` and `notReallyFive` from earlier:
 
@@ -996,7 +994,7 @@ As expected, both results are the same as applying `id` directly.
 
 ### The second Functor law
 
-The second law has to do with order of operations, it states:
+The second law has to do with order of operations. It states:
 
 ```haskell
 fmap (f . g) == fmap f . fmap g
@@ -1010,7 +1008,7 @@ Where `(.)` is a function that takes two functions and *composes* them together:
 ```
 
 What this law says is that if we compose two functions together, then `fmap` the
-resulting function, we should get a function which behaves the same as when we
+resulting function, we should get a function that behaves the same as when we
 `fmap` each function individually, then compose the two results. Let's prove
 again that this law holds for `Maybe` by walking through an example with
 `actuallyFive` and `notReallyFive`.
@@ -1058,7 +1056,7 @@ fmap h notReallyFive
 ```
 
 Similarly, we can give each of `f` and `g` to `fmap` separately to produce
-functions which can add 2 or multiply 3 to a `Maybe Int` and produce another
+functions that can add 2 or multiply 3 to a `Maybe Int` and produce another
 `Maybe Int`. The resulting functions can also be composed with `(.)` to produce
 a new function, `fh`:
 
@@ -1074,9 +1072,8 @@ fh :: Maybe Int -> Maybe Int
 fh x = fmap f (fmap g x)
 ```
 
-This function will call `fmap g` on its argument which will multiply by 3 if the
-number's there or return `Nothing` if it's not, then give that result to `fmap
-f` which will add 2 if the number's there, or return `Nothing` if it's not:
+This function will call `fmap g` on its argument, which will multiply by 3 if the
+number's there or return `Nothing` if it's not. Then it will give that result to `fmap f`, which will add 2 if the number's there, or return `Nothing` if it's not:
 
 ```haskell
 fh actuallyFive
@@ -1090,8 +1087,8 @@ You should convince yourself that `fh` and `fmap h` behave in exactly the same
 way. The second functor law states that this must be the case if your type is to
 be a valid `Functor`.
 
-Because Haskell is referentially transparent, we can replace functions with
-their implementations freely -- it may require some explicit parentheses here
+Because Haskell is referentially transparent, we can freely replace functions with
+their implementations. It may require some explicit parentheses here
 and there, but the code will always give the same answer. Doing so brings us
 back directly to the statement of the second law:
 
@@ -1112,11 +1109,11 @@ fmap (f . g) notReallyFive
 fmap (f . g) == fmap f . fmap g
 ```
 
-Not only can we take normal functions (those which operate on fully present
-values) and give them to `fmap` to get ones that can operate on `Maybe` values,
+Not only can we take normal functions (those that operate on fully present
+values) and give them to `fmap` to get functions that can operate on `Maybe` values,
 but this law states we can do so in any order. We can compose our system of
 functions together *then* give that to `fmap` or we can `fmap` individual
-functions and compose *those* together -- either way, we're guaranteed the same
+functions and compose *those* together. Either way, we're guaranteed to get the same
 result. We can rely on this fact whenever we use `fmap` for any type that's in
 the `Functor` type class.
 
@@ -1131,7 +1128,7 @@ findUser :: UserId -> Maybe User
 findUser = undefined
 ```
 
-I've left the implementation of `findUser` as `undefined` because it doesn't
+I've left the implementation of `findUser` as `undefined` because this doesn't
 matter for our example. I'll do this frequently throughout the book. `undefined`
 is a function with type `a`. That allows it to stand in for any expression. If
 your program ever tries to evaluate it, it will raise an exception. Still, it
@@ -1146,16 +1143,16 @@ userUpperName u = map toUpper (userName u)
 ```
 
 The logic of getting from a `User` to that capitalized `String` is not terribly
-complex, but it could be -- imagine something like getting from a `User` to
-their yearly spending on products valued over $1,000. In our case the
+complex, but it could be. Imagine something like getting from a `User` to
+that user's yearly spending on products valued over $1,000. In our case the
 transformation is only one function, but realistically it could be a whole suite
 of functions wired together. Ideally, none of these functions should have to
-think about potential non-presence or contain any "nil-checks" as that's not
+think about potential non-presence or contain any "nil-checks," as that's not
 their purpose; they should all be written to work on values that are fully
 present.
 
 Given `userUpperName`, which works only on present values, we can use `fmap` to
-apply it to a value which may not be present to get back the result we expect
+apply it to a value that may not be present to get back the result we expect
 with the same level of *present-ness*:
 
 ```haskell
@@ -1167,8 +1164,8 @@ We can do this repeatedly with every function in our system that's required to
 get from `findUser` to the eventual display of this name. Because of the second
 functor law, we know that if we compose all of these functions together then
 `fmap` the result, or if we `fmap` any individual functions and compose the
-results, we'll always get the same answer. We're free to architect our system as
-we see fit, but still pass along the `Maybe`s everywhere we need to.
+results, we'll always get the same answer. We're free to design our system as we
+see fit, but still pass along the `Maybe`s everywhere we need to.
 
 If we were doing this in the context of a web application, this maybe-name might
 end up being interpolated into some HTML. It's at this boundary that we'll have
@@ -1188,7 +1185,7 @@ template mname = "<span class=\"username\">" ++ name ++ "</span>"
 Before moving on, I need to pause briefly and answer a question I dodged in the
 Haskell Basics chapter. You may have wondered why Haskell type signatures don't
 separate a function's argument types from its return type. The direct answer is
-that all functions in Haskell are in *curried* form; an idea developed by and
+that all functions in Haskell are in *curried* form. This is an idea developed by and
 named for the same [logician][] as Haskell itself.
 
 [logician]: http://en.wikipedia.org/wiki/Haskell_Curry
@@ -1196,7 +1193,7 @@ named for the same [logician][] as Haskell itself.
 A curried function is one that *conceptually* accepts multiple arguments by
 actually accepting only one, but returning a function. The returned function
 itself will also be curried and use the same process to accept more arguments.
-This process continues for as many arguments as needed. In short, all functions
+This process continues for as many arguments as are needed. In short, all functions
 in Haskell are of the form `(a -> b)`. A (conceptually) multi-argument function
 like `add :: Int -> Int -> Int` is really `add :: Int -> (Int -> Int)`; this
 matches `(a -> b)` by taking `a` as `Int` and `b` as `(Int -> Int)`.
@@ -1205,14 +1202,14 @@ The reason I didn't talk about this earlier is that we can mostly ignore it when
 writing Haskell code. We define and apply functions as if they actually accept
 multiple arguments and things work as we intuitively expect. Even partial
 application (a topic I hand-waved a bit at the time) can be used effectively
-without realizing it's a direct result of curried functions. It's when we dive
+without realizing this is a direct result of curried functions. It's when we dive
 into concepts like `Applicative` (the focus of the next chapter) that we need to
 understand a bit more about what's going on under the hood.
 
 ### The Case for Currying
 
 In the implementation of purely functional programming languages, there is value
-in all functions taking exactly one argument and returning exactly one result.
+in having all functions taking exactly one argument and returning exactly one result.
 Haskell is written this way, so users have two choices for defining
 "multi-argument" functions.
 
@@ -1223,7 +1220,7 @@ add :: (Int, Int) -> Int
 add (x, y) = x + y
 ```
 
-This results in type signatures you might expect, where the argument types are
+This results in the sort of type signatures you might expect, where the argument types are
 shown separate from the return types. The problem with this form is that partial
 application can be cumbersome. How do you add 5 to every element in a list?
 
@@ -1262,7 +1259,7 @@ f = map (add 5) [1,2,3]
 ```
 
 While both forms are valid Haskell (in fact, the `curry` and `uncurry` functions
-in the Prelude convert functions between the two forms), the latter was chosen
+in the Prelude convert functions between the two forms), the curried version was chosen
 as the default and so Haskell's syntax allows some things that make it more
 convenient.
 
@@ -1312,16 +1309,16 @@ And it has the same meaning as well.
 
 These conveniences are why we don't actively picture functions as curried when
 writing Haskell code. We can define `addThree` naturally, as if it took three
-arguments and the rules of the language handle currying. We can also apply
+arguments, and let the rules of the language handle currying. We can also apply
 `addThree` naturally, as if it took three arguments and again the rules of the
-language handle the currying.
+language will handle the currying.
 
 ### Partial Application
 
 Some languages don't use curried functions but do support *partial application*:
 supplying only some of a function's arguments to get back another function that
-accepts the arguments left out. We can do this in Haskell too, but it's not
-"partial" at all, since all functions truly only accept a single argument.
+accepts the arguments that were left out. We can do this in Haskell too, but it's not
+"partial" at all, since all functions truly accept only a single argument.
 
 When we wrote the following expression:
 
@@ -1329,7 +1326,7 @@ When we wrote the following expression:
 maybeName = fmap userUpperName (findUser someId)
 ```
 
-What really happened is `fmap` was first applied to the function `userUpperName`
+What really happened is that `fmap` was first applied to the function `userUpperName`
 to return a new function of type `Maybe User -> Maybe String`.
 
 ```haskell
@@ -1347,14 +1344,14 @@ consistent syntax for doing either.
 
 ## Recap
 
-So far, we've seen an introduction to Haskell functions and its type system, a
+So far, we've seen an introduction to Haskell functions and to Haskell's type system. This is a
 new and powerful way to use that type system to describe something about your
-domain (that some values may not be present), and a type class (`Functor`) that
+domain--that some values may not be present--and a type class (`Functor`) that
 allows for strict separation between value-handling functions and the need to
 apply them to values that may not be present.
 
-We then saw some real-word code that takes advantage of these ideas and
-discussed type class laws as a means of abstraction and encapsulation: they give
+We then saw some real-world code that takes advantage of these ideas and
+discussed type class laws as a means of abstraction and encapsulation. These laws give
 us a precise understanding of how our code will behave without having to know
 its internals. Finally, we took a brief detour into the world of currying, a
 foundational concept responsible for many of the things we'll explore next.
@@ -1362,7 +1359,7 @@ foundational concept responsible for many of the things we'll explore next.
 In the next chapter, we'll talk about *applicative functors*. If we think of a
 *functor* as a value in some context, supporting an `fmap` operation for
 applying a function to that value while preserving its context, *applicative
-functors* are functors where the value itself *can be applied*, i.e. it's a
+functors* are functors for which the value itself *can be applied*. In simple terms: it's a
 function. These structures must then support another operation for applying that
 function from within its context. That operation, combined with currying, will
 grant us more power and convenience when working with `Maybe` values.
@@ -1370,15 +1367,15 @@ grant us more power and convenience when working with `Maybe` values.
 # Applicative
 
 In the last section we saw how to use `fmap` to take a system full of functions
-which operate on fully present values, free of any `nil`-checks, and employ them
-to safely manipulate values which may in fact not be present. This immediately
+that operate on fully present values, free of any `nil`-checks, and employ them
+to safely manipulate values that may in fact not be present. This immediately
 makes many uses of `Maybe` more convenient, while still being explicit and safe
 in the face of failure and partial functions.
 
 There's another notable case where `Maybe` can cause inconvenience, one that
 can't be solved by `fmap` alone. Imagine we're writing some code using a web
-framework. It provides a function `getParam` which takes the name of a query
-parameter (passed as part of the URL in a GET HTTP request), and returns the
+framework. It provides a function `getParam` that takes the name of a query
+parameter (passed as part of the URL in a GET HTTP request) and returns the
 value for that parameter as parsed out of the current URL. Since the parameter
 you name could be missing or invalid, this function returns `Maybe`:
 
@@ -1426,8 +1423,8 @@ end
 
 So how do we do this better? What we want is code that looks as if there is no
 `Maybe` involved (because that's convenient) but correctly accounts for `Maybe`
-at every step along the way (because that's safe). If there were no `Maybe`s
-involved, and we were constructing a normal `User` value, the code may look like
+at every step along the way (because that's safe). If no `Maybe`s
+were involved, and we were constructing a normal `User` value, the code might look like
 this:
 
 ```haskell
@@ -1487,8 +1484,8 @@ The `Control.Applicative` module exports an operator synonym for `fmap` called
 `(<$>)` (I pronounce this as *fmap* because that's what it's a synonym for). The
 reason this synonym exists is to get us closer to our original goal of making
 expressions look as if there are no `Maybe`s involved. Since operators are
-placed between their arguments, we can use `(<$>)` to rewrite our above
-expression to an equivalent one with less noise:
+placed between their arguments, we can use `(<$>)` to rewrite our
+expression above to an equivalent one with less noise:
 
 ```haskell
 User <$> getParam "name" params :: Maybe (String -> User)
@@ -1501,7 +1498,7 @@ User)`. Since functions are things that *can be applied*, these are called
 *applicative functors*.
 
 By using `fmap`, we reduced our problem space and isolated the functionality
-we're lacking; functionality we'll ultimately get from `Applicative`:
+we're lacking, functionality we'll ultimately get from `Applicative`:
 
 We have this:
 
@@ -1555,7 +1552,7 @@ defined for many types. Therefore, its actual type signature is:
 (<*>) :: f (a -> b) -> f a -> f b
 ```
 
-Where `f` is any type that has an `Applicative` instance (e.g. `Maybe`).
+Where `f` is any type that has an `Applicative` instance (such as `Maybe`).
 
 It's important to mention this because it is the type signature you're going to
 see in any documentation about `Applicative`. Now that I've done so, I'm going
@@ -1594,7 +1591,7 @@ Not only is this expression elegant, it's also safe. Because of the semantics of
 `userFromParams` expression results in `Nothing`. Only if they all return `Just`
 values, do we get `Just` our user.
 
-As always, Haskell being referentially transparent means we can prove this by
+As always, Haskell's being referentially transparent means we can prove this by
 substituting the definitions of `fmap` and `(<*>)` and tracing how the
 expression expands given some example `Maybe` values.
 
@@ -1607,7 +1604,7 @@ User <$> Just "Pat" <*> Nothing
 -- => Nothing                                   (<*> definition, second pattern)
 ```
 
-If the second value's present but the first is not:
+If the second value is present but the first is not:
 
 ```haskell
 User <$> Nothing <*> Just "pat@thoughtbot.com"
@@ -1627,15 +1624,15 @@ User <$> Just "Pat" <*> Just "pat@thoughtbot.com"
 
 ## Chaining
 
-One of the nice things about this pattern is that it scales up to functions with
-(conceptually) any number of arguments. Imagine that our `User` type had a third
-field representing their age:
+One of the nice things about this pattern is that it scales up to functions
+that, conceptually at least, can accept any number of arguments. Imagine that
+our `User` type had a third field representing their age:
 
 ```haskell
 data User = User String String Int
 ```
 
-Since our `getParam` function can only look up parameters of `String` values,
+Since our `getParam` function can only look up parameters of type `String`,
 we'll also need a `getIntParam` function to pull the user's age out of our
 `Params`:
 
@@ -1682,10 +1679,10 @@ This pattern is used in a number of places in the Haskell ecosystem.
 
 As one example, the [aeson][] package defines a number of functions for parsing
 things out of JSON values. These functions return their results wrapped in a
-`Parser` type which is very much like `Maybe` except that it holds a bit more
+`Parser` type. This is very much like `Maybe` except that it holds a bit more
 information about *why* the computation failed, not only *that* the computation
 failed. Not unlike our `getParam`, these sub-parsers pull basic types (`Int`,
-`String`, etc) out of JSON values. The `Applicative` instance for the `Parser`
+`String`, etc.) out of JSON values. The `Applicative` instance for the `Parser`
 type can then be used to combine them into something domain-specific, like a
 `User`.
 
@@ -1702,7 +1699,7 @@ data User = User
 ```
 
 We can tell aeson how to create a `User` from JSON, by implementing the
-`parseJSON` function which takes a JSON object (represented by the `Value` type)
+`parseJSON` function. That takes a JSON object (represented by the `Value` type)
 and returns a `Parser User`:
 
 ```haskell
@@ -1821,7 +1818,7 @@ value of the "type" param to know what to do next. We need... *monads*.
 
 ## And Then?
 
-Let's start with a minor refactor; let's pull out a `loginByType` function:
+Let's start with a minor refactor. We'll pull out a `loginByType` function:
 
 ```haskell
 loginUser :: Params -> Maybe User
@@ -1872,7 +1869,7 @@ loginByType params "email" =
 loginByType _ _ = Nothing
 ```
 
-This cleans things up nicely. The "passing along the `Maybe`" concern is
+This cleans things up nicely. The concern of "passing along the `Maybe`" is
 completely abstracted away behind `andThen` and we're free to describe the
 nature of *our* computation. If only Haskell had such a function...
 
@@ -1984,11 +1981,11 @@ That said, this sugar is available for any `Monad` and so we can use it for
 works. Then, if and when you come across some `IO` expressions using
 *do-notation*, you won't be as surprised or confused.
 
-De-sugaring *do-notation* is a straight-forward process followed out during
-Haskell compilation and can be understood best by doing it manually. Let's start
+De-sugaring *do-notation* is a straightforward process followed out during
+Haskell compilation. It can be understood best by doing it manually. Let's start
 with our end result from the last example. We'll translate this code
-step-by-step into the equivalent *do-notation* form, then follow the same
-process backward, as the compiler would if we had written it that way in the
+step by step into the equivalent *do-notation* form, then follow the same
+process backward, as the compiler would do if we had written it that way in the
 first place.
 
 ```haskell
@@ -2097,7 +2094,7 @@ findUserShippingCost uid = findUser uid >>= userZip >>= shippingCost
 
 And thus ends our discussion of monads. This also ends our discussion of
 `Maybe`. You've now seen the type itself and three of Haskell's most important
-abstractions which make its use convenient while still remaining explicit and
+abstractions, which make its use convenient while still remaining explicit and
 safe. To highlight the point that these abstractions (`Functor`, `Applicative`,
 and `Monad`) are *interfaces* shared by many types, the next and final section
 will briefly show a few other useful types that also have these three
@@ -2136,9 +2133,9 @@ data Either a b = Left a | Right b
 ```
 
 Traditionally, the `Right` constructor is used for a successful result (what a
-function would've returned normally) and `Left` is used in the failure case. The
+function would have returned normally) and `Left` is used in the failure case. The
 value of type `a` given to the `Left` constructor is meant to hold information
-about the failure -- i.e. why did it fail? This is only convention, but it's a
+about the failure: why did it fail? This is only a convention, but it's a
 strong one that we'll use throughout this chapter. To see one formalization of
 this convention, take a look at [Control.Monad.Except][except]. It can appear
 intimidating because it is so generalized, but [Example 1][example] should look
@@ -2154,7 +2151,7 @@ the context, therefore Haskell has instances of `Functor`, `Applicative`, and
 `Monad` for `Either a` (not `Either a b`).
 
 This use of `Left a` to represent failure with error information of type `a` can
-get confusing when we start looking at functions like `fmap` since the
+get confusing when we start looking at functions like `fmap`. Here's why: the
 generalized type of `fmap` talks about `f a` and I said our instance would be
 for `Either a` making that `Either a a`, but they aren't the same `a`!
 
@@ -2186,8 +2183,8 @@ data ParserError = ParserError Int Int
 ```
 
 From this, we can make a domain-specific type alias built on top of `Either`. We
-can say that a value which we parse may fail, and if it does, there will be
-error information in a `Left`-constructed result. If it succeeds, we'll get the
+can say a value that we parse may fail. If it does, 
+error information will appear in a `Left`-constructed result. If it succeeds, we'll get the
 `a` we originally wanted in a `Right`-constructed result.
 
 ```haskell
@@ -2195,8 +2192,7 @@ error information in a `Left`-constructed result. If it succeeds, we'll get the
 type Parsed a = Either ParserError a -- = Left ParserError | Right a
 ```
 
-Finally, we can give functions that may produce such results an informative
-type:
+Finally, we can give an informative type to functions that may produce such results:
 
 ```haskell
 parseJSON :: String -> Parsed JSON
@@ -2216,10 +2212,10 @@ case parseJSON jsonString of
 
 ### Functor
 
-You may have noticed that we've reached the same conundrum as `Maybe`: often,
+You may have noticed that we've reached the same conundrum as with `Maybe`: often,
 the best thing to do if we encounter a `Left` result is to pass it along to our
 own callers. Wouldn't it be nice if we could take some JSON-manipulating
-function and apply it directly to something we parse? Wouldn't it be nice if the
+function and apply it directly to something that we parse? Wouldn't it be nice if the
 "pass along the errors" concern were handled separately?
 
 ```haskell
@@ -2259,7 +2255,7 @@ If the incoming string is valid, we get a successful `Parsed JSON` result with
 the `"admin"` key replaced by `False`. Otherwise, we get an unsuccessful `Parsed
 JSON` result with the original error message still available.
 
-Knowing that `Control.Applicative` provides `(<$>)` is an infix synonym for
+Knowing that `Control.Applicative` provides `(<$>)` as an infix synonym for
 `fmap`, we could also use that to make this read a bit better:
 
 ```haskell
@@ -2270,11 +2266,11 @@ Speaking of `Applicative`...
 
 ### Applicative
 
-It would also be nice if we could take two potentially-failed results and pass
+It would also be nice if we could take two potentially failed results and pass
 them as arguments to some function that takes normal values. If any result
 fails, the overall result is also a failure. If all are successful, we get a
-successful overall result. This sounds a lot like what we did with `Maybe`, the
-only difference is we're doing it for a different kind of context.
+successful overall result. This sounds a lot like what we did with `Maybe`. The
+only difference is that we're doing it for a different kind of context.
 
 ```haskell
 -- Given two json objects, merge them into one
@@ -2308,17 +2304,17 @@ Right _ <*> Left e = Left e
 ```
 
 Astute readers may notice that we could reduce this to one pattern by using
-`fmap` -- this is left as an exercise.
+`fmap`. This is left as an exercise.
 
 What about the case where the first argument is `Left`? At first this seems
-trivial: there's no use inspecting the second value, we know something has
-already failed so let's pass that along, right? Well, what if the second value
+trivial: there's no use inspecting the second value because we know something has
+already failed, so let's pass that along, right? Well, what if the second value
 was also an error? Which error should we keep? Either way we discard one of
-them, and any potential loss of information should be met with pause.
+them. Any potential loss of information should be met with pause.
 
-It [turns out][gist], it doesn't matter -- at least not as far as the
+It [turns out][gist], it doesn't matter, at least not as far as the
 Applicative Laws are concerned. If choosing one over the other had violated any
-of the laws, we would've had our answer. Beyond those, we don't know how this
+of the laws, we would have had our answer. Beyond those, we don't know how this
 instance will eventually be used by end-users and we can't say which is the
 "right" choice standing here now.
 
@@ -2374,7 +2370,7 @@ parseBody jsonString = parseJSON jsonString >>= parseHTML . at "body"
 First, `parseJSON jsonString` gives us a `Parsed JSON`. This is the `m a` in
 `(>>=)`'s type signature. Then we use `(.)` to compose a function that gets the
 value at the `"body"` key and passes it to `parseHTML`. The type of this
-function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
+function is `(JSON -> Parsed HTML)`, which aligns with the `(a -> m b)` of
 `(>>=)`'s second argument. Knowing that `(>>=)` will return `m b`, we can see
 that that's the `Parsed HTML` we're after.
 
@@ -2383,7 +2379,7 @@ we want. If either parse fails, we get a `Left`-constructed value containing the
 `ParserError` from whichever failed.
 
 Allowing such a readable expression (*parse JSON and then parse HTML at body*),
-requires the following straight-forward implementation for `(>>=)`:
+requires the following straightforward implementation for `(>>=)`:
 
 ```haskell
 --       m        a -> (a -> m        b) -> m        b
@@ -2396,9 +2392,9 @@ Left e >>= _ = Left e
 Armed with instances for `Functor`, `Applicative`, and `Monad` for both `Maybe`
 and `Either e`, we can use the same set of functions (those with `Functor f`,
 `Applicative f` or `Monad m` in their class constraints) and apply them to a
-variety of functions which may fail (with or without useful error information).
+variety of functions that may fail (with or without useful error information).
 
-This is a great way to reduce a project's maintenance burden: if you start with
+This is a great way to reduce a project's maintenance burden. If you start with
 functions returning `Maybe` values but use generalized functions for (e.g.) any
 `Monad m`, you can later upgrade to a fully fledged `Error` type based on
 `Either` without having to change most of the code base.
@@ -2426,7 +2422,7 @@ In short, the algorithm plays out all possible moves from the perspective of one
 player and chooses the one that maximizes their score and minimizes their
 opponent's, hence the name. Tic-Tac-Toe is a good game for exploring this
 algorithm because the possible choices are small enough that we can take the
-naive approach of enumerating all of them then choosing the best.
+naive approach of enumerating all of them, then choosing the best.
 
 To model our Tic-Tac-Toe game, we'll need some data types:
 
@@ -2497,7 +2493,7 @@ openBoard = openSpace <$> [T, M, B] <*> [L, C, R]
 
 Let's walk through the body of `openBoard` to see why it gives the result we
 need. First, `openSpace <$> [T, M, B]` maps the two-argument `openSpace` over
-the list `[T, M, B]`. This creates a list of partially-applied functions. Each
+the list `[T, M, B]`. This creates a list of partially applied functions. Each
 of these functions has been given a `Row` but still needs a `Column` to produce
 a full `Space`. We can show this as a list of lambdas taking a `Column` and
 building a `Space` with the `Row` it has already:
@@ -2609,7 +2605,7 @@ the function `(a -> [b])` to every `a` in the input list. The result must be
 the types are so generic, this is the only implementation this function can
 have. If we rule out obvious mistakes like ignoring arguments and returning an
 empty list, reordering the list, or adding or dropping elements, the only way to
-define this function is to map then flatten.
+define this function is to map, then flatten.
 
 ```haskell
 xs >>= f = concat (map f xs)
@@ -2643,14 +2639,14 @@ possible states.
 
 ### The Future
 
-If the above theory didn't make complete sense, that's OK. Let's get back to our
+If the theory above didn't make complete sense, that's OK. Let's get back to our
 Tic-Tac-Toe program and see how this works in the context of a real-word
 example.
 
 When it's our turn (us being the computer player), we want to play out the next
 turn for every move we have available. For each of those next turns, we want to
 do the same thing again. We want to repeat this process until the game is over.
-At that point, we can see which choice lead to the best result and use that one.
+At that point, we can see which choice led to the best result and use that one.
 
 One thing we'll need, and our first opportunity to use `Monad`, is to find all
 available moves for a given `Board`:
@@ -2665,7 +2661,7 @@ available board = do
 
 In this expression, we're treating a `Board` as a list of `Space`s. In other
 words, it's one `Space` that is all of the spaces on the board at once. We're
-using `(>>=)`, through *do-notation*, to map-then-flatten each `Space` to its
+using `(>>=)`, through *do-notation*, to map, then flatten, each `Space` to its
 `Position`. We're using *do-notation* to take advantage of the fact that if we
 use a pattern in the left-hand side of `(<-)`, but the value doesn't match the
 pattern, it's discarded. This expression is a concise map-filter that relies on
@@ -2680,7 +2676,7 @@ Nor is it always required at the end of a monadic expression. `return` is
 another function from the `Monad` type class. Its job is to take some value of
 type `a` and make it an `m a`. Conceptually, it should do this by putting the
 value in some default or minimal context. For `Maybe` this means applying
-`Just`, for `[]`, we put the value in a singleton list:
+`Just`. For `[]`, we put the value in a singleton list:
 
 ```haskell
 --        a -> m  a
@@ -2708,7 +2704,7 @@ future player board = do
 ```
 
 First we check if the `Board` is `over`. If that's the case, the future is a
-singleton list of only that `Board` -- again, `return board` does that.
+singleton list of only that `Board`--again, `return board` does that.
 Otherwise, we explore all available spaces. For each of them, we explore into
 the future again, this time for our opponent on a `Board` where we've played
 that space. This process repeats until someone wins or we fill the board in a
@@ -2807,9 +2803,9 @@ that to a separate runtime, which is in charge of actually performing it.
 
 ### Statements and the curse of do-notation
 
-The above Haskell function used *do-notation*. I did this to highlight that the
+The Haskell function above used *do-notation*. I did this to highlight that the
 reason do-notation exists is for Haskell code to look like that equivalent,
-imperative Ruby on which it was based. This fact has the unfortunate consequence
+imperative Ruby, on which it was based. This fact has the unfortunate consequence
 of tricking new Haskell programmers into thinking that `putStr` (for example) is
 an imperative statement that actually puts the string to the screen when
 evaluated.
@@ -2818,7 +2814,7 @@ In the Ruby code, each statement is implicitly combined with the next as the
 interpreter sees them. There is some initial global state, statements modify
 that global state, and the interpreter handles ensuring that subsequent
 statements see an updated global state from all those that came before. If Ruby
-used a semi-colon instead of whitespace to delimit statements, we could almost
+used a semicolon instead of white space to delimit statements, we could almost
 think of `(;)` as an operator for combining statements and keeping track of the
 global state between them.
 
@@ -2842,7 +2838,7 @@ main :: IO ()
 ```
 
 The type of `main` is pronounced *IO void*. `()` itself is a type defined with a
-single constructor, it can also be thought of as an empty tuple:
+single constructor. It can also be thought of as an empty tuple:
 
 ```haskell
 data () = ()
@@ -2913,7 +2909,7 @@ In our case, `m` will always be `IO`, but `a` and `b` will be different each
 time we use `(>>=)`. The first combination we need is `putStr` and `getLine`.
 `putStr "..."` fits as `m a`, because its type is `IO ()`, but `getLine` does
 not have the type `() -> IO b` which is required for things to line up. There's
-another operator built on top of `(>>=)` designed to fix this problem:
+another operator, built on top of `(>>=)`, designed to fix this problem:
 
 ```haskell
 (>>) :: m a -> m b -> m b
@@ -2929,7 +2925,7 @@ main = putStr "..." >> getLine
 ```
 
 What is the type of this expression? If `(>>)` is `m a -> m b -> m b` and we've
-got `m a` as `IO ()` and `m b` as `IO String`, this combined expression must be
+got `m a` as `IO ()` and `m b` as `IO String`. This combined expression must be
 `IO String`. It represents an action that, *when executed*, would print the
 given string to the terminal, then read in a line.
 
@@ -2968,7 +2964,7 @@ instances for `Functor` and `Applicative`, the functions in these classes
 `Monad` instance. For this reason, I won't be showing their definitions. That
 said, these instances are still useful. If your `IO` code doesn't require the
 full power of monads, it's better to use a weaker constraint. More general
-programs are better and weaker constraints on what kind of data your functions
+programs are better; weaker constraints on what kind of data your functions
 can work with makes them more generally useful.
 
 #### Functor
@@ -2979,7 +2975,7 @@ can work with makes them more generally useful.
 fmap :: (a -> b) -> IO a -> IO b
 ```
 
-It takes a function and an `IO` action and returns another `IO` action which
+It takes a function and an `IO` action and returns another `IO` action, which
 represents applying that function to the *eventual* result returned by the
 first.
 
@@ -3045,7 +3041,7 @@ diffFiles fp1 fp2 = do
 ```
 
 Notice that the second `readFile` does not depend on the result of the first.
-Both `readFile` actions produce values that are combined *at-once* using the
+Both `readFile` actions produce values that are combined *at once* using the
 pure function `diff`. We can make this lack of dependency explicit and bring the
 expression closer to what it would look like without `IO` values by using
 `Applicative`:
