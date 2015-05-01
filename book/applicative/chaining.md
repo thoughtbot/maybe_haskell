@@ -1,13 +1,14 @@
 ## Chaining
 
-One of the nice things about this pattern is that it scales up to functions that, conceptually at least, can accept any number of arguments. Imagine that our `User` type had a third
-field representing their age:
+One of the nice things about this pattern is that it scales up to functions
+that, conceptually at least, can accept any number of arguments. Imagine that
+our `User` type had a third field representing their age:
 
 ```haskell
 data User = User String String Int
 ```
 
-Since our `getParam` function can only look up parameters with `String` values,
+Since our `getParam` function can only look up parameters of type `String`,
 we'll also need a `getIntParam` function to pull the user's age out of our
 `Params`:
 
