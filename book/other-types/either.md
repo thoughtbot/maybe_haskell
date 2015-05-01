@@ -7,9 +7,9 @@ data Either a b = Left a | Right b
 ```
 
 Traditionally, the `Right` constructor is used for a successful result (what a
-function would've returned normally) and `Left` is used in the failure case. The
+function would have returned normally) and `Left` is used in the failure case. The
 value of type `a` given to the `Left` constructor is meant to hold information
-about the failure -- i.e. why did it fail? This is only convention, but it's a
+about the failure: why did it fail? This is only a convention, but it's a
 strong one that we'll use throughout this chapter. To see one formalization of
 this convention, take a look at [Control.Monad.Except][except]. It can appear
 intimidating because it is so generalized, but [Example 1][example] should look
@@ -25,7 +25,7 @@ the context, therefore Haskell has instances of `Functor`, `Applicative`, and
 `Monad` for `Either a` (not `Either a b`).
 
 This use of `Left a` to represent failure with error information of type `a` can
-get confusing when we start looking at functions like `fmap` since the
+get confusing when we start looking at functions like `fmap`. Here's why: the
 generalized type of `fmap` talks about `f a` and I said our instance would be
 for `Either a` making that `Either a a`, but they aren't the same `a`!
 
@@ -57,8 +57,8 @@ data ParserError = ParserError Int Int
 ```
 
 From this, we can make a domain-specific type alias built on top of `Either`. We
-can say that a value which we parse may fail, and if it does, there will be
-error information in a `Left`-constructed result. If it succeeds, we'll get the
+can say a value that we parse may fail. If it does, 
+error information will appear in a `Left`-constructed result. If it succeeds, we'll get the
 `a` we originally wanted in a `Right`-constructed result.
 
 ```haskell
@@ -66,8 +66,7 @@ error information in a `Left`-constructed result. If it succeeds, we'll get the
 type Parsed a = Either ParserError a -- = Left ParserError | Right a
 ```
 
-Finally, we can give functions that may produce such results an informative
-type:
+Finally, we can give an informative type to functions that may produce such results:
 
 ```haskell
 parseJSON :: String -> Parsed JSON
@@ -87,10 +86,10 @@ case parseJSON jsonString of
 
 ### Functor
 
-You may have noticed that we've reached the same conundrum as `Maybe`: often,
+You may have noticed that we've reached the same conundrum as with `Maybe`: often,
 the best thing to do if we encounter a `Left` result is to pass it along to our
 own callers. Wouldn't it be nice if we could take some JSON-manipulating
-function and apply it directly to something we parse? Wouldn't it be nice if the
+function and apply it directly to something that we parse? Wouldn't it be nice if the
 "pass along the errors" concern were handled separately?
 
 ```haskell
@@ -130,7 +129,7 @@ If the incoming string is valid, we get a successful `Parsed JSON` result with
 the `"admin"` key replaced by `False`. Otherwise, we get an unsuccessful `Parsed
 JSON` result with the original error message still available.
 
-Knowing that `Control.Applicative` provides `(<$>)` is an infix synonym for
+Knowing that `Control.Applicative` provides `(<$>)` as an infix synonym for
 `fmap`, we could also use that to make this read a bit better:
 
 ```haskell
@@ -141,11 +140,11 @@ Speaking of `Applicative`...
 
 ### Applicative
 
-It would also be nice if we could take two potentially-failed results and pass
+It would also be nice if we could take two potentially failed results and pass
 them as arguments to some function that takes normal values. If any result
 fails, the overall result is also a failure. If all are successful, we get a
-successful overall result. This sounds a lot like what we did with `Maybe`, the
-only difference is we're doing it for a different kind of context.
+successful overall result. This sounds a lot like what we did with `Maybe`. The
+only difference is that we're doing it for a different kind of context.
 
 ```haskell
 -- Given two json objects, merge them into one
@@ -179,17 +178,17 @@ Right _ <*> Left e = Left e
 ```
 
 Astute readers may notice that we could reduce this to one pattern by using
-`fmap` -- this is left as an exercise.
+`fmap`. This is left as an exercise.
 
 What about the case where the first argument is `Left`? At first this seems
-trivial: there's no use inspecting the second value, we know something has
-already failed so let's pass that along, right? Well, what if the second value
+trivial: there's no use inspecting the second value because we know something has
+already failed, so let's pass that along, right? Well, what if the second value
 was also an error? Which error should we keep? Either way we discard one of
-them, and any potential loss of information should be met with pause.
+them. Any potential loss of information should be met with pause.
 
-It [turns out][gist], it doesn't matter -- at least not as far as the
+It [turns out][gist], it doesn't matter, at least not as far as the
 Applicative Laws are concerned. If choosing one over the other had violated any
-of the laws, we would've had our answer. Beyond those, we don't know how this
+of the laws, we would have had our answer. Beyond those, we don't know how this
 instance will eventually be used by end-users and we can't say which is the
 "right" choice standing here now.
 
@@ -245,7 +244,7 @@ parseBody jsonString = parseJSON jsonString >>= parseHTML . at "body"
 First, `parseJSON jsonString` gives us a `Parsed JSON`. This is the `m a` in
 `(>>=)`'s type signature. Then we use `(.)` to compose a function that gets the
 value at the `"body"` key and passes it to `parseHTML`. The type of this
-function is `(JSON -> Parsed HTML)` which aligns with the `(a -> m b)` of
+function is `(JSON -> Parsed HTML)`, which aligns with the `(a -> m b)` of
 `(>>=)`'s second argument. Knowing that `(>>=)` will return `m b`, we can see
 that that's the `Parsed HTML` we're after.
 
@@ -254,7 +253,7 @@ we want. If either parse fails, we get a `Left`-constructed value containing the
 `ParserError` from whichever failed.
 
 Allowing such a readable expression (*parse JSON and then parse HTML at body*),
-requires the following straight-forward implementation for `(>>=)`:
+requires the following straightforward implementation for `(>>=)`:
 
 ```haskell
 --       m        a -> (a -> m        b) -> m        b
@@ -267,9 +266,9 @@ Left e >>= _ = Left e
 Armed with instances for `Functor`, `Applicative`, and `Monad` for both `Maybe`
 and `Either e`, we can use the same set of functions (those with `Functor f`,
 `Applicative f` or `Monad m` in their class constraints) and apply them to a
-variety of functions which may fail (with or without useful error information).
+variety of functions that may fail (with or without useful error information).
 
-This is a great way to reduce a project's maintenance burden: if you start with
+This is a great way to reduce a project's maintenance burden. If you start with
 functions returning `Maybe` values but use generalized functions for (e.g.) any
 `Monad m`, you can later upgrade to a fully fledged `Error` type based on
 `Either` without having to change most of the code base.
