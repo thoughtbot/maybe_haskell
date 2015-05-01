@@ -34,7 +34,7 @@ instance Functor Maybe where
 
 This definition is exactly like the one we saw earlier for `whenJust`. The only
 difference is we're now implementing it as part of the `Functor` instance
-declaration for `Maybe`. For the rest of the book, I'll be omitting the `class`
+declaration for `Maybe`. For the rest of this book, I'll be omitting the `class`
 and `instance` syntax. Instead, I'll state in prose when a function is part of
 some type class but show its type and definition as if it was a normal,
 top-level function.
