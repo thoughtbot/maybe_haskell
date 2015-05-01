@@ -7,7 +7,7 @@ main :: IO ()
 ```
 
 The type of `main` is pronounced *IO void*. `()` itself is a type defined with a
-single constructor, it can also be thought of as an empty tuple:
+single constructor. It can also be thought of as an empty tuple:
 
 ```haskell
 data () = ()
@@ -77,8 +77,7 @@ Next, let's review the type of `(>>=)`:
 In our case, `m` will always be `IO`, but `a` and `b` will be different each
 time we use `(>>=)`. The first combination we need is `putStr` and `getLine`.
 `putStr "..."` fits as `m a`, because its type is `IO ()`, but `getLine` does
-not have the type `() -> IO b` which is required for things to line up. There's
-another operator built on top of `(>>=)` designed to fix this problem:
+not have the type `() -> IO b` which is required for things to line up. Another operator is built on top of `(>>=)`, designed to fix this problem:
 
 ```haskell
 (>>) :: m a -> m b -> m b
@@ -94,7 +93,7 @@ main = putStr "..." >> getLine
 ```
 
 What is the type of this expression? If `(>>)` is `m a -> m b -> m b` and we've
-got `m a` as `IO ()` and `m b` as `IO String`, this combined expression must be
+got `m a` as `IO ()` and `m b` as `IO String`. This combined expression must be
 `IO String`. It represents an action that, *when executed*, would print the
 given string to the terminal, then read in a line.
 
