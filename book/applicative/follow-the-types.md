@@ -24,8 +24,8 @@ User :: String -> (String -> User)
 fmap User :: Maybe String -> Maybe (String -> User)
 ```
 
-So now we have a function that takes a `Maybe String` and returns a 
-`Maybe (String -> User)`. We also have a value of type `Maybe String` that we can give
+So now we have a function that takes a `Maybe String` and returns a `Maybe
+(String -> User)`. We also have a value of type `Maybe String` that we can give
 to this function, `getParam "name" params`:
 
 ```haskell
