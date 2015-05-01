@@ -1,11 +1,11 @@
 ## List
 
-Throughout the book, I relied on most programmers having an understanding of
-arrays and lists of elements to ease the learning curve up to `Maybe` and
-particularly `fmap`. In this chapter, I'll recap and expand on some of the
-things I've said before and then show that `[a]` is more than a list of elements
-over which we can map. It also has `Applicative` and `Monad` instances that make
-it a natural fit for certain problems.
+At various points in the book, I relied on most programmers having an
+understanding of arrays and lists of elements to ease the learning curve up to
+`Maybe` and particularly `fmap`. In this chapter, I'll recap and expand on some
+of the things I've said before and then show that `[a]` is more than a list of
+elements over which we can map. It also has `Applicative` and `Monad` instances
+that make it a natural fit for certain problems.
 
 ### Tic-Tac-Toe and the Minimax algorithm
 
@@ -116,10 +116,10 @@ openSpace <$> [T, M, B]
 
 Like the `Maybe` example from the `Applicative` chapter, we've created a
 function in a context. Here we have the function `(Column -> Space)` in the `[]`
-context: `[(Column -> Space)]`. As in previous chapters, separating the type
-constructor from its argument and writing  `[(Column -> Space)]` as `[] (Column
--> Space)` shows how it matches the `f b` in `(<$>)`s type signature. How do we
-apply a function in a context to a value in a context? With `(<*>)`.
+context: `[(Column -> Space)]`. Separating the type constructor from its
+argument and writing  `[(Column -> Space)]` as `[] (Column -> Space)` shows how
+it matches the `f b` in `(<$>)`s type signature. How do we apply a function in a
+context to a value in a context? With `(<*>)`.
 
 Using `(<*>)` with lists means applying every function to every value:
 
