@@ -86,7 +86,7 @@ twice (add 2) 3
 `twice` takes as its first argument a function, `(Int -> Int)`. As its second
 argument, it takes an `Int`. The body of the function applies the first argument
 (`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
-definition of `twice` indicate a grouping, not an application. In Haskell, applying a
+definition of `twice` indicate grouping, not application. In Haskell, applying a
 function to some argument is simple: stick them together with a space in
 between. In this case, we need to group the inner `(f x)` so the outer `f` is
 applied to it as single argument. Without these parentheses, Haskell would think
@@ -130,7 +130,7 @@ convenient) behaviors:
    surrounded in parentheses (as in `(+) 2 2`).
 2. When defining an operator, we can assign custom [associativity][] and
    [precedence][] relative to other operators. This tells Haskell how to group
-   expressions like `2 + 3 * 5 / 10`. For more on these concepts, see the following links.
+   expressions like `2 + 3 * 5 / 10`.
 3. We can surround an operator and *either* of its arguments in parentheses to
    get a new function that accepts whichever argument we left off. Expressions
    like `(+ 2)` and `(10 /)` are examples. The former adds `2` to something and
