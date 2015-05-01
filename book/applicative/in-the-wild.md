@@ -6,10 +6,10 @@ This pattern is used in a number of places in the Haskell ecosystem.
 
 As one example, the [aeson][] package defines a number of functions for parsing
 things out of JSON values. These functions return their results wrapped in a
-`Parser` type which is very much like `Maybe` except that it holds a bit more
+`Parser` type. This is very much like `Maybe` except that it holds a bit more
 information about *why* the computation failed, not only *that* the computation
 failed. Not unlike our `getParam`, these sub-parsers pull basic types (`Int`,
-`String`, etc) out of JSON values. The `Applicative` instance for the `Parser`
+`String`, etc.) out of JSON values. The `Applicative` instance for the `Parser`
 type can then be used to combine them into something domain-specific, like a
 `User`.
 
@@ -26,7 +26,7 @@ data User = User
 ```
 
 We can tell aeson how to create a `User` from JSON, by implementing the
-`parseJSON` function which takes a JSON object (represented by the `Value` type)
+`parseJSON` function. That takes a JSON object (represented by the `Value` type)
 and returns a `Parser User`:
 
 ```haskell
