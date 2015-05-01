@@ -35,10 +35,11 @@ fmap id == id
 
 This law says that if we call `fmap id`, the function we get back should be
 equivalent to `id` itself. This is what "well-behaved" means in this context. If
-you think about `fmap` for `[]`, you would expect that applying `id` to every
-element in the list (as `fmap id` does) gives you back the exact same list.
-That is exactly what you expect to get if you apply `id` directly to the list
-itself.
+you're familiar with the common `map` function on lists, you would expect that
+applying `id` to every element in a list (as `map id` does) gives you back the
+exact same list. That is exactly what you expect to get if you apply `id`
+directly to the list itself. That `map` function is actually `fmap` specialized
+to the `[]` type. Hence, that behavior follows from the first law.
 
 Let's go through the same thought exercise for `Maybe` so you can see that this
 law holds for its implementation as well. We'll use our two example values
