@@ -11,8 +11,9 @@ indicates failure. Ruby has `nil`, Java has `null`, and many C functions return
 `-1` in failure cases. This is a huge hassle. You now have a system in which any
 value at any time can either be the value you expect or `nil`, always.
 
-For instance, if you try to find a `User`, and you try to treat the value you get back as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's worse,
-that error may not happen anywhere near the problem's source. The line of
+For instance, if you try to find a `User`, and then treat the value you get back
+as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
+worse, that error may not happen anywhere near the problem's source. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
 result is various "`nil` checks" peppered throughout the code. Is this the best
 we can do?
@@ -24,13 +25,13 @@ partial functions. What we don't need is `null`.
 ## An Alternate Solution
 
 In languages with sufficiently expressive type systems, we have another option:
-we can state in the types that certain values may not be present. Functions
-that typically are written in a partial way can instead be designed to return a type that captures any
-potential non-presence. Not only does this make it explicit and "type checked"
-that you have code to handle the case when a value isn't present, it
-also means that if a value is *not* of this special "nullable" type, you can
-feel safe in assuming the value is really there. In short: no `nil` checks are 
-required.
+we can state in the types that certain values may not be present. Functions that
+typically are written in a partial way can instead be defined to return a type
+that captures any potential non-presence. Not only does this make it explicit
+and "type checked" that you have code to handle the case when a value isn't
+present, it also means that if a value is *not* of this special "nullable" type,
+you can feel safe in assuming the value is really there. In short: no `nil`
+checks are required.
 
 The focus of this book will be how Haskell implements this idea via the
 `Maybe` data type. This type and all the functions that deal with it are not
