@@ -25,7 +25,7 @@ defined for many types. Therefore, its actual type signature is:
 (<*>) :: f (a -> b) -> f a -> f b
 ```
 
-Where `f` is any type that has an `Applicative` instance (e.g. `Maybe`).
+Where `f` is any type that has an `Applicative` instance (such as `Maybe`).
 
 It's important to mention this because it is the type signature you're going to
 see in any documentation about `Applicative`. Now that I've done so, I'm going
@@ -64,7 +64,7 @@ Not only is this expression elegant, it's also safe. Because of the semantics of
 `userFromParams` expression results in `Nothing`. Only if they all return `Just`
 values, do we get `Just` our user.
 
-As always, Haskell being referentially transparent means we can prove this by
+As always, Haskell's being referentially transparent means we can prove this by
 substituting the definitions of `fmap` and `(<*>)` and tracing how the
 expression expands given some example `Maybe` values.
 
@@ -77,7 +77,7 @@ User <$> Just "Pat" <*> Nothing
 -- => Nothing                                   (<*> definition, second pattern)
 ```
 
-If the second value's present but the first is not:
+If the second value is present but the first is not:
 
 ```haskell
 User <$> Nothing <*> Just "pat@thoughtbot.com"
