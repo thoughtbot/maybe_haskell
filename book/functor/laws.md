@@ -1,9 +1,9 @@
 ## The Functor Laws
 
 As mentioned, type class laws are a formal way of defining what it means for
-implementations to be "well-behaved". If someone writes a library function and
+implementations to be "well-behaved." If someone writes a library function and
 says it can work with "any `Functor`", that code can rely both on that type
-having an `fmap` implementation, and that it operates in accordance with these
+having an `fmap` implementation, and on its operating in accordance with these
 laws.
 
 ### The first Functor law
@@ -24,8 +24,8 @@ id :: a -> a
 id x = x
 ```
 
-Since pure functions always give the same result given the same input, it's
-equally correct to say that the functions themselves must be equivalent, rather
+Since pure functions always give the same result when given the same input, it's
+equally correct to say the functions themselves must be equivalent, rather
 than applying them to "any `x`" and saying the results must be equivalent. For
 this reason, the laws are usually stated as:
 
@@ -36,11 +36,11 @@ fmap id == id
 This law says that if we call `fmap id`, the function we get back should be
 equivalent to `id` itself. This is what "well-behaved" means in this context. If
 you think about `fmap` for `[]`, you would expect that applying `id` to every
-element in the list (as `fmap id` does) gives you back the same exact list, and
-that is exactly what you expect to get if you apply `id` directly to the list
+element in the list (as `fmap id` does) gives you back the exact same list.
+That is exactly what you expect to get if you apply `id` directly to the list
 itself.
 
-Let's go through the same thought exercise for `Maybe` so you can see that the
+Let's go through the same thought exercise for `Maybe` so you can see that this
 law holds for its implementation as well. We'll use our two example values
 `actuallyFive` and `notReallyFive` from earlier:
 
@@ -103,7 +103,7 @@ As expected, both results are the same as applying `id` directly.
 
 ### The second Functor law
 
-The second law has to do with order of operations, it states:
+The second law has to do with order of operations. It states:
 
 ```haskell
 fmap (f . g) == fmap f . fmap g
@@ -117,7 +117,7 @@ Where `(.)` is a function that takes two functions and *composes* them together:
 ```
 
 What this law says is that if we compose two functions together, then `fmap` the
-resulting function, we should get a function which behaves the same as when we
+resulting function, we should get a function that behaves the same as when we
 `fmap` each function individually, then compose the two results. Let's prove
 again that this law holds for `Maybe` by walking through an example with
 `actuallyFive` and `notReallyFive`.
@@ -165,7 +165,7 @@ fmap h notReallyFive
 ```
 
 Similarly, we can give each of `f` and `g` to `fmap` separately to produce
-functions which can add 2 or multiply 3 to a `Maybe Int` and produce another
+functions that can add 2 or multiply 3 to a `Maybe Int` and produce another
 `Maybe Int`. The resulting functions can also be composed with `(.)` to produce
 a new function, `fh`:
 
@@ -181,9 +181,8 @@ fh :: Maybe Int -> Maybe Int
 fh x = fmap f (fmap g x)
 ```
 
-This function will call `fmap g` on its argument which will multiply by 3 if the
-number's there or return `Nothing` if it's not, then give that result to `fmap
-f` which will add 2 if the number's there, or return `Nothing` if it's not:
+This function will call `fmap g` on its argument, which will multiply by 3 if the
+number's there or return `Nothing` if it's not. Then it will give that result to `fmap f`, which will add 2 if the number's there, or return `Nothing` if it's not:
 
 ```haskell
 fh actuallyFive
@@ -197,8 +196,8 @@ You should convince yourself that `fh` and `fmap h` behave in exactly the same
 way. The second functor law states that this must be the case if your type is to
 be a valid `Functor`.
 
-Because Haskell is referentially transparent, we can replace functions with
-their implementations freely -- it may require some explicit parentheses here
+Because Haskell is referentially transparent, we can freely replace functions with
+their implementations. It may require some explicit parentheses here
 and there, but the code will always give the same answer. Doing so brings us
 back directly to the statement of the second law:
 
@@ -219,10 +218,10 @@ fmap (f . g) notReallyFive
 fmap (f . g) == fmap f . fmap g
 ```
 
-Not only can we take normal functions (those which operate on fully present
-values) and give them to `fmap` to get ones that can operate on `Maybe` values,
+Not only can we take normal functions (those that operate on fully present
+values) and give them to `fmap` to get functions that can operate on `Maybe` values,
 but this law states we can do so in any order. We can compose our system of
 functions together *then* give that to `fmap` or we can `fmap` individual
-functions and compose *those* together -- either way, we're guaranteed the same
+functions and compose *those* together. Either way, we're guaranteed to get the same
 result. We can rely on this fact whenever we use `fmap` for any type that's in
 the `Functor` type class.
