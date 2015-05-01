@@ -45,8 +45,8 @@ We can do this repeatedly with every function in our system that's required to
 get from `findUser` to the eventual display of this name. Because of the second
 functor law, we know that if we compose all of these functions together then
 `fmap` the result, or if we `fmap` any individual functions and compose the
-results, we'll always get the same answer. We're free to design our system architecture as
-we see fit, but still pass along the `Maybe`s everywhere we need to.
+results, we'll always get the same answer. We're free to design our system as we
+see fit, but still pass along the `Maybe`s everywhere we need to.
 
 If we were doing this in the context of a web application, this maybe-name might
 end up being interpolated into some HTML. It's at this boundary that we'll have
