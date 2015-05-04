@@ -121,7 +121,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h1>Introduction</h1>
 <p>As a programmer, I spend a lot of time dealing with the fallout from one specific problem: partial functions. A partial function is one that can’t provide a valid result for all possible inputs. If you write a function (or method) to return the first element in an array that satisfies some condition, what do you do if no such element exists? You’ve been given an input for which you can’t return a valid result. Aside from raising an exception, what can you do?</p>
 <p>The most popular way to to deal with this is to return a special value that indicates failure. Ruby has <code>nil</code>, Java has <code>null</code>, and many C functions return <code>-1</code> in failure cases. This is a huge hassle. You now have a system in which any value at any time can either be the value you expect or <code>nil</code>, always.</p>
-<p>For instance, if you try to find a <code>User</code>, and then treat the value you get back as it it’s a <code>User</code> but it’s actually <code>nil</code>, you get a <code>NoMethodError</code>. What’s worse, that error may not happen anywhere near the problem’s source. The line of code that created that <code>nil</code> may not even appear in the eventual backtrace. The result is various “<code>nil</code> checks” peppered throughout the code. Is this the best we can do?</p>
+<p>For instance, if you try to find a <code>User</code>, and then treat the value you get back as if it’s a <code>User</code> but it’s actually <code>nil</code>, you get a <code>NoMethodError</code>. What’s worse, that error may not happen anywhere near the problem’s source. The line of code that created that <code>nil</code> may not even appear in the eventual backtrace. The result is various “<code>nil</code> checks” peppered throughout the code. Is this the best we can do?</p>
 <p>The problem of partial functions is not going away. User input may be invalid, files may not exist, networks may fail. We will always need a way to deal with partial functions. What we don’t need is <code>null</code>.</p>
 <section id="an-alternate-solution" class="level2">
 <h2>An Alternate Solution</h2>
@@ -149,7 +149,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>I don’t intend to teach you Haskell. Rather, I want to show you <em>barely enough</em> Haskell that I can wade into some more interesting topics. I want to show how this <code>Maybe</code> data type can add safety to your code base while remaining convenient, expressive, and powerful. My hope is to show that Haskell and its “academic” ideas are not limited to PhD thesis papers. These ideas can result directly in cleaner, more maintainable code that solves practical problems.</p>
 <p>I won’t describe how to set up a Haskell programming environment, show you how to write and run complete Haskell programs, or dive deeply into every language construct that we’ll encounter. If you are interested in going further and actually learning Haskell (and I hope you are!), then I recommend following Chris Allen’s great <a href="https://github.com/bitemyapp/learnhaskell">learning path</a>.</p>
 <p>Finally, a word of general advice before you get started:</p>
-<p>The type system is not your enemy. It’s your friend. It doesn’t slow you down; it keeps you honest. Keep an open mind. Haskell is simpler than you think. Likewise, monads are not some mystical burrito. They’re a simple abstraction that, when applied to a variety of problems, can lead to elegant solutions. Don’t get bogged down in what you don’t understand. Instead, dig deeper into what you do. And above all, take your time.</p>
+<p>The type system is not your enemy. It’s your friend. It doesn’t slow you down; it keeps you honest. Keep an open mind. Haskell is simpler than you think. Monads are not some mystical burrito. They’re a simple abstraction that, when applied to a variety of problems, can lead to elegant solutions. Don’t get bogged down in what you don’t understand. Instead, dig deeper into what you do. And above all, take your time.</p>
 <p></p>
 </section>
 </section>
@@ -187,7 +187,7 @@ twice f x <span class="fu">=</span> f (f x)
 
 twice (add <span class="dv">2</span>) <span class="dv">3</span>
 <span class="co">-- =&gt; 7</span></code></pre>
-<p><code>twice</code> takes as its first argument a function, <code>(Int -&gt; Int)</code>. As its second argument, it takes an <code>Int</code>. The body of the function applies the first argument (<code>f</code>) to the second (<code>x</code>) twice, returning another <code>Int</code>. The parentheses in the definition of <code>twice</code> indicate grouping, not application. In Haskell, applying a function to some argument is simple: stick them together with a space in between. In this case, we need to group the inner <code>(f x)</code> so the outer <code>f</code> is applied to it as single argument. Without these parentheses, Haskell would think we were applying <code>f</code> to two arguments: another <code>f</code> and <code>x</code>.</p>
+<p><code>twice</code> takes as its first argument a function of type <code>(Int -&gt; Int)</code>. As its second argument, it takes an <code>Int</code>. The body of the function applies the first argument (<code>f</code>) to the second (<code>x</code>) twice, returning another <code>Int</code>. The parentheses in the definition of <code>twice</code> indicate grouping, not application. In Haskell, applying a function to some argument is simple: stick them together with a space in between. In this case, we need to group the inner <code>(f x)</code> so the outer <code>f</code> is applied to it as single argument. Without these parentheses, Haskell would think we were applying <code>f</code> to two arguments: another <code>f</code> and <code>x</code>.</p>
 <p>You also saw an example of <em>partial application</em>. The expression <code>add 2</code> returns a new function that itself takes the argument we left off. Let’s break down that last expression to see how it works:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="co">-- Add takes two Ints and returns an Int</span>
 <span class="ot">add ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
@@ -274,7 +274,7 @@ getName (<span class="dt">Person</span> name _) <span class="fu">=</span> name
 
 <span class="ot">getAge ::</span> <span class="dt">Person</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 getAge (<span class="dt">Person</span> _ age) <span class="fu">=</span> age</code></pre>
-<p>In the definitions above, each function is looking for values constructed with <code>Person</code>. If it gets an argument that matches (which is guaranteed since that’s the only way to get a <code>Person</code> in our system so far), Haskell will use that function body, in which each part of the constructed value is bound to the variables given. The <code>_</code> pattern (called a <em>wildcard</em>) is used for any parts we don’t care about. Again, this is using <code>=</code> for equivalence (as always). We’re saying that <code>getName</code>, when given <code>(Person name _)</code>, <em>is equivalent to</em> <code>name</code>. It works similarly for <code>getAge</code>.</p>
+<p>In the definitions above, each function is looking for values constructed with <code>Person</code>. If it gets an argument that matches (which is guaranteed since that’s the only way to get a <code>Person</code> in our system so far), Haskell will use that function body with each part of the constructed value bound to the variables given. The <code>_</code> pattern (called a <em>wildcard</em>) is used for any parts we don’t care about. Again, this is using <code>=</code> for equivalence (as always). We’re saying that <code>getName</code>, when given <code>(Person name _)</code>, <em>is equivalent to</em> <code>name</code>. It works similarly for <code>getAge</code>.</p>
 <p>Haskell offers <a href="http://en.wikibooks.org/wiki/Haskell/More_on_datatypes#Named_Fields_.28Record_Syntax.29">other</a> <a href="http://www.haskellforall.com/2012/01/haskell-for-mainstream-programmers_28.html">ways</a> to do this sort of thing, but we won’t get into those here.</p>
 </section>
 <section id="sum-types" class="level2">
@@ -513,7 +513,7 @@ whenJust (<span class="fu">+</span><span class="dv">5</span>) notReallyFive
 id x <span class="fu">=</span> x</code></pre>
 <p>Since pure functions always give the same result when given the same input, it’s equally correct to say the functions themselves must be equivalent, rather than applying them to “any <code>x</code>” and saying the results must be equivalent. For this reason, the laws are usually stated as:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id <span class="fu">==</span> id</code></pre>
-<p>This law says that if we call <code>fmap id</code>, the function we get back should be equivalent to <code>id</code> itself. This is what “well-behaved” means in this context. If you think about <code>fmap</code> for <code>[]</code>, you would expect that applying <code>id</code> to every element in the list (as <code>fmap id</code> does) gives you back the exact same list. That is exactly what you expect to get if you apply <code>id</code> directly to the list itself.</p>
+<p>This law says that if we call <code>fmap id</code>, the function we get back should be equivalent to <code>id</code> itself. This is what “well-behaved” means in this context. If you’re familiar with the common <code>map</code> function on lists, you would expect that applying <code>id</code> to every element in a list (as <code>map id</code> does) gives you back the exact same list. That is exactly what you expect to get if you apply <code>id</code> directly to the list itself. That <code>map</code> function is actually <code>fmap</code> specialized to the <code>[]</code> type. Hence, that behavior follows from the first law.</p>
 <p>Let’s go through the same thought exercise for <code>Maybe</code> so you can see that this law holds for its implementation as well. We’ll use our two example values <code>actuallyFive</code> and <code>notReallyFive</code> from earlier:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">actuallyFive ::</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 actuallyFive <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">5</span>
@@ -696,9 +696,9 @@ fmap<span class="ot"> userUpperName ::</span> <span class="dt">Maybe</span> <spa
 </section>
 <section id="recap" class="level2">
 <h2>Recap</h2>
-<p>So far, we’ve seen an introduction to Haskell functions and to Haskell’s type system. This is a new and powerful way to use that type system to describe something about your domain–that some values may not be present–and a type class (<code>Functor</code>) that allows for strict separation between value-handling functions and the need to apply them to values that may not be present.</p>
+<p>So far, we’ve seen an introduction to Haskell functions and to Haskell’s type system. We then introduced the <code>Maybe</code> type as a new and powerful way to use that type system to describe something about your domain–that some values may not be present–and a type class (<code>Functor</code>) that allows for strict separation between value-handling functions and the need to apply them to values that may not be present.</p>
 <p>We then saw some real-world code that takes advantage of these ideas and discussed type class laws as a means of abstraction and encapsulation. These laws give us a precise understanding of how our code will behave without having to know its internals. Finally, we took a brief detour into the world of currying, a foundational concept responsible for many of the things we’ll explore next.</p>
-<p>In the next chapter, we’ll talk about <em>applicative functors</em>. If we think of a <em>functor</em> as a value in some context, supporting an <code>fmap</code> operation for applying a function to that value while preserving its context, <em>applicative functors</em> are functors for which the value itself <em>can be applied</em>. In simple terms: it’s a function. These structures must then support another operation for applying that function from within its context. That operation, combined with currying, will grant us more power and convenience when working with <code>Maybe</code> values.</p>
+<p>In the next chapter, we’ll talk about <em>applicative functors</em>. If we think of a <em>functor</em> as a value in some context, supporting an <code>fmap</code> operation for applying a function to that value while preserving its context, <em>applicative functors</em> are functors where the value itself <em>can be applied</em>. In simple terms: it’s a function. These structures must then support another operation for applying that function from within its context. That operation, combined with currying, will grant us more power and convenience when working with <code>Maybe</code> values.</p>
 </section>
 </section>
 <section id="applicative" class="level1">
@@ -722,7 +722,7 @@ userFromParams params <span class="fu">=</span>
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">def</span> user_from_params(params)
   <span class="kw">if</span> name = get_param <span class="st">&quot;name&quot;</span> params
     <span class="kw">if</span> email = get_param <span class="st">&quot;email&quot;</span> params
-      <span class="kw">return</span> <span class="dt">User</span>.new(name, email)
+      <span class="dt">User</span>.new(name, email)
     <span class="kw">end</span>
   <span class="kw">end</span>
 <span class="kw">end</span></code></pre>
@@ -1093,8 +1093,8 @@ parseJSON <span class="fu">=</span> undefined</code></pre>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">jsonString <span class="fu">=</span> <span class="st">&quot;...&quot;</span>
 
 <span class="kw">case</span> parseJSON jsonString <span class="kw">of</span>
-   <span class="dt">Right</span> json <span class="ot">-&gt;</span>                <span class="co">-- do something with json</span>
-   <span class="dt">Left</span> (<span class="dt">ParserError</span> ln ch) <span class="ot">-&gt;</span>  <span class="co">-- do something with the error information</span></code></pre>
+   <span class="dt">Right</span> json <span class="ot">-&gt;</span>                 <span class="co">-- do something with json</span>
+   <span class="dt">Left</span> (<span class="dt">ParserError</span> ln col) <span class="ot">-&gt;</span>  <span class="co">-- do something with the error information</span></code></pre>
 </section>
 <section id="functor-2" class="level3">
 <h3>Functor</h3>
@@ -1179,7 +1179,7 @@ parseBody jsonString <span class="fu">=</span> parseJSON jsonString <span class=
 </section>
 <section id="list" class="level2">
 <h2>List</h2>
-<p>Throughout the book, I relied on most programmers having an understanding of arrays and lists of elements to ease the learning curve up to <code>Maybe</code> and particularly <code>fmap</code>. In this chapter, I’ll recap and expand on some of the things I’ve said before and then show that <code>[a]</code> is more than a list of elements over which we can map. It also has <code>Applicative</code> and <code>Monad</code> instances that make it a natural fit for certain problems.</p>
+<p>At various points in the book, I relied on most programmers having an understanding of arrays and lists of elements to ease the learning curve up to <code>Maybe</code> and particularly <code>fmap</code>. In this chapter, I’ll recap and expand on some of the things I’ve said before and then show that <code>[a]</code> is more than a list of elements over which we can map. It also has <code>Applicative</code> and <code>Monad</code> instances that make it a natural fit for certain problems.</p>
 <section id="tic-tac-toe-and-the-minimax-algorithm" class="level3">
 <h3>Tic-Tac-Toe and the Minimax algorithm</h3>
 <p>For this chapter’s example, I’m going to show portions of a program for playing Tic-Tac-Toe. The full program is too large to include, but portions of it are well-suited to using the <code>Applicative</code> and <code>Monad</code> instances for <code>[]</code>. The program uses an algorithm known as <a href="http://en.wikipedia.org/wiki/Minimax">minimax</a> to choose the best move to make in a game of Tic-Tac-Toe.</p>
@@ -1247,7 +1247,7 @@ openSpace <span class="fu">&lt;$&gt;</span> [<span class="dt">T</span>, <span cl
 <span class="co">-- =&gt; , (\c -&gt; ((M, c), Open))</span>
 <span class="co">-- =&gt; , (\c -&gt; ((B, c), Open))</span>
 <span class="co">-- =&gt; ]</span></code></pre>
-<p>Like the <code>Maybe</code> example from the <code>Applicative</code> chapter, we’ve created a function in a context. Here we have the function <code>(Column -&gt; Space)</code> in the <code>[]</code> context: <code>[(Column -&gt; Space)]</code>. As in previous chapters, separating the type constructor from its argument and writing <code>[(Column -&gt; Space)]</code> as <code>[] (Column -&gt; Space)</code> shows how it matches the <code>f b</code> in <code>(&lt;$&gt;)</code>s type signature. How do we apply a function in a context to a value in a context? With <code>(&lt;*&gt;)</code>.</p>
+<p>Like the <code>Maybe</code> example from the <code>Applicative</code> chapter, we’ve created a function in a context. Here we have the function <code>(Column -&gt; Space)</code> in the <code>[]</code> context: <code>[(Column -&gt; Space)]</code>. Separating the type constructor from its argument and writing <code>[(Column -&gt; Space)]</code> as <code>[] (Column -&gt; Space)</code> shows how it matches the <code>f b</code> in <code>(&lt;$&gt;)</code>s type signature. How do we apply a function in a context to a value in a context? With <code>(&lt;*&gt;)</code>.</p>
 <p>Using <code>(&lt;*&gt;)</code> with lists means applying every function to every value:</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">openSpace <span class="fu">&lt;$&gt;</span> [<span class="dt">T</span>, <span class="dt">M</span>, <span class="dt">B</span>] <span class="fu">&lt;*&gt;</span> [<span class="dt">L</span>, <span class="dt">C</span>, <span class="dt">R</span>]
 <span class="co">-- =&gt; [ (\c -&gt; ((T, c), Open)) L        (first function applied to each value)</span>

@@ -19,7 +19,7 @@ indicates failure. Ruby has `nil`, Java has `null`, and many C functions return
 value at any time can either be the value you expect or `nil`, always.
 
 For instance, if you try to find a `User`, and then treat the value you get back
-as it it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
+as if it's a `User` but it's actually `nil`, you get a `NoMethodError`. What's
 worse, that error may not happen anywhere near the problem's source. The line of
 code that created that `nil` may not even appear in the eventual backtrace. The
 result is various "`nil` checks" peppered throughout the code. Is this the best
@@ -132,10 +132,10 @@ Finally, a word of general advice before you get started:
 
 The type system is not your enemy. It's your friend. It doesn't slow you down;
 it keeps you honest. Keep an open mind. Haskell is simpler than you think.
-Likewise, monads are not some mystical burrito. They're a simple abstraction that, when
+Monads are not some mystical burrito. They're a simple abstraction that, when
 applied to a variety of problems, can lead to elegant solutions. Don't get
-bogged down in what you don't understand. Instead, dig deeper into what you do. And above
-all, take your time.
+bogged down in what you don't understand. Instead, dig deeper into what you do.
+And above all, take your time.
 
 \mainmatter
 
@@ -226,14 +226,14 @@ twice (add 2) 3
 -- => 7
 ```
 
-`twice` takes as its first argument a function, `(Int -> Int)`. As its second
-argument, it takes an `Int`. The body of the function applies the first argument
-(`f`) to the second (`x`) twice, returning another `Int`. The parentheses in the
-definition of `twice` indicate grouping, not application. In Haskell, applying a
-function to some argument is simple: stick them together with a space in
-between. In this case, we need to group the inner `(f x)` so the outer `f` is
-applied to it as single argument. Without these parentheses, Haskell would think
-we were applying `f` to two arguments: another `f` and `x`.
+`twice` takes as its first argument a function of type `(Int -> Int)`. As its
+second argument, it takes an `Int`. The body of the function applies the first
+argument (`f`) to the second (`x`) twice, returning another `Int`. The
+parentheses in the definition of `twice` indicate grouping, not application. In
+Haskell, applying a function to some argument is simple: stick them together
+with a space in between. In this case, we need to group the inner `(f x)` so the
+outer `f` is applied to it as single argument. Without these parentheses,
+Haskell would think we were applying `f` to two arguments: another `f` and `x`.
 
 You also saw an example of *partial application*. The expression `add 2` returns
 a new function that itself takes the argument we left off. Let's break down that
@@ -396,11 +396,11 @@ getAge (Person _ age) = age
 In the definitions above, each function is looking for values constructed with
 `Person`. If it gets an argument that matches (which is guaranteed since that's
 the only way to get a `Person` in our system so far), Haskell will use that
-function body, in which each part of the constructed value is bound to the variables
+function body with each part of the constructed value bound to the variables
 given. The `_` pattern (called a *wildcard*) is used for any parts we don't care
 about. Again, this is using `=` for equivalence (as always). We're saying that
-`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works similarly
-for `getAge`.
+`getName`, when given `(Person name _)`, *is equivalent to* `name`. It works
+similarly for `getAge`.
 
 Haskell offers [other][records] [ways][lenses] to do this sort of thing, but we won't
 get into those here.
@@ -926,10 +926,11 @@ fmap id == id
 
 This law says that if we call `fmap id`, the function we get back should be
 equivalent to `id` itself. This is what "well-behaved" means in this context. If
-you think about `fmap` for `[]`, you would expect that applying `id` to every
-element in the list (as `fmap id` does) gives you back the exact same list.
-That is exactly what you expect to get if you apply `id` directly to the list
-itself.
+you're familiar with the common `map` function on lists, you would expect that
+applying `id` to every element in a list (as `map id` does) gives you back the
+exact same list. That is exactly what you expect to get if you apply `id`
+directly to the list itself. That `map` function is actually `fmap` specialized
+to the `[]` type. Hence, that behavior follows from the first law.
 
 Let's go through the same thought exercise for `Maybe` so you can see that this
 law holds for its implementation as well. We'll use our two example values
@@ -1344,25 +1345,28 @@ consistent syntax for doing either.
 
 ## Recap
 
-So far, we've seen an introduction to Haskell functions and to Haskell's type system. This is a
-new and powerful way to use that type system to describe something about your
-domain--that some values may not be present--and a type class (`Functor`) that
-allows for strict separation between value-handling functions and the need to
-apply them to values that may not be present.
+So far, we've seen an introduction to Haskell functions and to Haskell's type
+system. We then introduced the `Maybe` type as a new and powerful way to use
+that type system to describe something about your domain--that some values may
+not be present--and a type class (`Functor`) that allows for strict separation
+between value-handling functions and the need to apply them to values that may
+not be present.
 
 We then saw some real-world code that takes advantage of these ideas and
-discussed type class laws as a means of abstraction and encapsulation. These laws give
-us a precise understanding of how our code will behave without having to know
-its internals. Finally, we took a brief detour into the world of currying, a
-foundational concept responsible for many of the things we'll explore next.
+discussed type class laws as a means of abstraction and encapsulation. These
+laws give us a precise understanding of how our code will behave without having
+to know its internals. Finally, we took a brief detour into the world of
+currying, a foundational concept responsible for many of the things we'll
+explore next.
 
 In the next chapter, we'll talk about *applicative functors*. If we think of a
 *functor* as a value in some context, supporting an `fmap` operation for
 applying a function to that value while preserving its context, *applicative
-functors* are functors for which the value itself *can be applied*. In simple terms: it's a
-function. These structures must then support another operation for applying that
-function from within its context. That operation, combined with currying, will
-grant us more power and convenience when working with `Maybe` values.
+functors* are functors where the value itself *can be applied*. In simple terms:
+it's a function. These structures must then support another operation for
+applying that function from within its context. That operation, combined with
+currying, will grant us more power and convenience when working with `Maybe`
+values.
 
 # Applicative
 
@@ -1413,7 +1417,7 @@ any language:
 def user_from_params(params)
   if name = get_param "name" params
     if email = get_param "email" params
-      return User.new(name, email)
+      User.new(name, email)
     end
   end
 end
@@ -2206,8 +2210,8 @@ invalid character and line can be found:
 jsonString = "..."
 
 case parseJSON jsonString of
-   Right json ->                -- do something with json
-   Left (ParserError ln ch) ->  -- do something with the error information
+   Right json ->                 -- do something with json
+   Left (ParserError ln col) ->  -- do something with the error information
 ```
 
 ### Functor
@@ -2401,12 +2405,12 @@ functions returning `Maybe` values but use generalized functions for (e.g.) any
 
 ## List
 
-Throughout the book, I relied on most programmers having an understanding of
-arrays and lists of elements to ease the learning curve up to `Maybe` and
-particularly `fmap`. In this chapter, I'll recap and expand on some of the
-things I've said before and then show that `[a]` is more than a list of elements
-over which we can map. It also has `Applicative` and `Monad` instances that make
-it a natural fit for certain problems.
+At various points in the book, I relied on most programmers having an
+understanding of arrays and lists of elements to ease the learning curve up to
+`Maybe` and particularly `fmap`. In this chapter, I'll recap and expand on some
+of the things I've said before and then show that `[a]` is more than a list of
+elements over which we can map. It also has `Applicative` and `Monad` instances
+that make it a natural fit for certain problems.
 
 ### Tic-Tac-Toe and the Minimax algorithm
 
@@ -2517,10 +2521,10 @@ openSpace <$> [T, M, B]
 
 Like the `Maybe` example from the `Applicative` chapter, we've created a
 function in a context. Here we have the function `(Column -> Space)` in the `[]`
-context: `[(Column -> Space)]`. As in previous chapters, separating the type
-constructor from its argument and writing  `[(Column -> Space)]` as `[] (Column
--> Space)` shows how it matches the `f b` in `(<$>)`s type signature. How do we
-apply a function in a context to a value in a context? With `(<*>)`.
+context: `[(Column -> Space)]`. Separating the type constructor from its
+argument and writing  `[(Column -> Space)]` as `[] (Column -> Space)` shows how
+it matches the `f b` in `(<$>)`s type signature. How do we apply a function in a
+context to a value in a context? With `(<*>)`.
 
 Using `(<*>)` with lists means applying every function to every value:
 
