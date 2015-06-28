@@ -30,4 +30,5 @@ Thank you to all who've [contributed][contributors] so far!
 - [x] Other Types
 - [x] Conclusion
 - [x] Technical review
-- [ ] Copy editing
+- [x] Copy editing
+- [x] Release v1
