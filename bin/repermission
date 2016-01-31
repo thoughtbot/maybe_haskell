@@ -1,0 +1,110 @@
+#!/usr/bin/env stack
+{- stack
+  --resolver lts-5.0
+  --install-ghc
+  runghc
+  --package load-env
+  --package http-conduit
+  --package aeson
+  -- -Wall -Werror
+-}
+{-# LANGUAGE OverloadedStrings #-}
+
+module Main (main) where
+
+import Control.Monad (forM_, unless)
+import Control.Monad.Trans.Resource
+import Data.Aeson
+import Data.ByteString (ByteString)
+import Data.Monoid ((<>))
+import LoadEnv
+import Network.HTTP.Conduit
+import System.Environment (getEnv)
+
+import qualified Data.ByteString.Char8 as C8
+
+data Permission
+    = Admin
+    | Push
+    | Pull
+    | None -- ^ Should never actually happen
+    deriving Eq
+
+instance FromJSON Permission where
+    parseJSON = withObject "Permission" $ \o -> fromTriad
+        <$> o .: "admin"
+        <*> o .: "push"
+        <*> o .: "pull"
+      where
+        fromTriad True _ _ = Admin
+        fromTriad _ True _ = Push
+        fromTriad _ _ True = Pull
+        fromTriad _ _ _ = None
+
+instance ToJSON Permission where
+    toJSON Admin = String "admin"
+    toJSON Push = String "push"
+    toJSON Pull = String "pull"
+    toJSON None = String "none"
+
+data Collaborator = Collaborator
+    { coUsername :: String
+    , coPermission :: Permission
+    }
+
+instance FromJSON Collaborator where
+    parseJSON = withObject "Collaborator" $ \o -> Collaborator
+        <$> o .: "login"
+        <*> o .: "permissions"
+
+instance ToJSON Collaborator where
+    toJSON c = object ["permission" .= coPermission c]
+
+canPush :: Collaborator -> Bool
+canPush c = coPermission c == Push
+
+main :: IO ()
+main = loadEnv >> run 1
+
+run :: Int -> IO ()
+run n = do
+    putStrLn $ "requesting collaborators, page " <> show n <> "... "
+    cs <- requestJSON "/collaborators" n id
+
+    unless (null cs) $ do
+        forM_ (filter canPush cs) $ \c -> do
+            putStrLn $ "updating " <> coUsername c <> " to permission:pull..."
+            requestJSON ("/collaborators/" <> coUsername c) 1
+                $ setMethod "PUT" . setBody (c { coPermission = Pull }) :: IO ()
+
+        run $ n + 1
+
+requestJSON :: FromJSON a => String -> Int -> (Request -> Request) -> IO a
+requestJSON p n f = do
+    t <- getEnv "GITHUB_ACCESS_TOKEN"
+    r <- setHeaders t . f <$> parseUrl (requestUrl p n)
+    m <- newManager tlsManagerSettings
+    bs <- runResourceT $ responseBody <$> httpLbs r m
+    return $ either error id $ eitherDecode bs
+
+requestUrl:: String -> Int -> String
+requestUrl p n = "https://api.github.com"
+    <> "/repos/thoughtbot/maybe_haskell" <> p
+    <> "?page=" <> show n
+    <> "&per_page=100"
+
+setMethod :: ByteString -> Request -> Request
+setMethod m r = r { method = m }
+
+setBody :: ToJSON a => a -> Request -> Request
+setBody b r = r { requestBody = RequestBodyLBS $ encode b }
+
+setHeaders :: String -> Request -> Request
+setHeaders token r = r
+    { requestHeaders =
+        [ ("Accept", "application/json")
+        , ("Authorization", "token " <> C8.pack token)
+        , ("Content-Type", "application/json")
+        , ("User-Agent", "pbrisbin")
+        ]
+    }
