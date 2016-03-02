@@ -108,3 +108,5 @@ setHeaders token r = r
         , ("User-Agent", "pbrisbin")
         ]
     }
+
+-- vim: ft=haskell
