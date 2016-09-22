@@ -1,27 +1,21 @@
 #!/usr/bin/env stack
 {- stack
-  --resolver lts-5.0
+  --resolver lts-7.0
   --install-ghc
   runghc
-  --package load-env
-  --package http-conduit
   --package aeson
+  --package gh-pocket-knife
+  --package load-env
   -- -Wall -Werror
 -}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
 
-import Control.Monad (forM_, unless)
-import Control.Monad.Trans.Resource
+import Control.Monad
 import Data.Aeson
-import Data.ByteString (ByteString)
-import Data.Monoid ((<>))
+import GH
 import LoadEnv
-import Network.HTTP.Conduit
-import System.Environment (getEnv)
-
-import qualified Data.ByteString.Char8 as C8
 
 data Permission
     = Admin
@@ -60,53 +54,13 @@ instance FromJSON Collaborator where
 instance ToJSON Collaborator where
     toJSON c = object ["permission" .= coPermission c]
 
-canPush :: Collaborator -> Bool
-canPush c = coPermission c == Push
-
 main :: IO ()
-main = loadEnv >> run 1
+main = do
+    loadEnv
 
-run :: Int -> IO ()
-run n = do
-    putStrLn $ "requesting collaborators, page " <> show n <> "... "
-    cs <- requestJSON "/collaborators" n id
-
-    unless (null cs) $ do
-        forM_ (filter canPush cs) $ \c -> do
-            putStrLn $ "updating " <> coUsername c <> " to permission:pull..."
-            requestJSON ("/collaborators/" <> coUsername c) 1
-                $ setMethod "PUT" . setBody (c { coPermission = Pull }) :: IO ()
-
-        run $ n + 1
-
-requestJSON :: FromJSON a => String -> Int -> (Request -> Request) -> IO a
-requestJSON p n f = do
-    t <- getEnv "GITHUB_ACCESS_TOKEN"
-    r <- setHeaders t . f <$> parseUrl (requestUrl p n)
-    m <- newManager tlsManagerSettings
-    bs <- runResourceT $ responseBody <$> httpLbs r m
-    return $ either error id $ eitherDecode bs
-
-requestUrl:: String -> Int -> String
-requestUrl p n = "https://api.github.com"
-    <> "/repos/thoughtbot/maybe_haskell" <> p
-    <> "?page=" <> show n
-    <> "&per_page=100"
-
-setMethod :: ByteString -> Request -> Request
-setMethod m r = r { method = m }
-
-setBody :: ToJSON a => a -> Request -> Request
-setBody b r = r { requestBody = RequestBodyLBS $ encode b }
-
-setHeaders :: String -> Request -> Request
-setHeaders token r = r
-    { requestHeaders =
-        [ ("Accept", "application/json")
-        , ("Authorization", "token " <> C8.pack token)
-        , ("Content-Type", "application/json")
-        , ("User-Agent", "pbrisbin")
-        ]
-    }
+    getEach_ "/repos/thoughtbot/maybe_haskell/collaborators" $ \c -> do
+        when (coPermission c == Push) $ do
+            putStrLn $ "updating " ++ coUsername c ++ " to permission:pull..."
+            put ("/repos/thoughtbot/maybe_haskell/collaborators/" ++ coUsername c) $ c { coPermission = Pull }
 
 -- vim: ft=haskell
