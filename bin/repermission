@@ -82,7 +82,7 @@ run n = do
 requestJSON :: FromJSON a => String -> Int -> (Request -> Request) -> IO a
 requestJSON p n f = do
     t <- getEnv "GITHUB_ACCESS_TOKEN"
-    r <- setHeaders t . f <$> parseUrl (requestUrl p n)
+    r <- setHeaders t . f <$> parseUrlThrow (requestUrl p n)
     m <- newManager tlsManagerSettings
     bs <- runResourceT $ responseBody <$> httpLbs r m
     return $ either error id $ eitherDecode bs
