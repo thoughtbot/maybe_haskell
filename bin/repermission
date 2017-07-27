@@ -12,7 +12,7 @@
 
 module Main (main) where
 
-import Control.Monad (forM_, unless)
+import Control.Monad (forM_)
 import Control.Monad.Trans.Resource
 import Data.Aeson
 import Data.ByteString (ByteString)
@@ -64,20 +64,26 @@ canPush :: Collaborator -> Bool
 canPush c = coPermission c == Push
 
 main :: IO ()
-main = loadEnv >> run 1
+main = do
+    loadEnv
+    nCollaborators <- run 1 0
 
-run :: Int -> IO ()
-run n = do
-    putStrLn $ "requesting collaborators, page " <> show n <> "... "
+    putStrLn $ "Total collaborators: " <> show nCollaborators
+
+run :: Int -> Int -> IO Int
+run n acc = do
+    putStrLn $ "requesting collaborators, page " <> show n <> "..."
     cs <- requestJSON "/collaborators" n id
 
-    unless (null cs) $ do
-        forM_ (filter canPush cs) $ \c -> do
-            putStrLn $ "updating " <> coUsername c <> " to permission:pull..."
-            requestJSON ("/collaborators/" <> coUsername c) 1
-                $ setMethod "PUT" . setBody (c { coPermission = Pull }) :: IO ()
+    if (null cs)
+        then return acc
+        else do
+            forM_ (filter canPush cs) $ \c -> do
+                putStrLn $ "updating " <> coUsername c <> " to permission:pull..."
+                requestJSON ("/collaborators/" <> coUsername c) 1
+                    $ setMethod "PUT" . setBody (c { coPermission = Pull }) :: IO ()
 
-        run $ n + 1
+            run (n + 1) $ acc + length cs
 
 requestJSON :: FromJSON a => String -> Int -> (Request -> Request) -> IO a
 requestJSON p n f = do
