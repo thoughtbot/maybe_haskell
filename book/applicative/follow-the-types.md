@@ -73,8 +73,8 @@ aMaybeEmail = getParam "email" params
 And we're trying to ultimately get to this:
 
 ```haskell
-userFromParams :: Params -> Maybe User
-userFromParams params = fmapUser <*> aMaybeEmail
+userFromParams :: Maybe User
+userFromParams = fmapUser <*> aMaybeEmail
 ```
 
 We only have to figure out what that `(<*>)` should do. At this point, we have
