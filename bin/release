@@ -7,6 +7,9 @@ find build \
   -mindepth 2 -maxdepth 2 \! -name '*-sample*' \
   -exec cp -rv {} release/ \;
 
+# Relies on zsh rename tool
+(cd release && rename src maybe_haskell ./*)
+
 tag="$(git tag | vbump "${1:-minor}")"
 git add release
 git commit -m "Releasing $tag"
