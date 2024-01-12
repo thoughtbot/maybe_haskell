@@ -1,5 +1,17 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+prompt() {
+  read -r -p "$*? [y/n]" ans
+
+  case "$ans" in
+    y | Y)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
 
 ./bin/build
 
@@ -11,6 +23,15 @@ find build \
 (cd release && rename src maybe_haskell ./*)
 
 tag="$(git tag | vbump "${1:-minor}")"
-git add release
-git commit -m "Releasing $tag"
-git tag -s -m "$tag" "$tag"
+
+git status
+
+if prompt "commit and tag as $tag"; then
+  git add release
+  git commit -m "Releasing $tag"
+  git tag -s -m "$tag" "$tag"
+
+  if prompt 'push'; then
+    git push --follow-tags
+  fi
+fi
