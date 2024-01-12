@@ -2,7 +2,7 @@
 set -euo pipefail
 
 prompt() {
-  read -r -p "$*? [y/n]" ans
+  read -r -p "$*? [y/n] " ans
 
   case "$ans" in
     y | Y)
